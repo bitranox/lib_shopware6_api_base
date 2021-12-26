@@ -63,7 +63,7 @@ Python version required: 3.6.0 or newer
 
 tested on recent linux with python 3.6, 3.7, 3.8, 3.9, 3.10.0, pypy-3.8 - architectures: amd64
 
-`100% code coverage <https://codecov.io/gh/bitranox/lib_shopware6_api_base>`_, flake8 style checking ,mypy static type checking ,tested under `Windows <https://github.com/bitranox/lib_shopware6_api_base/actions/workflows/python-package.yml>`_, automatic daily builds and monitoring
+`100% code coverage <https://codecov.io/gh/bitranox/lib_shopware6_api_base>`_, flake8 style checking ,mypy static type checking ,
 
 ----
 
@@ -86,8 +86,10 @@ tested on recent linux with python 3.6, 3.7, 3.8, 3.9, 3.10.0, pypy-3.8 - archit
 Usage
 -----------
 
-- configuration
-    the configuration is passed to the client as an configuration object of the type "ConfShopware6ApiBase"
+configuration
+-------------
+
+    the configuration is passed to the client as a configuration object of the type "ConfShopware6ApiBase"
     simply copy the Class definition of "ConfShopware6ApiBase" and create Your own configuration file, for instance "my_shop_config.py"
 
 .. code-block:: python
@@ -128,7 +130,12 @@ Usage
         # the client secret, set up at setup at admin/settings/system/itegrations/access_secret
         client_secret: str = ""
 
-        # which grant type to use can be either 'user_credentials'- or 'resource_owner'
+        """
+        Admin API:
+        Grant Type to use:
+        ==================
+        which grant type to use - can be either 'user_credentials'- or 'resource_owner'
+        """
         grant_type: str = ""
 
         """
@@ -158,6 +165,246 @@ now You can use this configuration:
 
         my_api_client = Shopware6AdminAPIClientBase(use_docker_test_container=True)
         ...
+
+
+methods
+-------
+
+    please note, that on github actions the test configuration is used automatically,
+    therefore on all examples no configuration is passed on purpose.
+
+
+- Store API
+    for the Store API only "request_post" is implemented at the moment,
+    which might be used as an example to implement all other methods
+    like 'get', 'patch', 'put', 'delete'.
+
+    this is, because I only need the AdminAPI myself - contributions welcome !
+
+.. code-block:: python
+
+    class Shopware6StoreAPIClientBase(object):
+        def __init__(self, config: Optional[ConfShopware6ApiBase] = None, use_docker_test_container: bool = False) -> None:
+            """
+            the Shopware6 Store Base API
+
+            :param config:  You can pass a configuration object here.
+                            If not given and github actions is detected, or use_docker_test_container == True:
+                                conf_shopware6_api_docker_testcontainer.py will be loaded automatically
+                            If not given and no github actions is detected:
+                                conf_shopware6_api_base_rotek.py will be loaded automatically
+
+            :param use_docker_test_container:   if True, and no config is given, the dockware config will be loaded
+
+            >>> # Setup
+            >>> my_api_client = Shopware6StoreAPIClientBase()
+
+            """
+
+- Store API Post
+
+.. code-block:: python
+
+        def request_post(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+            """
+
+            >>> # Setup
+            >>> my_api_client = Shopware6StoreAPIClientBase()
+
+            >>> # test POST without payload
+            >>> my_response = my_api_client.request_post(request_url='product')
+            >>> assert 'elements' in my_response
+
+            >>> # test POST with payload
+            >>> # see : https://shopware.stoplight.io/docs/store-api/b3A6ODI2NTY4MQ-fetch-a-list-of-products
+            >>> my_payload = {}  # noqa
+            >>> my_payload["filter"] = [{"type": "equals", "field": "active", "value": "true"}]
+            >>> my_response = my_api_client.request_post(request_url='product', payload=my_payload)
+            >>> assert 'elements' in my_response
+
+            """
+
+- Admin API
+
+.. code-block:: python
+
+    class Shopware6AdminAPIClientBase(object):
+        def __init__(self, config: Optional[ConfShopware6ApiBase] = None, use_docker_test_container: bool = False) -> None:
+            """
+            the Shopware6 Admin Base API
+
+            :param config:  You can pass a configuration object here.
+                    If not given and github actions is detected, or use_docker_test_container == True:
+                        conf_shopware6_api_docker_testcontainer.py will be loaded automatically
+                    If not given and no github actions is detected:
+                        conf_shopware6_api_base_rotek.py will be loaded automatically
+
+            :param use_docker_test_container:   if True, and no config is given, the dockware config will be loaded
+
+            >>> # Setup
+            >>> my_api_client = Shopware6AdminAPIClientBase()
+
+            """
+
+- Admin API GET
+
+.. code-block:: python
+
+        def request_get(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+            """
+            makes a get request
+
+            parameters:
+                request_url: API Url, without the common api prefix
+                payload : a dictionary
+
+            :returns
+                response_dict: dictionary with the response as dict
+
+            >>> # Setup
+            >>> my_api_client = Shopware6AdminAPIClientBase()
+
+            >>> # test resource owner token
+            >>> ignore = my_api_client._get_access_token_by_user_credentials()
+            >>> my_api_client._get_session()
+            >>> ignore = my_api_client.request_get('customer-group')  # noqa
+
+            >>> # test resource owner token refresh
+            >>> my_access_token = my_api_client.token['access_token']
+            >>> my_api_client.token['expires_in']=-1
+            >>> my_api_client.token['expires_at']=time.time()-1
+            >>> ignore = my_api_client.request_get('customer-group')
+            >>> assert my_api_client.token['access_token'] != my_access_token
+
+            >>> # Test client credentials token
+            >>> ignore = my_api_client._get_access_token_by_resource_owner()
+            >>> my_api_client._get_session()
+            >>> ignore = my_api_client.request_get('customer-group')  # noqa
+
+            >>> # test client credentials token refresh
+            >>> my_access_token = my_api_client.token['access_token']
+            >>> my_api_client.token['expires_in']=-1
+            >>> my_api_client.token['expires_at']=time.time()-1
+            >>> ignore = my_api_client.request_get('customer-group')
+            >>> assert my_api_client.token['access_token'] != my_access_token
+
+            """
+
+- Admin API GET Paginated
+
+.. code-block:: python
+
+        def request_get_paginated(self, request_url: str, payload: Optional[Dict[str, Any]] = None, limit: int = 100) -> Dict[str, Any]:
+            """
+            get the data paginated - metadata 'total' and 'totalCountMode' will be updated
+            if You expect a big number of records, the paginated request reads those records in junks of limit=100 for performance reasons.
+
+            parameters:
+                request_url: API Url, without the common api prefix
+                payload : a dictionary
+                limit : the junk size
+
+            :returns
+                response_dict: dictionary with the response as dict
+
+            >>> # Setup
+            >>> my_api_client = Shopware6AdminAPIClientBase()
+
+            >>> # test read product
+            >>> my_response_dict = my_api_client.request_get_paginated(request_url='product', limit=3)
+            >>> # we have got more then 3 items - so pagination is working
+            >>> assert len(my_response_dict['data']) > 3
+
+            """
+
+- Admin API PATCH
+
+.. code-block:: python
+
+        def request_patch(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+            """
+            makes a patch request
+
+            parameters:
+                request_url: API Url, without the common api prefix
+                payload : a dictionary
+
+            :returns
+                response_dict: dictionary with the response as dict
+
+            """
+
+- Admin API POST
+
+.. code-block:: python
+
+        def request_post(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+            """
+            makes a post request
+
+            parameters:
+                request_url: API Url, without the common api prefix
+                payload : a dictionary
+
+            :returns
+                response_dict: dictionary with the response as dict
+
+            """
+
+- Admin API POST PAGINATED
+
+.. code-block:: python
+
+        def request_post_paginated(self, request_url: str, payload: Optional[Dict[str, Any]] = None, limit: int = 100) -> Dict[str, Any]:
+            """
+            post the data paginated - metadata 'total' and 'totalCountMode' will be updated
+            if You expect a big number of records, the paginated request reads those records in junks of limit=100 for performance reasons.
+
+            parameters:
+                request_url: API Url, without the common api prefix
+                payload : a dictionary
+                limit : the junk size
+
+            :returns
+                response_dict: dictionary with the response as dict
+
+            """
+
+- Admin API PUT
+
+.. code-block:: python
+
+        def request_put(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+            """
+            makes a put request
+
+            parameters:
+                http_method: get, post, put, delete
+                request_url: API Url, without the common api prefix
+                payload : a dictionary
+
+            :returns
+                response_dict: dictionary with the response as dict
+
+            """
+
+- Admin API DELETE
+
+.. code-block:: python
+
+        def request_delete(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+            """
+            makes a delete request
+
+            parameters:
+                http_method: get, post, put, delete
+                request_url: API Url, without the common api prefix
+                payload : a dictionary
+
+            :returns
+                response_dict: dictionary with the response as dict
+
+            """
 
 Usage from Commandline
 ------------------------
@@ -293,3 +540,4 @@ YYYY-MM-DD: <some release name>
     - change1
     - change2
     - ...
+

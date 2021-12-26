@@ -77,21 +77,6 @@ jobs:
         include:
           # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-software
 
-          - os: windows-latest
-            python-version: 3.9
-            env:
-              cEXPORT: "SET"
-              BUILD_DOCS: "False"
-              DEPLOY_SDIST: "False"
-              DEPLOY_WHEEL: "False"
-              DEPLOY_TEST: "False"
-              MYPY_DO_TESTS: "True"
-              # Setup tests
-              DO_SETUP_INSTALL: "True"
-              DO_SETUP_INSTALL_TEST: "True"
-              # Test registered CLI Command
-              DO_CLI_TEST: "True"
-
 
           - os: ubuntu-latest
             python-version: "3.6"
