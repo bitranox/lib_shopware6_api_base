@@ -703,7 +703,7 @@ class Shopware6AdminAPIClientBase(object):
         request_url = request_url.lstrip("/")
         return f"{self.config.shopware_admin_api_url}/{request_url}"
 
-    @cache
+    @cache  # type: ignore
     def _get_headers(self) -> Dict[str, str]:
         """
         >>> my_api_client = Shopware6AdminAPIClientBase()
