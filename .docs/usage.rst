@@ -22,15 +22,17 @@ now You can use this configuration:
     ...
 
 - test configuration
-    .. include:: ../lib_shopware6_api_base/conf_shopware6_api_base_docker_testcontainer.py
-        :start-after: # config_dockware{{{
-        :end-before:  # config_dockware}}}
-    now You can test against that container with :
 
-    .. code-block::
+.. include:: ../lib_shopware6_api_base/conf_shopware6_api_base_docker_testcontainer.py
+    :start-after: # config_dockware{{{
+    :end-before:  # config_dockware}}}
 
-        my_api_client = Shopware6AdminAPIClientBase(use_docker_test_container=True)
-        ...
+now You can test against that container with :
+
+.. code-block::
+
+    my_api_client = Shopware6AdminAPIClientBase(use_docker_test_container=True)
+    ...
 
 
 methods

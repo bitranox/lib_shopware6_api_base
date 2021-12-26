@@ -159,15 +159,22 @@ now You can use this configuration:
     ...
 
 - test configuration
-    .. include:: ../lib_shopware6_api_base/conf_shopware6_api_base_docker_testcontainer.py
-        :start-after: # config_dockware{{{
-        :end-before:  # config_dockware}}}
-    now You can test against that container with :
 
-    .. code-block::
+for testing we use the dockware docker container,
+see : `dockware <https://developer.shopware.com/docs/guides/installation/dockware>`_
 
-        my_api_client = Shopware6AdminAPIClientBase(use_docker_test_container=True)
-        ...
+
+on github actions the dockware docker test container is installed as a service and is available
+for communication on localhost
+
+You can start the dockware container locally with the command : sudo docker run -d --rm -p 80:80 --name dockware dockware/dev:latest
+
+now You can test against that container with :
+
+.. code-block::
+
+    my_api_client = Shopware6AdminAPIClientBase(use_docker_test_container=True)
+    ...
 
 
 methods
