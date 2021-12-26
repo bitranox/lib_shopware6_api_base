@@ -139,7 +139,7 @@ class Shopware6StoreAPIClientBase(object):
             raise ShopwareAPIError(f"{exc}{detailed_error}")
         return response
 
-    @cache
+    @cache  # type: ignore
     def _get_headers(self) -> Dict[str, str]:
         """
         >>> my_api_client = Shopware6StoreAPIClientBase()
