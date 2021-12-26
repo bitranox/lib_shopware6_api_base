@@ -720,6 +720,7 @@ def _load_config(use_docker_test_container: bool) -> ConfShopware6ApiBase:
     if _is_github_actions() or use_docker_test_container:
         config = _load_config_for_docker_test_container()
         config.store_api_sw_access_key = _get_docker_test_container_store_access_key()
+        _create_docker_test_container_resource_owner_credentials()
     else:
         config = _load_config_for_rotek_production()
     return config
