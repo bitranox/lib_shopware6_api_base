@@ -9,10 +9,7 @@ see : `dockware <https://developer.shopware.com/docs/guides/installation/dockwar
 
 
 on github actions the dockware docker test container is installed as a service and is available
-for communication via the dns name "dockware"
-
-for local testing You need to create an entry in your /etc/hosts like :  "127.0.0.1  dockware"
-
+for communication on localhost
 
 You can start the dockware container locally with the command : sudo docker run -d --rm -p 80:80 --name dockware dockware/dev:latest
 # config_dockware}}}
@@ -31,9 +28,9 @@ except ImportError:
 
 conf_shopware6_api_base = ConfShopware6ApiBase()
 # the api url, like : 'https://shop.yourdomain.com/api'
-conf_shopware6_api_base.shopware_admin_api_url = "http://dockware/api"
+conf_shopware6_api_base.shopware_admin_api_url = "http://localhost/api"
 # the storefront api url, like : 'https://shop.yourdomain.com/store-api'
-conf_shopware6_api_base.shopware_storefront_api_url = "http://dockware/store-api"
+conf_shopware6_api_base.shopware_storefront_api_url = "http://localhost/store-api"
 
 # since dockware container does not support https, we need to disable secure transport for oauth2
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
