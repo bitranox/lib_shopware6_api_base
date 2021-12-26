@@ -141,7 +141,7 @@ function run_flake8_tests() {
 
 function run_mypy_tests() {
   my_banner "mypy tests"
-  if ! python3 -m mypy "${project_root_dir}" --follow-imports=normal --ignore-missing-imports --implicit-reexport --install-types --no-warn-unused-ignores --non-interactive --strict; then
+  if ! python3 -m mypy "${project_root_dir}" --follow-imports=normal --ignore-missing-imports --implicit-reexport --install-types --no-disallow-untyped-decorators --no-warn-unused-ignores --non-interactive --strict; then
     my_banner_warning "mypy tests ERROR"
     beep
     sleep "${sleeptime_on_error}"
