@@ -77,10 +77,10 @@ class Shopware6StoreAPIClientBase(object):
         # store_api_post}}}
 
         response = self._request(http_method="post", request_url=request_url, payload=payload)
-        if hasattr(response, "json"):
-            response_dict = dict(response.json())  # type: ignore
+        if hasattr(response, "json"):               # pragma: no cover
+            response_dict = dict(response.json())   # type: ignore
         else:
-            response_dict = dict()
+            response_dict = dict()                  # pragma: no cover
         return response_dict
 
     def _request(self, http_method: str, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Optional[requests.Response]:
@@ -137,10 +137,10 @@ class Shopware6StoreAPIClientBase(object):
         try:
             response.raise_for_status()
         except Exception as exc:
-            if hasattr(exc, "response"):
-                detailed_error = f" : {exc.response.text}"  # type: ignore
+            if hasattr(exc, "response"):                        # pragma: no cover
+                detailed_error = f" : {exc.response.text}"      # type: ignore
             else:
-                detailed_error = ""
+                detailed_error = ""                             # pragma: no cover
             raise ShopwareAPIError(f"{exc}{detailed_error}")
         return response
 
@@ -441,10 +441,10 @@ class Shopware6AdminAPIClientBase(object):
             self._token_saver(token=exc.token)
             response = self._request(http_method=http_method, request_url=request_url, payload=payload)
         except TokenExpiredError:
-            if self._is_refreshable_token():
+            if self._is_refreshable_token():                                                                                        # pragma: no cover
                 # this actually should never happen - just in case.
-                logger.warning("something went wrong - the token should have been automatically refreshed. getting a new token")
-                self._get_access_token_by_user_credentials()
+                logger.warning("something went wrong - the token should have been automatically refreshed. getting a new token")    # pragma: no cover
+                self._get_access_token_by_user_credentials()                                                                        # pragma: no cover
             else:
                 self._get_access_token_by_resource_owner()
             self._get_session()
@@ -876,7 +876,7 @@ def _load_config_for_rotek_production() -> ConfShopware6ApiBase:
     load config file for the rotek shop
 
     """
-    try:
+    try:                                                                    # pragma: no cover
         from conf_shopware6_api_base_rotek import conf_shopware6_api_base   # pragma: no cover
     except ImportError:                                                     # pragma: no cover
         # Imports for Doctest
@@ -902,8 +902,8 @@ def _is_local_docker_container_active() -> bool:
     try:
         requests.get("http://localhost/admin")
         is_active = True
-    except requests.exceptions.ConnectionError:
-        is_active = False  # pragma: no cover
+    except requests.exceptions.ConnectionError:     # pragma: no cover
+        is_active = False                           # pragma: no cover
     return is_active
 
 
