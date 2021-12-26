@@ -22,9 +22,9 @@ import os
 # conf
 try:
     from conf_shopware6_api_base_classes import ConfShopware6ApiBase
-except ImportError:
+except ImportError:              # pragma: no cover
     # Imports for Doctest
-    from .conf_shopware6_api_base_classes import ConfShopware6ApiBase  # type: ignore
+    from .conf_shopware6_api_base_classes import ConfShopware6ApiBase  # type: ignore # pragma: no cover
 
 conf_shopware6_api_base = ConfShopware6ApiBase()
 # the api url, like : 'https://shop.yourdomain.com/api'

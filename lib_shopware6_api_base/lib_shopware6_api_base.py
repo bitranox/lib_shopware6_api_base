@@ -38,8 +38,13 @@ class Shopware6StoreAPIClientBase(object):
 
         :param use_docker_test_container:   if True, and no config is given, the dockware config will be loaded
 
-        >>> # Setup
+        >>> # Test to load automatic configuration
         >>> my_api_client = Shopware6StoreAPIClientBase()
+
+        >>> # Test pass configuration
+        >>> if _is_github_actions():
+        ...     my_config = _load_config_for_docker_test_container()
+        ...     my_api_client = Shopware6StoreAPIClientBase(config=my_config)
 
         """
         # store_api}}}
@@ -550,9 +555,39 @@ class Shopware6AdminAPIClientBase(object):
         :returns
             self.token
 
+        >>> # Setup
         >>> my_api_client = Shopware6AdminAPIClientBase()
+        >>> save_shopware_admin_api_url = my_api_client.config.shopware_admin_api_url
+        >>> save_client_id = my_api_client.config.client_id
+        >>> save_client_secret = my_api_client.config.client_secret
+
+        >>> # Test Ok
         >>> my_api_client._get_access_token_by_resource_owner()
         {'token_type': 'Bearer', 'expires_in': 600, 'access_token': '...', 'expires_at': ...}
+
+        >>> # Test no url
+        >>> my_api_client.config.shopware_admin_api_url = ''
+        >>> my_api_client._get_access_token_by_resource_owner()
+        Traceback (most recent call last):
+            ...
+        conf_shopware6_api_base_classes.ShopwareAPIError: shopware_api_url needed
+        >>> my_api_client.config.shopware_admin_api_url = save_shopware_admin_api_url
+
+        >>> # Test no client_id
+        >>> my_api_client.config.client_id = ''
+        >>> my_api_client._get_access_token_by_resource_owner()
+        Traceback (most recent call last):
+            ...
+        conf_shopware6_api_base_classes.ShopwareAPIError: client_id needed
+        >>> my_api_client.config.client_id = save_client_id
+
+        >>> # Test no client_secret
+        >>> my_api_client.config.client_secret = ''
+        >>> my_api_client._get_access_token_by_resource_owner()
+        Traceback (most recent call last):
+            ...
+        conf_shopware6_api_base_classes.ShopwareAPIError: client_secret needed
+        >>> my_api_client.config.client_secret = save_client_secret
 
         """
         if not self.config.shopware_admin_api_url:
@@ -592,9 +627,40 @@ class Shopware6AdminAPIClientBase(object):
         :returns
             self.token
 
+
+        >>> # Setup
         >>> my_api_client = Shopware6AdminAPIClientBase()
+        >>> save_shopware_admin_api_url = my_api_client.config.shopware_admin_api_url
+        >>> save_username = my_api_client.config.username
+        >>> save_password = my_api_client.config.password
+
+        >>> # Test Ok
         >>> my_api_client._get_access_token_by_user_credentials()
         {'token_type': 'Bearer', 'expires_in': 600, 'access_token': '...', 'refresh_token': '...', 'expires_at': ...}
+
+        >>> # Test no url
+        >>> my_api_client.config.shopware_admin_api_url = ''
+        >>> my_api_client._get_access_token_by_user_credentials()
+        Traceback (most recent call last):
+            ...
+        conf_shopware6_api_base_classes.ShopwareAPIError: shopware_api_url needed
+        >>> my_api_client.config.shopware_admin_api_url = save_shopware_admin_api_url
+
+        >>> # Test no username
+        >>> my_api_client.config.username = ''
+        >>> my_api_client._get_access_token_by_user_credentials()
+        Traceback (most recent call last):
+            ...
+        conf_shopware6_api_base_classes.ShopwareAPIError: username needed
+        >>> my_api_client.config.username = save_username
+
+        >>> # Test no password
+        >>> my_api_client.config.password = ''
+        >>> my_api_client._get_access_token_by_user_credentials()
+        Traceback (most recent call last):
+            ...
+        conf_shopware6_api_base_classes.ShopwareAPIError: password needed
+        >>> my_api_client.config.password = save_password
 
         """
 
@@ -717,12 +783,12 @@ class Shopware6AdminAPIClientBase(object):
 
 
 def _load_config(use_docker_test_container: bool) -> ConfShopware6ApiBase:
-    if _is_github_actions() or use_docker_test_container:
+    if _is_github_actions() or use_docker_test_container:   # pragma: no cover
         config = _load_config_for_docker_test_container()
         config.store_api_sw_access_key = _get_docker_test_container_store_access_key()
         _create_docker_test_container_resource_owner_credentials()
     else:
-        config = _load_config_for_rotek_production()
+        config = _load_config_for_rotek_production()        # pragma: no cover
     return config
 
 
@@ -811,11 +877,11 @@ def _load_config_for_rotek_production() -> ConfShopware6ApiBase:
 
     """
     try:
-        from conf_shopware6_api_base_rotek import conf_shopware6_api_base
-    except ImportError:  # pragma: no cover
+        from conf_shopware6_api_base_rotek import conf_shopware6_api_base   # pragma: no cover
+    except ImportError:                                                     # pragma: no cover
         # Imports for Doctest
         from .conf_shopware6_api_base_rotek import conf_shopware6_api_base  # type: ignore  # pragma: no cover
-    return conf_shopware6_api_base
+    return conf_shopware6_api_base                                          # pragma: no cover
 
 
 def _is_github_actions() -> bool:
@@ -834,10 +900,10 @@ def _is_local_docker_container_active() -> bool:
 
     """
     try:
-        requests.get("http://dockware/admin")
+        requests.get("http://localhost/admin")
         is_active = True
     except requests.exceptions.ConnectionError:
-        is_active = False
+        is_active = False  # pragma: no cover
     return is_active
 
 
