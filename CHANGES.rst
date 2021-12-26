@@ -5,9 +5,6 @@ Changelog
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
 
-v0.0.1
+v1.0.0
 --------
-YYYY-MM-DD: <some release name>
-    - change1
-    - change2
-    - ...
+2021-12-26: initial release

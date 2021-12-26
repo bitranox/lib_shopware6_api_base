@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v0.0.1 as of 2021-12-26 see `Changelog`_
+Version v1.0.0 as of 2021-12-26 see `Changelog`_
 
 |build_badge| |license| |pypi| |black|
 
@@ -544,10 +544,7 @@ Changelog
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
 
-v0.0.1
+v1.0.0
 --------
-YYYY-MM-DD: <some release name>
-    - change1
-    - change2
-    - ...
+2021-12-26: initial release
 
