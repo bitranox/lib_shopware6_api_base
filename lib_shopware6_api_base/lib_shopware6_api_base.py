@@ -1,6 +1,6 @@
 # STDLIB
 import os
-from functools import cache
+from functools import lru_cache
 import json
 
 import logging
@@ -139,7 +139,7 @@ class Shopware6StoreAPIClientBase(object):
             raise ShopwareAPIError(f"{exc}{detailed_error}")
         return response
 
-    @cache  # type: ignore
+    @lru_cache(maxsize=None)
     def _get_headers(self) -> Dict[str, str]:
         """
         >>> my_api_client = Shopware6StoreAPIClientBase()
@@ -703,7 +703,7 @@ class Shopware6AdminAPIClientBase(object):
         request_url = request_url.lstrip("/")
         return f"{self.config.shopware_admin_api_url}/{request_url}"
 
-    @cache  # type: ignore
+    @lru_cache(maxsize=None)
     def _get_headers(self) -> Dict[str, str]:
         """
         >>> my_api_client = Shopware6AdminAPIClientBase()
