@@ -22,7 +22,7 @@ import os
 # conf
 try:
     from conf_shopware6_api_base_classes import ConfShopware6ApiBase
-except ImportError:              # pragma: no cover
+except ImportError:  # pragma: no cover
     # Imports for Doctest
     from .conf_shopware6_api_base_classes import ConfShopware6ApiBase  # type: ignore # pragma: no cover
 

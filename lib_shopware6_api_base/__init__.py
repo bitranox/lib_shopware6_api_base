@@ -2,7 +2,7 @@
 # this should be the first import in __init__.py
 from lib_detect_testenv import *
 
-if is_testenv_active():     # pragma: no cover
+if is_testenv_active():  # pragma: no cover
     add_path_to_syspath(__file__)
 
 # put Your imports here

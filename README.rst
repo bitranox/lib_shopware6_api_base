@@ -206,8 +206,13 @@ methods
 
             :param use_docker_test_container:   if True, and no config is given, the dockware config will be loaded
 
-            >>> # Setup
+            >>> # Test to load automatic configuration
             >>> my_api_client = Shopware6StoreAPIClientBase()
+
+            >>> # Test pass configuration
+            >>> if _is_github_actions():
+            ...     my_config = _load_config_for_docker_test_container()
+            ...     my_api_client = Shopware6StoreAPIClientBase(config=my_config)
 
             """
 
