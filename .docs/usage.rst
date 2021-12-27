@@ -45,12 +45,6 @@ methods
 Store API
 ---------
 
-    for the Store API only "request_post" is implemented at the moment,
-    which might be used as an example to implement all other methods
-    like 'get', 'patch', 'put', 'delete'.
-
-    this is, because I only need the AdminAPI myself - contributions welcome !
-
 
 .. include:: ../lib_shopware6_api_base/lib_shopware6_api_base.py
     :code: python
