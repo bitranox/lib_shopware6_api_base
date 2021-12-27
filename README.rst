@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v1.0.0 as of 2021-12-26 see `Changelog`_
+Version v1.1.0 as of 2021-12-27 see `Changelog`_
 
 |build_badge| |license| |pypi| |black|
 
@@ -100,7 +100,7 @@ configuration
     import attr
 
 
-    @attr.dataclass()
+    @attr.dataclass
     class ConfShopware6ApiBase(object):
         # the api url, like : 'https://shop.yourdomain.com/api'
         shopware_admin_api_url: str = ""
@@ -184,7 +184,9 @@ methods
     therefore on all examples no configuration is passed on purpose.
 
 
-- Store API
+Store API
+---------
+
     for the Store API only "request_post" is implemented at the moment,
     which might be used as an example to implement all other methods
     like 'get', 'patch', 'put', 'delete'.
@@ -193,10 +195,10 @@ methods
 
 .. code-block:: python
 
-    class Shopware6StoreAPIClientBase(object):
+    class Shopware6StoreFrontClientBase(object):
         def __init__(self, config: Optional[ConfShopware6ApiBase] = None, use_docker_test_container: bool = False) -> None:
             """
-            the Shopware6 Store Base API
+            the Shopware6 Storefront Base API
 
             :param config:  You can pass a configuration object here.
                             If not given and github actions is detected, or use_docker_test_container == True:
@@ -207,12 +209,88 @@ methods
             :param use_docker_test_container:   if True, and no config is given, the dockware config will be loaded
 
             >>> # Test to load automatic configuration
-            >>> my_api_client = Shopware6StoreAPIClientBase()
+            >>> my_storefront_client = Shopware6StoreFrontClientBase()
 
             >>> # Test pass configuration
             >>> if _is_github_actions():
             ...     my_config = _load_config_for_docker_test_container()
-            ...     my_api_client = Shopware6StoreAPIClientBase(config=my_config)
+            ...     my_storefront_client = Shopware6StoreFrontClientBase(config=my_config)
+
+            """
+
+- Store API Get
+
+.. code-block:: python
+
+        def request_get(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+            """
+            make a get request
+
+            parameters:
+                request_url: API Url, without the common api prefix
+                payload : a dictionary
+
+            :returns
+                response_dict: dictionary with the response as dict
+
+            >>> # Setup
+            >>> my_storefront_client = Shopware6StoreFrontClientBase()
+
+            >>> # test GET a dictionary
+            >>> my_response = my_storefront_client.request_get(request_url='context')
+
+            >>> # test GET a List
+            >>> my_response = my_storefront_client.request_get(request_url='sitemap')
+            Traceback (most recent call last):
+                ...
+            conf_shopware6_api_base_classes.ShopwareAPIError: received a list instead of a dict - You need to use the method request_get_list
+
+            """
+
+- Store API Get List
+
+.. code-block:: python
+
+        def request_get_list(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+            """
+            make a get request, expecting a list of dictionaries as result
+
+            parameters:
+                request_url: API Url, without the common api prefix
+                payload : a dictionary
+
+            :returns
+                List[response_dict]: a list of dictionaries
+
+            >>> # Setup
+            >>> my_storefront_client = Shopware6StoreFrontClientBase()
+
+            >>> # test GET a List
+            >>> my_response = my_storefront_client.request_get_list(request_url='sitemap')
+
+            >>> # test GET a dictionary
+            >>> my_response = my_storefront_client.request_get_list(request_url='context')
+            Traceback (most recent call last):
+                ...
+            conf_shopware6_api_base_classes.ShopwareAPIError: received a dict instead of a list - You need to use the method request_get
+
+
+            """
+
+- Store API Patch
+
+.. code-block:: python
+
+        def request_patch(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+            """
+            makes a patch request
+
+            parameters:
+                request_url: API Url, without the common api prefix
+                payload : a dictionary
+
+            :returns
+                response_dict: dictionary with the response as dict
 
             """
 
@@ -222,24 +300,69 @@ methods
 
         def request_post(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
             """
+            make a post request
+
+            parameters:
+                request_url: API Url, without the common api prefix
+                payload : a dictionary
+
+            :returns
+                response_dict: dictionary with the response as dict
 
             >>> # Setup
-            >>> my_api_client = Shopware6StoreAPIClientBase()
+            >>> my_storefront_client = Shopware6StoreFrontClientBase()
 
             >>> # test POST without payload
-            >>> my_response = my_api_client.request_post(request_url='product')
+            >>> my_response = my_storefront_client.request_post(request_url='product')
             >>> assert 'elements' in my_response
 
             >>> # test POST with payload
             >>> # see : https://shopware.stoplight.io/docs/store-api/b3A6ODI2NTY4MQ-fetch-a-list-of-products
             >>> my_payload = {}  # noqa
             >>> my_payload["filter"] = [{"type": "equals", "field": "active", "value": "true"}]
-            >>> my_response = my_api_client.request_post(request_url='product', payload=my_payload)
+            >>> my_response = my_storefront_client.request_post(request_url='product', payload=my_payload)
             >>> assert 'elements' in my_response
 
             """
 
-- Admin API
+- Store API Put
+
+.. code-block:: python
+
+        def request_put(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+            """
+            make a put request
+
+            parameters:
+                http_method: get, post, put, delete
+                request_url: API Url, without the common api prefix
+                payload : a dictionary
+
+            :returns
+                response_dict: dictionary with the response as dict
+
+            """
+
+- Store API Delete
+
+.. code-block:: python
+
+        def request_delete(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+            """
+            make a delete request
+
+            parameters:
+                http_method: get, post, put, delete
+                request_url: API Url, without the common api prefix
+                payload : a dictionary
+
+            :returns
+                response_dict: dictionary with the response as dict
+
+            """
+
+Admin API
+---------
 
 .. code-block:: python
 
@@ -548,6 +671,16 @@ Changelog
 - new MAJOR version for incompatible API changes,
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
+
+v1.1.0
+--------
+2021-12-27:
+    - add Store Api DELETE method
+    - add Store Api GET method
+    - add Store Api GET LIST method
+    - add Store Api PATCH method
+    - add Store Api PUT method
+
 
 v1.0.0
 --------

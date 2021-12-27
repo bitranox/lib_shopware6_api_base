@@ -6,7 +6,7 @@ import json
 import logging
 import sys
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 # EXT
 import oauthlib
@@ -25,10 +25,10 @@ logger = logging.getLogger(__name__)
 
 
 # store_api{{{
-class Shopware6StoreAPIClientBase(object):
+class Shopware6StoreFrontClientBase(object):
     def __init__(self, config: Optional[ConfShopware6ApiBase] = None, use_docker_test_container: bool = False) -> None:
         """
-        the Shopware6 Store Base API
+        the Shopware6 Storefront Base API
 
         :param config:  You can pass a configuration object here.
                         If not given and github actions is detected, or use_docker_test_container == True:
@@ -39,12 +39,12 @@ class Shopware6StoreAPIClientBase(object):
         :param use_docker_test_container:   if True, and no config is given, the dockware config will be loaded
 
         >>> # Test to load automatic configuration
-        >>> my_api_client = Shopware6StoreAPIClientBase()
+        >>> my_storefront_client = Shopware6StoreFrontClientBase()
 
         >>> # Test pass configuration
         >>> if _is_github_actions():
         ...     my_config = _load_config_for_docker_test_container()
-        ...     my_api_client = Shopware6StoreAPIClientBase(config=my_config)
+        ...     my_storefront_client = Shopware6StoreFrontClientBase(config=my_config)
 
         """
         # store_api}}}
@@ -55,33 +55,185 @@ class Shopware6StoreAPIClientBase(object):
 
         self.config = config
 
+    # store_api_delete{{{
+    def request_delete(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        make a delete request
+
+        parameters:
+            http_method: get, post, put, delete
+            request_url: API Url, without the common api prefix
+            payload : a dictionary
+
+        :returns
+            response_dict: dictionary with the response as dict
+
+        """
+        # store_api_delete}}}
+        response_dict = self._request_dict(http_method="delete", request_url=request_url, payload=payload)
+        return response_dict
+
+    # store_api_get{{{
+    def request_get(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        make a get request
+
+        parameters:
+            request_url: API Url, without the common api prefix
+            payload : a dictionary
+
+        :returns
+            response_dict: dictionary with the response as dict
+
+        >>> # Setup
+        >>> my_storefront_client = Shopware6StoreFrontClientBase()
+
+        >>> # test GET a dictionary
+        >>> my_response = my_storefront_client.request_get(request_url='context')
+
+        >>> # test GET a List
+        >>> my_response = my_storefront_client.request_get(request_url='sitemap')
+        Traceback (most recent call last):
+            ...
+        conf_shopware6_api_base_classes.ShopwareAPIError: received a list instead of a dict - You need to use the method request_get_list
+
+        """
+        # store_api_get}}}
+        response_dict = self._request_dict(http_method="get", request_url=request_url, payload=payload)
+        return response_dict
+
+    # store_api_get_list{{{
+    def request_get_list(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """
+        make a get request, expecting a list of dictionaries as result
+
+        parameters:
+            request_url: API Url, without the common api prefix
+            payload : a dictionary
+
+        :returns
+            List[response_dict]: a list of dictionaries
+
+        >>> # Setup
+        >>> my_storefront_client = Shopware6StoreFrontClientBase()
+
+        >>> # test GET a List
+        >>> my_response = my_storefront_client.request_get_list(request_url='sitemap')
+
+        >>> # test GET a dictionary
+        >>> my_response = my_storefront_client.request_get_list(request_url='context')
+        Traceback (most recent call last):
+            ...
+        conf_shopware6_api_base_classes.ShopwareAPIError: received a dict instead of a list - You need to use the method request_get
+
+
+        """
+        # store_api_get_list}}}
+        response_l_dict = self._request_list(http_method="get", request_url=request_url, payload=payload)
+        return response_l_dict
+
+    # store_api_patch{{{
+    def request_patch(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        makes a patch request
+
+        parameters:
+            request_url: API Url, without the common api prefix
+            payload : a dictionary
+
+        :returns
+            response_dict: dictionary with the response as dict
+
+        """
+        # store_api_patch}}}
+        response_dict = self._request_dict(http_method="patch", request_url=request_url, payload=payload)
+        return response_dict
+
     # store_api_post{{{
     def request_post(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
+        make a post request
+
+        parameters:
+            request_url: API Url, without the common api prefix
+            payload : a dictionary
+
+        :returns
+            response_dict: dictionary with the response as dict
 
         >>> # Setup
-        >>> my_api_client = Shopware6StoreAPIClientBase()
+        >>> my_storefront_client = Shopware6StoreFrontClientBase()
 
         >>> # test POST without payload
-        >>> my_response = my_api_client.request_post(request_url='product')
+        >>> my_response = my_storefront_client.request_post(request_url='product')
         >>> assert 'elements' in my_response
 
         >>> # test POST with payload
         >>> # see : https://shopware.stoplight.io/docs/store-api/b3A6ODI2NTY4MQ-fetch-a-list-of-products
         >>> my_payload = {}  # noqa
         >>> my_payload["filter"] = [{"type": "equals", "field": "active", "value": "true"}]
-        >>> my_response = my_api_client.request_post(request_url='product', payload=my_payload)
+        >>> my_response = my_storefront_client.request_post(request_url='product', payload=my_payload)
         >>> assert 'elements' in my_response
 
         """
         # store_api_post}}}
 
-        response = self._request(http_method="post", request_url=request_url, payload=payload)
+        response_dict = self._request_dict(http_method="post", request_url=request_url, payload=payload)
+        return response_dict
+
+    # store_api_put{{{
+    def request_put(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        make a put request
+
+        parameters:
+            http_method: get, post, put, delete
+            request_url: API Url, without the common api prefix
+            payload : a dictionary
+
+        :returns
+            response_dict: dictionary with the response as dict
+
+        """
+        # store_api_put}}}
+        response_dict = self._request_dict(http_method="put", request_url=request_url, payload=payload)
+        return response_dict
+
+    def _request_dict(self, http_method: str, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        http requests a dictionary. raises ShopwareAPIError if the result is not a dictionary
+        :param http_method:
+        :param request_url:
+        :param payload:
+        :return:
+        """
+        response = self._request(http_method=http_method, request_url=request_url, payload=payload)
         if hasattr(response, "json"):  # pragma: no cover
-            response_dict = dict(response.json())  # type: ignore
+            response_json = response.json()  # type: ignore
+            if isinstance(response_json, list):
+                raise ShopwareAPIError(f"received a list instead of a dict - You need to use the method request_{http_method}_list")
+            response_dict = dict(response_json)
         else:
             response_dict = dict()  # pragma: no cover
         return response_dict
+
+    def _request_list(self, http_method: str, request_url: str, payload: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """
+        http requests a list of dictionaries. raises ShopwareAPIError if the result is not a list
+        :param http_method:
+        :param request_url:
+        :param payload:
+        :return:
+        """
+        response = self._request(http_method=http_method, request_url=request_url, payload=payload)
+        if hasattr(response, "json"):  # pragma: no cover
+            response_json = response.json()  # type: ignore
+            if isinstance(response_json, dict):
+                raise ShopwareAPIError(f"received a dict instead of a list - You need to use the method request_{http_method}")
+            response_l_dict = list(response_json)
+        else:
+            response_l_dict = list()  # pragma: no cover
+        return response_l_dict
 
     def _request(self, http_method: str, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Optional[requests.Response]:
         """
@@ -97,7 +249,7 @@ class Shopware6StoreAPIClientBase(object):
 
 
         >>> # Setup
-        >>> my_api_client = Shopware6StoreAPIClientBase()
+        >>> my_api_client = Shopware6StoreFrontClientBase()
 
         >>> # test GET (a new cart)
         >>> my_api_client._request(http_method='get', request_url='checkout/cart', payload={'name': 'rn_doctest'})
@@ -147,7 +299,7 @@ class Shopware6StoreAPIClientBase(object):
     @lru_cache(maxsize=None)
     def _get_headers(self) -> Dict[str, str]:
         """
-        >>> my_api_client = Shopware6StoreAPIClientBase()
+        >>> my_api_client = Shopware6StoreFrontClientBase()
         >>> my_api_client._get_headers()
         {'Content-Type': 'application/json', 'Accept': 'application/json', 'sw-access-key': '...'}
         >>> my_api_client._get_headers.cache_clear()
@@ -167,7 +319,7 @@ class Shopware6StoreAPIClientBase(object):
         :returns
             the formatted url, like  https://your.shop-domain.com/store-api/product
 
-        >>> my_api_client = Shopware6StoreAPIClientBase()
+        >>> my_api_client = Shopware6StoreFrontClientBase()
         >>> my_api_client._format_storefront_api_url('test')
         'http.../store-api/test'
 

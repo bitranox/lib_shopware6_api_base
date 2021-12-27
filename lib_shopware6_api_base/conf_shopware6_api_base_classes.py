@@ -3,7 +3,7 @@
 import attr
 
 
-@attr.dataclass()
+@attr.dataclass
 class ConfShopware6ApiBase(object):
     # the api url, like : 'https://shop.yourdomain.com/api'
     shopware_admin_api_url: str = ""

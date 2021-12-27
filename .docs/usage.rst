@@ -42,7 +42,9 @@ methods
     therefore on all examples no configuration is passed on purpose.
 
 
-- Store API
+Store API
+---------
+
     for the Store API only "request_post" is implemented at the moment,
     which might be used as an example to implement all other methods
     like 'get', 'patch', 'put', 'delete'.
@@ -56,6 +58,30 @@ methods
     :end-before:  # store_api}}}
 
 
+- Store API Get
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base.py
+    :code: python
+    :start-after: # store_api_get{{{
+    :end-before:  # store_api_get}}}
+
+
+- Store API Get List
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base.py
+    :code: python
+    :start-after: # store_api_get_list{{{
+    :end-before:  # store_api_get_list}}}
+
+
+- Store API Patch
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base.py
+    :code: python
+    :start-after: # store_api_patch{{{
+    :end-before:  # store_api_patch}}}
+
+
 - Store API Post
 
 .. include:: ../lib_shopware6_api_base/lib_shopware6_api_base.py
@@ -64,7 +90,24 @@ methods
     :end-before:  # store_api_post}}}
 
 
-- Admin API
+- Store API Put
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base.py
+    :code: python
+    :start-after: # store_api_put{{{
+    :end-before:  # store_api_put}}}
+
+
+- Store API Delete
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base.py
+    :code: python
+    :start-after: # store_api_delete{{{
+    :end-before:  # store_api_delete}}}
+
+
+Admin API
+---------
 
 .. include:: ../lib_shopware6_api_base/lib_shopware6_api_base.py
     :code: python
