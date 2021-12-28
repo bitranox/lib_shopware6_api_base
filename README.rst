@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v1.1.0 as of 2021-12-27 see `Changelog`_
+Version v1.2.0 as of 2021-12-29 see `Changelog`_
 
 |build_badge| |license| |pypi| |black|
 
@@ -89,6 +89,22 @@ tested on recent linux with python 3.6, 3.7, 3.8, 3.9, 3.10.0, pypy-3.8 - archit
 Usage
 -----------
 
+- `configuration`_
+- `methods`_
+- `Store API`_
+- `Admin API`_
+- `Query Syntax`_
+- `Filters`_
+    - `EqualsFilter`_
+    - `EqualsAnyFilter`_
+    - `ContainsFilter`_
+    - `RangeFilter`_
+    - `NotFilter`_
+    - `MultiFilter`_
+    - `PrefixFilter`_
+    - `SuffixFilter`_
+
+
 configuration
 -------------
 
@@ -97,10 +113,11 @@ configuration
 
 .. code-block:: python
 
-    import attr
+    import attrs
+    from attrs import validators
 
 
-    @attr.dataclass
+    @attrs.define
     class ConfShopware6ApiBase(object):
         # the api url, like : 'https://shop.yourdomain.com/api'
         shopware_admin_api_url: str = ""
@@ -180,9 +197,12 @@ now You can test against that container with :
 methods
 -------
 
-    please note, that on github actions the test configuration is used automatically,
-    therefore on all examples no configuration is passed on purpose.
+please note, that on github actions the test configuration is used automatically,
+therefore on all examples no configuration is passed on purpose.
 
+methods which take the parameter 'payload', the payload is of following type :
+
+PayLoad = Union[None, Dict[str, Any], Criteria]
 
 Store API
 ---------
@@ -216,7 +236,7 @@ Store API
 
 .. code-block:: python
 
-        def request_get(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        def request_get(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
             """
             make a get request
 
@@ -245,7 +265,7 @@ Store API
 
 .. code-block:: python
 
-        def request_get_list(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        def request_get_list(self, request_url: str, payload: PayLoad = None) -> List[Dict[str, Any]]:
             """
             make a get request, expecting a list of dictionaries as result
 
@@ -275,7 +295,7 @@ Store API
 
 .. code-block:: python
 
-        def request_patch(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        def request_patch(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
             """
             makes a patch request
 
@@ -292,7 +312,7 @@ Store API
 
 .. code-block:: python
 
-        def request_post(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        def request_post(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
             """
             make a post request
 
@@ -312,8 +332,8 @@ Store API
 
             >>> # test POST with payload
             >>> # see : https://shopware.stoplight.io/docs/store-api/b3A6ODI2NTY4MQ-fetch-a-list-of-products
-            >>> my_payload = {}  # noqa
-            >>> my_payload["filter"] = [{"type": "equals", "field": "active", "value": "true"}]
+            >>> my_payload = Criteria()
+            >>> my_payload.filter.append(EqualsFilter(field='active', value='true'))
             >>> my_response = my_storefront_client.request_post(request_url='product', payload=my_payload)
             >>> assert 'elements' in my_response
 
@@ -323,7 +343,7 @@ Store API
 
 .. code-block:: python
 
-        def request_put(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        def request_put(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
             """
             make a put request
 
@@ -341,7 +361,7 @@ Store API
 
 .. code-block:: python
 
-        def request_delete(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        def request_delete(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
             """
             make a delete request
 
@@ -382,7 +402,7 @@ Admin API
 
 .. code-block:: python
 
-        def request_get(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        def request_get(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
             """
             makes a get request
 
@@ -426,7 +446,7 @@ Admin API
 
 .. code-block:: python
 
-        def request_get_paginated(self, request_url: str, payload: Optional[Dict[str, Any]] = None, limit: int = 100) -> Dict[str, Any]:
+        def request_get_paginated(self, request_url: str, payload: PayLoad = None, limit: int = 100) -> Dict[str, Any]:
             """
             get the data paginated - metadata 'total' and 'totalCountMode' will be updated
             if You expect a big number of records, the paginated request reads those records in junks of limit=100 for performance reasons.
@@ -453,7 +473,7 @@ Admin API
 
 .. code-block:: python
 
-        def request_patch(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        def request_patch(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
             """
             makes a patch request
 
@@ -470,7 +490,7 @@ Admin API
 
 .. code-block:: python
 
-        def request_post(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        def request_post(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
             """
             makes a post request
 
@@ -487,7 +507,7 @@ Admin API
 
 .. code-block:: python
 
-        def request_post_paginated(self, request_url: str, payload: Optional[Dict[str, Any]] = None, limit: int = 100) -> Dict[str, Any]:
+        def request_post_paginated(self, request_url: str, payload: PayLoad = None, limit: int = 100) -> Dict[str, Any]:
             """
             post the data paginated - metadata 'total' and 'totalCountMode' will be updated
             if You expect a big number of records, the paginated request reads those records in junks of limit=100 for performance reasons.
@@ -506,7 +526,7 @@ Admin API
 
 .. code-block:: python
 
-        def request_put(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        def request_put(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
             """
             makes a put request
 
@@ -524,7 +544,7 @@ Admin API
 
 .. code-block:: python
 
-        def request_delete(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        def request_delete(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
             """
             makes a delete request
 
@@ -537,6 +557,319 @@ Admin API
                 response_dict: dictionary with the response as dict
 
             """
+
+Query Syntax
+------------
+
+The querying syntax closely resembling the one from the internal DAL.
+If you're familiar with Shopware 6 DAL syntax and how to retrieve it,
+you might see the examples are predictable and straightforward
+
+a search criteria follows the following schema:
+
+.. code-block:: python
+
+    @attrs.define()
+    class Criteria:
+        """
+        see: https://shopware.stoplight.io/docs/store-api/ZG9jOjEwODExNzU2-search-queries
+
+        structure of Criteria:
+
+        parameter:
+        associations                not implemented at the moment
+        includes                    not implemented at the moment
+        ids                         not implemented at the moment
+        total-count-mode            not implemented at the moment
+        page    integer
+        limit   integer
+        filter  List[Filter]
+        post-filter                 not implemented at the moment
+        query                       not implemented at the moment
+        term                        not implemented at the moment
+        sort    List[Sort]
+        aggregations                not implemented at the moment
+        grouping                    not implemented at the moment
+
+        >>> # Test shorthand set filters
+        >>> my_criteria = Criteria()
+        >>> my_criteria.filter = [EqualsFilter('a', 'a'), EqualsFilter('b', 'b'), EqualsFilter('d', 'd')]
+
+Filters
+-------
+
+EqualsFilter
+------------
+
+.. code-block:: python
+
+    @attrs.define
+    class EqualsFilter:
+        """
+        see filter reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/filters-reference
+        The Equals filter allows you to check fields for an exact value.
+        The following SQL statement is executed in the background: WHERE stock = 10.
+
+        :parameter:
+            field: str
+            value: str  # todo check ! type is str, really ? on examples it seems it can be also int
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter().pprint
+
+        >>> # Test
+        >>> my_filter = EqualsFilter('stock', 10)
+        >>> pp(attrs.asdict(my_filter))
+        {'field': 'stock', 'type': 'equals', 'value': 10}
+        """
+
+EqualsAnyFilter
+---------------
+
+.. code-block:: python
+
+    @attrs.define
+    class EqualsAnyFilter:
+        """
+        see filter reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/filters-reference
+        The EqualsAny filter allows you to filter a field where at least one of the defined values matches exactly.
+        The following SQL statement is executed in the background:
+        WHERE productNumber IN ('3fed029475fa4d4585f3a119886e0eb1', '77d26d011d914c3aa2c197c81241a45b').
+
+        :parameter:
+            field: str
+            value: List[str]
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter().pprint
+
+        >>> # Test
+        >>> my_filter = EqualsAnyFilter(field = 'productNumber', value = ["3fed029475fa4d4585f3a119886e0eb1", "77d26d011d914c3aa2c197c81241a45b"])
+        >>> pp(attrs.asdict(my_filter))
+        {'field': 'productNumber',
+         'type': 'equals',
+         'value': ['3fed029475fa4d4585f3a119886e0eb1',
+                   '77d26d011d914c3aa2c197c81241a45b']}
+
+        """
+
+ContainsFilter
+---------------
+
+.. code-block:: python
+
+    @attrs.define
+    class ContainsFilter:
+        """
+        see filter reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/filters-reference
+        The Contains Filter allows you to filter a field to an approximate value, where the passed value must be contained as a full value.
+        The following SQL statement is executed in the background: WHERE name LIKE '%Lightweight%'.
+
+        :parameter:
+            field: str
+            value: List[str]
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter().pprint
+
+        >>> # Test
+        >>> my_filter = ContainsFilter(field = 'productNumber', value = 'Lightweight')
+        >>> pp(attrs.asdict(my_filter))
+        {'field': 'productNumber', 'type': 'contains', 'value': 'Lightweight'}
+
+
+        """
+
+RangeFilter
+---------------
+
+.. code-block:: python
+
+    @attrs.define
+    class RangeFilter:
+        """
+        see filter reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/filters-reference
+        The Range filter allows you to filter a field to a value space. This can work with date or numerical values.
+        Within the parameter property the following values are possible:
+            gte => Greater than equals  (You might pass 'gte' or range_filter.gte)
+            lte => Less than equals     (You might pass 'lte' or range_filter.lte)
+            gt => Greater than          (You might pass 'gt' or range_filter.gt)
+            lt => Less than             (You might pass 'lt' or range_filter.lt)
+
+        :parameter:
+            field: str
+            parameters: Dict[str, Union[int, datetime]]
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter().pprint
+
+        >>> # Test (pass range type as string)
+        >>> my_filter = RangeFilter(field = 'stock', parameters = {'gte': 20, 'lte': 30})
+        >>> pp(attrs.asdict(my_filter))
+        {'field': 'stock', 'parameters': {'gte': 20, 'lte': 30}, 'type': 'range'}
+
+        >>> # Test (pass range type from 'range_filter' object)
+        >>> my_filter = RangeFilter(field = 'stock', parameters = {range_filter.gte: 20, range_filter.lte: 30})
+        >>> pp(attrs.asdict(my_filter))
+        {'field': 'stock', 'parameters': {'gte': 20, 'lte': 30}, 'type': 'range'}
+
+        >>> # Test (wrong range)
+        >>> my_filter = RangeFilter(field = 'stock', parameters = {'gte': 20, 'less': 30})
+        Traceback (most recent call last):
+            ...
+        ValueError: "less" is not a valid range
+
+        """
+
+NotFilter
+---------------
+
+.. code-block:: python
+
+    @attrs.define
+    class NotFilter:
+        """
+        see filter reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/filters-reference
+        The Not Filter is a container which allows to negate any kind of filter.
+        The operator allows you to define the combination of queries within the NOT filter (OR and AND).
+        The following SQL statement is executed in the background: WHERE !(stock = 1 OR availableStock = 1):
+
+        :parameter:
+            operator: 'or' | 'and'
+            queries: List[Filter]
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter().pprint
+
+        >>> # Test (pass operator as string)
+        >>> my_filter = NotFilter('or', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
+        >>> pp(attrs.asdict(my_filter))
+        {'operator': 'or',
+         'queries': [{'field': 'stock', 'type': 'equals', 'value': 1},
+                     {'field': 'availableStock', 'type': 'equals', 'value': 10}],
+         'type': 'not'}
+
+
+        >>> # Test (pass operator from 'not_filter_operator' object)
+        >>> my_filter = NotFilter(not_filter_operator.or_, [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
+        >>> pp(attrs.asdict(my_filter))
+        {'operator': 'or',
+         'queries': [{'field': 'stock', 'type': 'equals', 'value': 1},
+                     {'field': 'availableStock', 'type': 'equals', 'value': 10}],
+         'type': 'not'}
+
+        >>> # Test unknown operator
+        >>> my_filter = NotFilter('duck', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
+        Traceback (most recent call last):
+            ...
+        ValueError: 'operator' must be in ['and', 'or'] (got 'duck')
+
+        """
+
+MultiFilter
+---------------
+
+.. code-block:: python
+
+    @attrs.define
+    class MultiFilter:
+        """
+        see filter reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/filters-reference
+        The Multi Filter is a container, which allows to set logical links between filters.
+        The operator allows you to define the links between the queries within the Multi filter (OR and AND).
+        The following SQL statement is executed in the background: WHERE (stock = 1 OR availableStock = 1)
+
+        :parameter:
+            operator: 'or' | 'and'
+            queries: List[Filter]
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter().pprint
+
+        >>> # Test (pass operator as string)
+        >>> my_filter = MultiFilter('or', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
+        >>> pp(attrs.asdict(my_filter))
+        {'operator': 'or',
+         'queries': [{'field': 'stock', 'type': 'equals', 'value': 1},
+                     {'field': 'availableStock', 'type': 'equals', 'value': 10}],
+         'type': 'multi'}
+
+
+        >>> # Test (pass operator from 'not_filter_operator' object)
+        >>> my_filter = MultiFilter(multi_filter_operator.or_, [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
+        >>> pp(attrs.asdict(my_filter))
+        {'operator': 'or',
+         'queries': [{'field': 'stock', 'type': 'equals', 'value': 1},
+                     {'field': 'availableStock', 'type': 'equals', 'value': 10}],
+         'type': 'multi'}
+
+        >>> # Test unknown operator
+        >>> my_filter = MultiFilter('duck', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
+        Traceback (most recent call last):
+            ...
+        ValueError: 'operator' must be in ['and', 'or'] (got 'duck')
+
+        """
+
+PrefixFilter
+---------------
+
+.. code-block:: python
+
+    @attrs.define
+    class PrefixFilter:
+        """
+        see filter reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/filters-reference
+        The Prefix Filter allows you to filter a field to an approximate value, where the passed value must be the start of a full value.
+        The following SQL statement is executed in the background: WHERE name LIKE 'Lightweight%'.
+
+        :parameter:
+            field: str
+            value: str
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter().pprint
+
+        >>> # Test
+        >>> my_filter = PrefixFilter('name', 'Lightweight')
+        >>> pp(attrs.asdict(my_filter))
+        {'field': 'name', 'type': 'prefix', 'value': 'Lightweight'}
+
+        """
+
+SuffixFilter
+---------------
+
+.. code-block:: python
+
+    @attrs.define
+    class SuffixFilter:
+        """
+        see filter reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/filters-reference
+        The Suffix Filter allows you to filter a field to an approximate value, where the passed value must be the end of a full value.
+        The following SQL statement is executed in the background: WHERE name LIKE '%Lightweight'.
+
+        :parameter:
+            field: str
+            value: str
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter().pprint
+
+        >>> # Test
+        >>> my_filter = SuffixFilter('name', 'Lightweight')
+        >>> pp(attrs.asdict(my_filter))
+        {'field': 'name', 'type': 'suffix', 'value': 'Lightweight'}
+
+        """
 
 Usage from Commandline
 ------------------------
@@ -633,7 +966,7 @@ following modules will be automatically installed :
 .. code-block:: bash
 
     ## Project Requirements
-    attr
+    attrs
     click
     cli_exit_tools
     lib_detect_testenv
@@ -666,15 +999,15 @@ Changelog
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
 
+v1.2.0
+--------
+2021-12-28:
+    - add Criteria, Filters
+
 v1.1.0
 --------
 2021-12-27:
-    - add Store Api DELETE method
-    - add Store Api GET method
-    - add Store Api GET LIST method
-    - add Store Api PATCH method
-    - add Store Api PUT method
-
+    - add Store Api DELETE/GET/GET LIST/PATCH/PUT methods
 
 v1.0.0
 --------

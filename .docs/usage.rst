@@ -1,3 +1,19 @@
+- `configuration`_
+- `methods`_
+- `Store API`_
+- `Admin API`_
+- `Query Syntax`_
+- `Filters`_
+    - `EqualsFilter`_
+    - `EqualsAnyFilter`_
+    - `ContainsFilter`_
+    - `RangeFilter`_
+    - `NotFilter`_
+    - `MultiFilter`_
+    - `PrefixFilter`_
+    - `SuffixFilter`_
+
+
 configuration
 -------------
 
@@ -38,8 +54,15 @@ now You can test against that container with :
 methods
 -------
 
-    please note, that on github actions the test configuration is used automatically,
-    therefore on all examples no configuration is passed on purpose.
+please note, that on github actions the test configuration is used automatically,
+therefore on all examples no configuration is passed on purpose.
+
+methods which take the parameter 'payload', the payload is of following type :
+
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base.py
+    :start-after: # payload_type{{{
+    :end-before:  # payload_type}}}
 
 
 Store API
@@ -163,3 +186,93 @@ Admin API
     :code: python
     :start-after: # admin_api_delete{{{
     :end-before:  # admin_api_delete}}}
+
+
+Query Syntax
+------------
+
+The querying syntax closely resembling the one from the internal DAL.
+If you're familiar with Shopware 6 DAL syntax and how to retrieve it,
+you might see the examples are predictable and straightforward
+
+a search criteria follows the following schema:
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria.py
+    :code: python
+    :start-after: # criteria{{{
+    :end-before:  # criteria}}}
+
+
+Filters
+-------
+
+EqualsFilter
+------------
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_filter.py
+    :code: python
+    :start-after: # EqualsFilter{{{
+    :end-before:  # EqualsFilter}}}
+
+
+EqualsAnyFilter
+---------------
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_filter.py
+    :code: python
+    :start-after: # EqualsAnyFilter{{{
+    :end-before:  # EqualsAnyFilter}}}
+
+
+ContainsFilter
+---------------
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_filter.py
+    :code: python
+    :start-after: # ContainsFilter{{{
+    :end-before:  # ContainsFilter}}}
+
+
+RangeFilter
+---------------
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_filter.py
+    :code: python
+    :start-after: # RangeFilter{{{
+    :end-before:  # RangeFilter}}}
+
+
+NotFilter
+---------------
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_filter.py
+    :code: python
+    :start-after: # NotFilter{{{
+    :end-before:  # NotFilter}}}
+
+
+MultiFilter
+---------------
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_filter.py
+    :code: python
+    :start-after: # MultiFilter{{{
+    :end-before:  # MultiFilter}}}
+
+
+PrefixFilter
+---------------
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_filter.py
+    :code: python
+    :start-after: # PrefixFilter{{{
+    :end-before:  # PrefixFilter}}}
+
+
+SuffixFilter
+---------------
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_filter.py
+    :code: python
+    :start-after: # SuffixFilter{{{
+    :end-before:  # SuffixFilter}}}

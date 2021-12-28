@@ -1,9 +1,14 @@
+# STDLIB
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Union
+
 # EXT
 # config_class{{{
-import attr
+import attrs
+from attrs import validators
 
 
-@attr.dataclass
+@attrs.define
 class ConfShopware6ApiBase(object):
     # the api url, like : 'https://shop.yourdomain.com/api'
     shopware_admin_api_url: str = ""

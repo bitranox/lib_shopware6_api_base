@@ -6,7 +6,7 @@ import json
 import logging
 import sys
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union, cast
 
 # EXT
 import oauthlib
@@ -16,12 +16,19 @@ import requests_oauthlib
 
 # conf
 try:
-    from conf_shopware6_api_base_classes import ConfShopware6ApiBase, ShopwareAPIError
+    from conf_shopware6_api_base_classes import *
+    from lib_shopware6_api_base_criteria import *
 except ImportError:  # pragma: no cover
     # Imports for Doctest
-    from .conf_shopware6_api_base_classes import ConfShopware6ApiBase, ShopwareAPIError  # type: ignore  # pragma: no cover
+    from .conf_shopware6_api_base_classes import *  # type: ignore  # pragma: no cover
+    from .lib_shopware6_api_base_criteria import *
+
 
 logger = logging.getLogger(__name__)
+
+# payload_type{{{
+PayLoad = Union[None, Dict[str, Any], Criteria]
+# payload_type}}}
 
 
 # store_api{{{
@@ -56,7 +63,7 @@ class Shopware6StoreFrontClientBase(object):
         self.config = config
 
     # store_api_delete{{{
-    def request_delete(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def request_delete(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
         """
         make a delete request
 
@@ -74,7 +81,7 @@ class Shopware6StoreFrontClientBase(object):
         return response_dict
 
     # store_api_get{{{
-    def request_get(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def request_get(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
         """
         make a get request
 
@@ -103,7 +110,7 @@ class Shopware6StoreFrontClientBase(object):
         return response_dict
 
     # store_api_get_list{{{
-    def request_get_list(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+    def request_get_list(self, request_url: str, payload: PayLoad = None) -> List[Dict[str, Any]]:
         """
         make a get request, expecting a list of dictionaries as result
 
@@ -133,7 +140,7 @@ class Shopware6StoreFrontClientBase(object):
         return response_l_dict
 
     # store_api_patch{{{
-    def request_patch(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def request_patch(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
         """
         makes a patch request
 
@@ -150,7 +157,7 @@ class Shopware6StoreFrontClientBase(object):
         return response_dict
 
     # store_api_post{{{
-    def request_post(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def request_post(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
         """
         make a post request
 
@@ -170,8 +177,8 @@ class Shopware6StoreFrontClientBase(object):
 
         >>> # test POST with payload
         >>> # see : https://shopware.stoplight.io/docs/store-api/b3A6ODI2NTY4MQ-fetch-a-list-of-products
-        >>> my_payload = {}  # noqa
-        >>> my_payload["filter"] = [{"type": "equals", "field": "active", "value": "true"}]
+        >>> my_payload = Criteria()
+        >>> my_payload.filter.append(EqualsFilter(field='active', value='true'))
         >>> my_response = my_storefront_client.request_post(request_url='product', payload=my_payload)
         >>> assert 'elements' in my_response
 
@@ -182,7 +189,7 @@ class Shopware6StoreFrontClientBase(object):
         return response_dict
 
     # store_api_put{{{
-    def request_put(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def request_put(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
         """
         make a put request
 
@@ -199,7 +206,7 @@ class Shopware6StoreFrontClientBase(object):
         response_dict = self._request_dict(http_method="put", request_url=request_url, payload=payload)
         return response_dict
 
-    def _request_dict(self, http_method: str, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def _request_dict(self, http_method: str, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
         """
         http requests a dictionary. raises ShopwareAPIError if the result is not a dictionary
         :param http_method:
@@ -217,7 +224,7 @@ class Shopware6StoreFrontClientBase(object):
             response_dict = dict()  # pragma: no cover
         return response_dict
 
-    def _request_list(self, http_method: str, request_url: str, payload: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+    def _request_list(self, http_method: str, request_url: str, payload: PayLoad = None) -> List[Dict[str, Any]]:
         """
         http requests a list of dictionaries. raises ShopwareAPIError if the result is not a list
         :param http_method:
@@ -235,7 +242,7 @@ class Shopware6StoreFrontClientBase(object):
             response_l_dict = list()  # pragma: no cover
         return response_l_dict
 
-    def _request(self, http_method: str, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Optional[requests.Response]:
+    def _request(self, http_method: str, request_url: str, payload: PayLoad = None) -> Optional[requests.Response]:
         """
         makes a request, using the conf.store_api_sw_access_key for authentication
 
@@ -260,7 +267,7 @@ class Shopware6StoreFrontClientBase(object):
         <Response [204]>
 
         >>> # test POST (a single product)
-        >>> my_payload = {'filter': [{"type": "equals", "field": "active", "value": "true"}]}
+        >>> my_payload=Criteria(filter=[EqualsFilter(field='active', value='true')])
         >>> my_api_client._request(http_method='post', request_url='product', payload=my_payload)
         <Response [200]>
 
@@ -271,6 +278,8 @@ class Shopware6StoreFrontClientBase(object):
         conf_shopware6_api_base_classes.ShopwareAPIError: 400 Client Error: Bad Request for url: ...
 
         """
+        if isinstance(payload, Criteria):
+            payload = payload.get_dict()
         formatted_request_url = self._format_storefront_api_url(request_url)
         response: requests.Response = requests.Response()
         headers = self._get_headers()
@@ -356,7 +365,7 @@ class Shopware6AdminAPIClientBase(object):
         self.session: requests_oauthlib.OAuth2Session = requests_oauthlib.OAuth2Session()
 
     # admin_api_get{{{
-    def request_get(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def request_get(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
         """
         makes a get request
 
@@ -400,7 +409,7 @@ class Shopware6AdminAPIClientBase(object):
         return response_dict
 
     # admin_api_get_paginated{{{
-    def request_get_paginated(self, request_url: str, payload: Optional[Dict[str, Any]] = None, limit: int = 100) -> Dict[str, Any]:
+    def request_get_paginated(self, request_url: str, payload: PayLoad = None, limit: int = 100) -> Dict[str, Any]:
         """
         get the data paginated - metadata 'total' and 'totalCountMode' will be updated
         if You expect a big number of records, the paginated request reads those records in junks of limit=100 for performance reasons.
@@ -427,7 +436,7 @@ class Shopware6AdminAPIClientBase(object):
         return response_dict
 
     # admin_api_patch{{{
-    def request_patch(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def request_patch(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
         """
         makes a patch request
 
@@ -444,7 +453,7 @@ class Shopware6AdminAPIClientBase(object):
         return response_dict
 
     # admin_api_post{{{
-    def request_post(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def request_post(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
         """
         makes a post request
 
@@ -461,7 +470,7 @@ class Shopware6AdminAPIClientBase(object):
         return response_dict
 
     # admin_api_post_paginated{{{
-    def request_post_paginated(self, request_url: str, payload: Optional[Dict[str, Any]] = None, limit: int = 100) -> Dict[str, Any]:
+    def request_post_paginated(self, request_url: str, payload: PayLoad = None, limit: int = 100) -> Dict[str, Any]:
         """
         post the data paginated - metadata 'total' and 'totalCountMode' will be updated
         if You expect a big number of records, the paginated request reads those records in junks of limit=100 for performance reasons.
@@ -480,7 +489,7 @@ class Shopware6AdminAPIClientBase(object):
         return response_dict
 
     # admin_api_put{{{
-    def request_put(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def request_put(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
         """
         makes a put request
 
@@ -498,7 +507,7 @@ class Shopware6AdminAPIClientBase(object):
         return response_dict
 
     # admin_api_delete{{{
-    def request_delete(self, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def request_delete(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
         """
         makes a delete request
 
@@ -515,12 +524,14 @@ class Shopware6AdminAPIClientBase(object):
         response_dict = self._make_request(http_method="delete", request_url=request_url, payload=payload)
         return response_dict
 
-    def _request_paginated(self, http_method: str, request_url: str, payload: Optional[Dict[str, Any]] = None, limit: int = 100) -> Dict[str, Any]:
+    def _request_paginated(self, http_method: str, request_url: str, payload: PayLoad = None, limit: int = 100) -> Dict[str, Any]:
         response_dict: Dict[str, Any] = dict()
         response_dict["data"] = list()
 
         if payload is None:
             payload = dict()
+        elif isinstance(payload, Criteria):
+            payload = payload.get_dict()
 
         payload["limit"] = str(limit)
         page = 1
@@ -535,7 +546,7 @@ class Shopware6AdminAPIClientBase(object):
                 break
         return response_dict
 
-    def _make_request(self, http_method: str, request_url: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def _make_request(self, http_method: str, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
         """
         makes a request - creates and refresh a token and sessions as needed
 
@@ -607,7 +618,7 @@ class Shopware6AdminAPIClientBase(object):
             response_dict = dict()
         return response_dict
 
-    def _request(self, http_method: str, request_url: str, payload: Optional[Dict[str, Any]]) -> requests.Response:
+    def _request(self, http_method: str, request_url: str, payload: PayLoad) -> requests.Response:
         """
         makes a request, needs a self.session to be set up and authenticated
 
@@ -628,6 +639,9 @@ class Shopware6AdminAPIClientBase(object):
         """
         if payload is None:
             payload = dict()
+        elif isinstance(payload, Criteria):
+            payload = payload.get_dict()
+
         response: requests.Response = requests.Response()
         headers = self._get_headers()
 
@@ -715,7 +729,7 @@ class Shopware6AdminAPIClientBase(object):
 
         >>> # Test Ok
         >>> my_api_client._get_access_token_by_resource_owner()
-        {'token_type': 'Bearer', 'expires_in': 600, 'access_token': '...', 'expires_at': ...}
+        {'token_type': 'Bearer', 'expires_in': ..., 'access_token': '...', 'expires_at': ...}
 
         >>> # Test no url
         >>> my_api_client.config.shopware_admin_api_url = ''
@@ -788,7 +802,7 @@ class Shopware6AdminAPIClientBase(object):
 
         >>> # Test Ok
         >>> my_api_client._get_access_token_by_user_credentials()
-        {'token_type': 'Bearer', 'expires_in': 600, 'access_token': '...', 'refresh_token': '...', 'expires_at': ...}
+        {'token_type': 'Bearer', 'expires_in': ..., 'access_token': '...', 'refresh_token': '...', 'expires_at': ...}
 
         >>> # Test no url
         >>> my_api_client.config.shopware_admin_api_url = ''
@@ -950,7 +964,7 @@ def _load_config_for_docker_test_container() -> ConfShopware6ApiBase:
     except ImportError:  # pragma: no cover
         # Imports for Doctest
         from .conf_shopware6_api_base_docker_testcontainer import conf_shopware6_api_base  # type: ignore  # pragma: no cover
-    return conf_shopware6_api_base
+    return conf_shopware6_api_base  # type: ignore
 
 
 def _get_docker_test_container_store_access_key() -> str:
@@ -1033,7 +1047,7 @@ def _load_config_for_rotek_production() -> ConfShopware6ApiBase:
     except ImportError:  # pragma: no cover
         # Imports for Doctest
         from .conf_shopware6_api_base_rotek import conf_shopware6_api_base  # type: ignore  # pragma: no cover
-    return conf_shopware6_api_base  # pragma: no cover
+    return conf_shopware6_api_base  # type: ignore
 
 
 def _is_github_actions() -> bool:
