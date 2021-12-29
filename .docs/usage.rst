@@ -448,8 +448,9 @@ back to `Query Syntax`_
 
 The grouping parameter allows you to group the result over fields.
 It can be used to realise queries such as:
-    - Fetch one product for each manufacturer
-    - Fetch one order per day and customer
+
+- Fetch one product for each manufacturer
+- Fetch one order per day and customer
 
 .. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria.py
     :code: python
