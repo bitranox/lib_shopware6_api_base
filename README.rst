@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v1.2.0 as of 2021-12-29 see `Changelog`_
+Version v1.3.0 as of 2021-12-29 see `Changelog`_
 
 |build_badge| |license| |pypi| |black|
 
@@ -94,16 +94,37 @@ Usage
 - `Store API`_
 - `Admin API`_
 - `Query Syntax`_
-- `Filters`_
-    - `EqualsFilter`_
-    - `EqualsAnyFilter`_
-    - `ContainsFilter`_
-    - `RangeFilter`_
-    - `NotFilter`_
-    - `MultiFilter`_
-    - `PrefixFilter`_
-    - `SuffixFilter`_
-
+    - `Aggregations`_
+        - `AvgAggregation`_
+        - `CountAggregation`_
+        - `MaxAggregation`_
+        - `MinAggregation`_
+        - `SumAggregation`_
+        - `StatsAggregation`_
+        - `TermsAggregation`_
+        - `FilterAggregation`_
+        - `EntityAggregation`_
+        - `DateHistogramAggregation`_
+        - `NestingAggregations`_
+    - `Associations`_
+    - `Filters`_
+        - `EqualsFilter`_
+        - `EqualsAnyFilter`_
+        - `ContainsFilter`_
+        - `RangeFilter`_
+        - `NotFilter`_
+        - `MultiFilter`_
+        - `PrefixFilter`_
+        - `SuffixFilter`_
+    - `Grouping`_
+    - `ids`_
+    - `includes`_
+    - `page & limit`_
+    - `Query`_
+    - `Sort`_
+        - `FieldSorting`_
+        - `AscFieldSorting`_
+        - `DescFieldSorting`_
 
 configuration
 -------------
@@ -203,6 +224,9 @@ therefore on all examples no configuration is passed on purpose.
 methods which take the parameter 'payload', the payload is of following type :
 
 PayLoad = Union[None, Dict[str, Any], Criteria]
+
+for the definition of "Criteria" see `Query Syntax`_
+
 
 Store API
 ---------
@@ -569,7 +593,7 @@ a search criteria follows the following schema:
 
 .. code-block:: python
 
-    @attrs.define()
+    @attrs.define
     class Criteria:
         """
         see: https://shopware.stoplight.io/docs/store-api/ZG9jOjEwODExNzU2-search-queries
@@ -577,29 +601,544 @@ a search criteria follows the following schema:
         structure of Criteria:
 
         parameter:
-        associations                not implemented at the moment
-        includes                    not implemented at the moment
-        ids                         not implemented at the moment
-        total-count-mode            not implemented at the moment
-        page    integer
-        limit   integer
-        filter  List[Filter]
-        post-filter                 not implemented at the moment
-        query                       not implemented at the moment
-        term                        not implemented at the moment
-        sort    List[Sort]
-        aggregations                not implemented at the moment
-        grouping                    not implemented at the moment
 
-        >>> # Test shorthand set filters
+        aggregations  List[Aggregation]                    Specify aggregations to be computed on-the-fly
+        associations  Dict['<name>', 'Criteria']           Allows to load additional data to the standard data of an entity
+        filter        List[Filter]                         Allows you to filter the result and aggregations
+        grouping      List['<fieldname>']                  allows you to group the result over fields
+        ids           List['<id>']                         Limits the search to a list of Ids
+        includes      Dict['apiAlias', List[<fieldname>]]  Restricts the output to the defined fields
+        limit         Optional[int]                        Defines the number of entries to be determined
+        page          Optional[int]                        Defines at which page the search result should start
+        post-filter                           not implemented at the moment
+        query         List[Query]                          Enables you to determine a ranking for the search result
+        sort          List[Sort]                           Defines the sorting of the search result
+        term          Optional[str]                        text search on all records based on their data model and weighting
+                                                           Don't use term parameters together with query parameters.
+        total-count-mode    Optional[int]                  Defines whether a total must be determined
+
+
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+
+        >>> # Test empty
+        >>> my_criteria = Criteria()
+        >>> pp(my_criteria.get_dict())
+        {}
+
+        >>> # Test Average aggregation
+        >>> my_criteria = Criteria()
+        >>> my_criteria.limit=1
+        >>> my_criteria.includes['product'] = ['id', 'name']
+        >>> my_criteria.aggregations = [AvgAggregation('average-price', 'price')]
+        >>> pp(my_criteria.get_dict())
+        {'limit': 1,
+         'aggregations': [{'name': 'average-price', 'type': 'avg', 'field': 'price'}],
+         'includes': {'product': ['id', 'name']}}
+
+        >>> # Test Filter aggregation
+        >>> my_criteria = Criteria(limit=1, includes={'product':['id', 'name']},
+        ...     aggregations=FilterAggregation(name='active-price-avg',
+        ...                                    filter=EqualsFilter(field='active', value=True),
+        ...                                    aggregation=AvgAggregation(name='avg-price',field='price')))
+        >>> pp(my_criteria.get_dict())
+        {'limit': 1,
+         'aggregations': {'name': 'active-price-avg',
+                          'type': 'filter',
+                          'filter': {'type': 'equals',
+                                     'field': 'active',
+                                     'value': True},
+                          'aggregation': {'name': 'avg-price',
+                                          'type': 'avg',
+                                          'field': 'price'}},
+         'includes': {'product': ['id', 'name']}}
+
+        >>> # Association{{{
+        >>> # Test Association
+        >>> my_criteria = Criteria()
+        >>> my_criteria.associations['products'] = Criteria(limit=5, filter=[EqualsFilter('active', 'true')])
+        >>> pp(my_criteria.get_dict())
+        {'associations': {'products': {'limit': 5,
+                                       'filter': [{'type': 'equals',
+                                                   'field': 'active',
+                                                   'value': 'true'}]}}}
+        >>> # Association}}}
+
+        >>> # Test append filters
+        >>> my_criteria = Criteria()
+        >>> my_criteria.page = 0
+        >>> my_criteria.limit=1
+        >>> my_criteria.filter.append(EqualsFilter('a', 'a'))
+        >>> my_criteria.filter.append(EqualsFilter('b', 'b'))
+        >>> my_criteria.filter.append(EqualsFilter('d', 'd'))
+        >>> pp(my_criteria.get_dict())
+        {'limit': 1,
+         'page': 0,
+         'filter': [{'type': 'equals', 'field': 'a', 'value': 'a'},
+                    {'type': 'equals', 'field': 'b', 'value': 'b'},
+                    {'type': 'equals', 'field': 'd', 'value': 'd'}]}
+
+        >>> # Test set filters
         >>> my_criteria = Criteria()
         >>> my_criteria.filter = [EqualsFilter('a', 'a'), EqualsFilter('b', 'b'), EqualsFilter('d', 'd')]
+        >>> pp(my_criteria.get_dict())
+        {'filter': [{'type': 'equals', 'field': 'a', 'value': 'a'},
+                    {'type': 'equals', 'field': 'b', 'value': 'b'},
+                    {'type': 'equals', 'field': 'd', 'value': 'd'}]}
+
+        >>> # Grouping{{{
+        >>> # Test Grouping
+        >>> my_criteria = Criteria()
+        >>> my_criteria.limit=5
+        >>> my_criteria.grouping=['active']
+        >>> pp(my_criteria.get_dict())
+        {'limit': 5, 'grouping': ['active']}
+        >>> # Grouping}}}
+
+        >>> # ids{{{
+        >>> # Test ids
+        >>> my_criteria = Criteria()
+        >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
+        >>> pp(my_criteria.get_dict())
+        {'ids': ['012cd563cf8e4f0384eed93b5201cc98',
+                 '075fb241b769444bb72431f797fd5776',
+                 '090fcc2099794771935acf814e3fdb24']}
+
+        >>> # ids}}}
+
+        >>> # includes{{{
+        >>> # Test includes
+        >>> my_criteria = Criteria()
+        >>> my_criteria.includes['product'] = ['id', 'name']
+        >>> pp(my_criteria.get_dict())
+        {'includes': {'product': ['id', 'name']}}
+
+        >>> # includes}}}
+
+        >>> # page&limit{{{
+        >>> my_criteria = Criteria(page=1, limit=5)
+        >>> pp(my_criteria.get_dict())
+        {'limit': 5, 'page': 1}
+
+        >>> # page&limit}}}
+
+        >>> # Test Query
+        >>> my_criteria = Criteria(
+        ...    query=[Query(score=500, query=ContainsFilter(field='name', value='Bronze')),
+        ...           Query(score=500, query=EqualsFilter(field='active', value='true')),
+        ...           Query(score=100, query=EqualsFilter(field='manufacturerId', value='db3c17b1e572432eb4a4c881b6f9d68f'))])
+        >>> pp(my_criteria.get_dict())
+        {'query': [{'score': 500,
+                    'query': {'type': 'contains', 'field': 'name', 'value': 'Bronze'}},
+                   {'score': 500,
+                    'query': {'type': 'equals', 'field': 'active', 'value': 'true'}},
+                   {'score': 100,
+                    'query': {'type': 'equals',
+                              'field': 'manufacturerId',
+                              'value': 'db3c17b1e572432eb4a4c881b6f9d68f'}}]}
+
+        >>> # Test Sorting
+        >>> my_criteria = Criteria(limit=5,
+        ...                        sort=[FieldSorting('name', 'ASC', True),
+        ...                              DescFieldSorting('active')])
+        >>> pp(my_criteria.get_dict())
+        {'limit': 5,
+         'sort': [{'field': 'name', 'order': 'ASC', 'naturalSorting': True},
+                  {'field': 'active', 'order': 'DESC'}]}
+
+        """
+
+Aggregations
+------------
+back to `Query Syntax`_
+
+- `AvgAggregation`_
+- `CountAggregation`_
+- `MaxAggregation`_
+- `MinAggregation`_
+- `SumAggregation`_
+- `StatsAggregation`_
+- `TermsAggregation`_
+- `FilterAggregation`_
+- `EntityAggregation`_
+- `DateHistogramAggregation`_
+- `NestingAggregations`_
+
+
+AvgAggregation
+========================
+back to `Aggregations`_
+
+.. code-block:: python
+
+    @attrs.define
+    class AvgAggregation:
+        """
+        see aggregations reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/aggregations-reference
+        The Avg aggregation makes it possible to calculate the average value for a field.
+        The following SQL statement is executed in the background: AVG(price).
+
+        :parameter:
+            name: str
+            field: str
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+
+        >>> # Test
+        >>> my_aggregation = AvgAggregation('avg-price', 'price')
+        >>> pp(attrs.asdict(my_aggregation))
+        {'name': 'avg-price', 'type': 'avg', 'field': 'price'}
+
+        """
+
+CountAggregation
+========================
+back to `Aggregations`_
+
+.. code-block:: python
+
+    @attrs.define
+    class CountAggregation:
+        """
+        see aggregations reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/aggregations-reference
+        The count aggregation makes it possible to determine the number of entries for a field that are filled with a value.
+        The following SQL statement is executed in the background: COUNT(DISTINCT(manufacturerId)).
+
+        :parameter:
+            name: str
+            field: str
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+
+        >>> # Test
+        >>> my_aggregation = CountAggregation('count-manufacturers', 'manufacturerId')
+        >>> pp(attrs.asdict(my_aggregation))
+        {'name': 'count-manufacturers', 'type': 'count', 'field': 'manufacturerId'}
+
+        """
+
+MaxAggregation
+========================
+back to `Aggregations`_
+
+.. code-block:: python
+
+    @attrs.define
+    class MaxAggregation:
+        """
+        see aggregations reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/aggregations-reference
+        The max aggregation allows you to determine the maximum value of a field.
+        The following SQL statement is executed in the background: MAX(price).
+
+        :parameter:
+            name: str
+            field: str
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+
+        >>> # Test
+        >>> my_aggregation = MaxAggregation('max-price', 'price')
+        >>> pp(attrs.asdict(my_aggregation))
+        {'name': 'max-price', 'type': 'max', 'field': 'price'}
+
+        """
+
+MinAggregation
+========================
+back to `Aggregations`_
+
+.. code-block:: python
+
+    @attrs.define
+    class MinAggregation:
+        """
+        see aggregations reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/aggregations-reference
+        The min aggregation makes it possible to determine the minimum value of a field.
+        The following SQL statement is executed in the background: MIN(price)
+
+        :parameter:
+            name: str
+            field: str
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+
+        >>> # Test
+        >>> my_aggregation = MinAggregation('min-price', 'price')
+        >>> pp(attrs.asdict(my_aggregation))
+        {'name': 'min-price', 'type': 'min', 'field': 'price'}
+
+        """
+
+SumAggregation
+========================
+back to `Aggregations`_
+
+.. code-block:: python
+
+    @attrs.define
+    class SumAggregation:
+        """
+        see aggregations reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/aggregations-reference
+        The sum aggregation makes it possible to determine the total of a field.
+        The following SQL statement is executed in the background: SUM(price)
+
+        :parameter:
+            name: str
+            field: str
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+
+        >>> # Test
+        >>> my_aggregation = SumAggregation('sum-price', 'price')
+        >>> pp(attrs.asdict(my_aggregation))
+        {'name': 'sum-price', 'type': 'sum', 'field': 'price'}
+
+        """
+
+StatsAggregation
+========================
+back to `Aggregations`_
+
+.. code-block:: python
+
+    @attrs.define
+    class StatsAggregation:
+        """
+        see aggregations reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/aggregations-reference
+        The stats aggregation makes it possible to calculate several values at once for a field.
+        This includes the previous max, min, avg and sum aggregation.
+        The following SQL statement is executed in the background: SELECT MAX(price), MIN(price), AVG(price), SUM(price)
+
+        :parameter:
+            name: str
+            field: str
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+
+        >>> # Test
+        >>> my_aggregation = StatsAggregation('stats-price', 'price')
+        >>> pp(attrs.asdict(my_aggregation))
+        {'name': 'stats-price', 'type': 'stats', 'field': 'price'}
+
+        """
+
+TermsAggregation
+========================
+back to `Aggregations`_
+
+.. code-block:: python
+
+    @attrs.define
+    class TermsAggregation:
+        """
+        see aggregations reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/aggregations-reference
+
+        The terms aggregation belongs to the bucket aggregations.
+        This allows you to determine the values of a field.
+        The result contains each value once and how often this value occurs in the result.
+        The terms aggregation also supports the following parameters:
+            limit - Defines a maximum number of entries to be returned (default: zero)
+            sort - Defines the order of the entries. By default the following is not sorted
+            aggregation - Enables you to calculate further aggregations for each key
+        The following SQL statement is executed in the background: SELECT DISTINCT(manufacturerId) as key, COUNT(manufacturerId) as count
+
+
+        :parameter:
+            name: str
+            field: str
+            sort: Optional[SortType]
+            limit: Optional[int]
+            aggregation: Optional[]
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+
+        >>> # Test
+        >>> my_aggregation = TermsAggregation(name='manufacturer-ids', limit=3, sort=DescFieldSorting('manufacturer.name'), field='manufacturerId')
+        >>> pp(attrs.asdict(my_aggregation))
+        {'name': 'manufacturer-ids',
+         'type': 'terms',
+         'field': 'manufacturerId',
+         'sort': {'field': 'manufacturer.name',
+                  'order': 'DESC',
+                  'naturalSorting': None},
+         'limit': 3,
+         'aggregation': None}
+
+        """
+
+FilterAggregation
+========================
+back to `Aggregations`_
+
+.. code-block:: python
+
+    @attrs.define
+    class FilterAggregation:
+        """
+        see aggregations reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/aggregations-reference
+
+        The filter aggregation belongs to the bucket aggregations.
+        Unlike all other aggregations, this aggregation does not determine any result, it cannot be used alone.
+        It is only used to further restrict the result of an aggregation in a criterion.
+        Filters which defined inside the filter property of this aggregation type,
+        are only used when calculating this aggregation.
+        The filters have no effect on other aggregations or on the result of the search.
+
+        :parameter:
+            name: str
+            sort: SortType
+            filter: FilterType
+            aggregation : AggregationType
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+
+        >>> # Test
+        >>> my_aggregation = FilterAggregation(
+        ...     name='active-price-avg',
+        ...     filter=EqualsFilter(field='active', value=True),
+        ...     aggregation=AvgAggregation(name='avg-price',field='price'))
+        >>> pp(attrs.asdict(my_aggregation))
+        {'name': 'active-price-avg',
+         'type': 'filter',
+         'filter': {'type': 'equals', 'field': 'active', 'value': True},
+         'aggregation': {'name': 'avg-price', 'type': 'avg', 'field': 'price'}}
+
+        """
+
+EntityAggregation
+========================
+back to `Aggregations`_
+
+.. code-block:: python
+
+    @attrs.define
+    class EntityAggregation:
+        """
+        see aggregations reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/aggregations-reference
+
+        The entity aggregation is similar to the terms aggregation, it belongs to the bucket aggregations.
+        As with terms aggregation, all unique values are determined for a field.
+        The aggregation then uses the determined keys to load the defined entity. The keys are used here as ids.
+
+        :parameter:
+            name: str
+            definition: str
+            field: str
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+
+        >>> # Test
+        >>> my_aggregation = EntityAggregation(name='manufacturers', definition='product_manufacturer', field='manufacturerId')
+        >>> pp(attrs.asdict(my_aggregation))
+        {'name': 'manufacturers',
+         'type': 'entity',
+         'definition': 'product_manufacturer',
+         'field': 'manufacturerId'}
+        """
+
+DateHistogramAggregation
+========================
+back to `Aggregations`_
+
+.. code-block:: python
+
+    @attrs.define
+    class DateHistogramAggregation:
+        """
+        see aggregations reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/aggregations-reference
+
+        The histogram aggregation is used as soon as the data to be determined refers to a date field.
+        With the histogram aggregation,
+        one of the following date intervals can be given: minute, hour, day, week, month, quarter, year, day.
+        This interval groups the result and calculates the corresponding count of hits.
+
+        :parameter:
+            name: str
+            field: str
+            interval: str ,  possible values: 'minute', 'hour', 'day', 'week', 'month', 'quarter', 'year', 'day'
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+
+        >>> # Test
+        >>> my_aggregation = DateHistogramAggregation(name='release-dates', field='releaseDate', interval='month')
+        >>> pp(attrs.asdict(my_aggregation))
+        {'name': 'release-dates',
+         'type': 'histogram',
+         'field': 'releaseDate',
+         'interval': 'month'}
+
+        """
+
+NestingAggregations
+========================
+back to `Aggregations`_
+
+.. code-block:: python
+
+    """
+    see: https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/aggregations-reference#nesting-aggregations
+    """
+
+Associations
+------------------------
+back to `Query Syntax`_
+
+The associations parameter allows you to load additional data to the minimal data set
+of an entity without sending an extra request - similar to a SQL Join.
+The key of the parameter is the property name of the association in the entity.
+You can pass a nested criteria just for that association - e.g. to perform a sort
+to or apply filters within the association.
+
+.. code-block:: python
+
+        >>> # Test Association
+        >>> my_criteria = Criteria()
+        >>> my_criteria.associations['products'] = Criteria(limit=5, filter=[EqualsFilter('active', 'true')])
+        >>> pp(my_criteria.get_dict())
+        {'associations': {'products': {'limit': 5,
+                                       'filter': [{'type': 'equals',
+                                                   'field': 'active',
+                                                   'value': 'true'}]}}}
+        >>>
 
 Filters
--------
+------------------------
+back to `Query Syntax`_
+
+- `EqualsFilter`_
+- `EqualsAnyFilter`_
+- `ContainsFilter`_
+- `RangeFilter`_
+- `NotFilter`_
+- `MultiFilter`_
+- `PrefixFilter`_
+- `SuffixFilter`_
 
 EqualsFilter
-------------
+========================
+back to `Filters`_
 
 .. code-block:: python
 
@@ -616,16 +1155,18 @@ EqualsFilter
 
         >>> # Setup
         >>> import pprint
-        >>> pp = pprint.PrettyPrinter().pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
 
         >>> # Test
         >>> my_filter = EqualsFilter('stock', 10)
         >>> pp(attrs.asdict(my_filter))
-        {'field': 'stock', 'type': 'equals', 'value': 10}
+        {'type': 'equals', 'field': 'stock', 'value': 10}
+
         """
 
 EqualsAnyFilter
----------------
+========================
+back to `Filters`_
 
 .. code-block:: python
 
@@ -643,20 +1184,29 @@ EqualsAnyFilter
 
         >>> # Setup
         >>> import pprint
-        >>> pp = pprint.PrettyPrinter().pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
 
-        >>> # Test
+        >>> # Test Keyword param
         >>> my_filter = EqualsAnyFilter(field = 'productNumber', value = ["3fed029475fa4d4585f3a119886e0eb1", "77d26d011d914c3aa2c197c81241a45b"])
         >>> pp(attrs.asdict(my_filter))
-        {'field': 'productNumber',
-         'type': 'equals',
+        {'type': 'equals',
+         'field': 'productNumber',
+         'value': ['3fed029475fa4d4585f3a119886e0eb1',
+                   '77d26d011d914c3aa2c197c81241a45b']}
+
+        >>> # Test positional param
+        >>> my_filter = EqualsAnyFilter('productNumber', ["3fed029475fa4d4585f3a119886e0eb1", "77d26d011d914c3aa2c197c81241a45b"])
+        >>> pp(attrs.asdict(my_filter))
+        {'type': 'equals',
+         'field': 'productNumber',
          'value': ['3fed029475fa4d4585f3a119886e0eb1',
                    '77d26d011d914c3aa2c197c81241a45b']}
 
         """
 
 ContainsFilter
----------------
+========================
+back to `Filters`_
 
 .. code-block:: python
 
@@ -673,18 +1223,19 @@ ContainsFilter
 
         >>> # Setup
         >>> import pprint
-        >>> pp = pprint.PrettyPrinter().pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
 
         >>> # Test
         >>> my_filter = ContainsFilter(field = 'productNumber', value = 'Lightweight')
         >>> pp(attrs.asdict(my_filter))
-        {'field': 'productNumber', 'type': 'contains', 'value': 'Lightweight'}
+        {'type': 'contains', 'field': 'productNumber', 'value': 'Lightweight'}
 
 
         """
 
 RangeFilter
----------------
+========================
+back to `Filters`_
 
 .. code-block:: python
 
@@ -705,17 +1256,17 @@ RangeFilter
 
         >>> # Setup
         >>> import pprint
-        >>> pp = pprint.PrettyPrinter().pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
 
         >>> # Test (pass range type as string)
         >>> my_filter = RangeFilter(field = 'stock', parameters = {'gte': 20, 'lte': 30})
         >>> pp(attrs.asdict(my_filter))
-        {'field': 'stock', 'parameters': {'gte': 20, 'lte': 30}, 'type': 'range'}
+        {'type': 'range', 'field': 'stock', 'parameters': {'gte': 20, 'lte': 30}}
 
         >>> # Test (pass range type from 'range_filter' object)
         >>> my_filter = RangeFilter(field = 'stock', parameters = {range_filter.gte: 20, range_filter.lte: 30})
         >>> pp(attrs.asdict(my_filter))
-        {'field': 'stock', 'parameters': {'gte': 20, 'lte': 30}, 'type': 'range'}
+        {'type': 'range', 'field': 'stock', 'parameters': {'gte': 20, 'lte': 30}}
 
         >>> # Test (wrong range)
         >>> my_filter = RangeFilter(field = 'stock', parameters = {'gte': 20, 'less': 30})
@@ -726,7 +1277,8 @@ RangeFilter
         """
 
 NotFilter
----------------
+========================
+back to `Filters`_
 
 .. code-block:: python
 
@@ -744,24 +1296,23 @@ NotFilter
 
         >>> # Setup
         >>> import pprint
-        >>> pp = pprint.PrettyPrinter().pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
 
         >>> # Test (pass operator as string)
         >>> my_filter = NotFilter('or', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
         >>> pp(attrs.asdict(my_filter))
-        {'operator': 'or',
-         'queries': [{'field': 'stock', 'type': 'equals', 'value': 1},
-                     {'field': 'availableStock', 'type': 'equals', 'value': 10}],
-         'type': 'not'}
-
+        {'type': 'not',
+         'operator': 'or',
+         'queries': [{'type': 'equals', 'field': 'stock', 'value': 1},
+                     {'type': 'equals', 'field': 'availableStock', 'value': 10}]}
 
         >>> # Test (pass operator from 'not_filter_operator' object)
         >>> my_filter = NotFilter(not_filter_operator.or_, [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
         >>> pp(attrs.asdict(my_filter))
-        {'operator': 'or',
-         'queries': [{'field': 'stock', 'type': 'equals', 'value': 1},
-                     {'field': 'availableStock', 'type': 'equals', 'value': 10}],
-         'type': 'not'}
+        {'type': 'not',
+         'operator': 'or',
+         'queries': [{'type': 'equals', 'field': 'stock', 'value': 1},
+                     {'type': 'equals', 'field': 'availableStock', 'value': 10}]}
 
         >>> # Test unknown operator
         >>> my_filter = NotFilter('duck', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
@@ -772,7 +1323,8 @@ NotFilter
         """
 
 MultiFilter
----------------
+========================
+back to `Filters`_
 
 .. code-block:: python
 
@@ -790,24 +1342,23 @@ MultiFilter
 
         >>> # Setup
         >>> import pprint
-        >>> pp = pprint.PrettyPrinter().pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
 
         >>> # Test (pass operator as string)
         >>> my_filter = MultiFilter('or', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
         >>> pp(attrs.asdict(my_filter))
-        {'operator': 'or',
-         'queries': [{'field': 'stock', 'type': 'equals', 'value': 1},
-                     {'field': 'availableStock', 'type': 'equals', 'value': 10}],
-         'type': 'multi'}
-
+        {'type': 'multi',
+         'operator': 'or',
+         'queries': [{'type': 'equals', 'field': 'stock', 'value': 1},
+                     {'type': 'equals', 'field': 'availableStock', 'value': 10}]}
 
         >>> # Test (pass operator from 'not_filter_operator' object)
         >>> my_filter = MultiFilter(multi_filter_operator.or_, [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
         >>> pp(attrs.asdict(my_filter))
-        {'operator': 'or',
-         'queries': [{'field': 'stock', 'type': 'equals', 'value': 1},
-                     {'field': 'availableStock', 'type': 'equals', 'value': 10}],
-         'type': 'multi'}
+        {'type': 'multi',
+         'operator': 'or',
+         'queries': [{'type': 'equals', 'field': 'stock', 'value': 1},
+                     {'type': 'equals', 'field': 'availableStock', 'value': 10}]}
 
         >>> # Test unknown operator
         >>> my_filter = MultiFilter('duck', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
@@ -818,7 +1369,8 @@ MultiFilter
         """
 
 PrefixFilter
----------------
+========================
+back to `Filters`_
 
 .. code-block:: python
 
@@ -835,17 +1387,18 @@ PrefixFilter
 
         >>> # Setup
         >>> import pprint
-        >>> pp = pprint.PrettyPrinter().pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
 
         >>> # Test
         >>> my_filter = PrefixFilter('name', 'Lightweight')
         >>> pp(attrs.asdict(my_filter))
-        {'field': 'name', 'type': 'prefix', 'value': 'Lightweight'}
+        {'type': 'prefix', 'field': 'name', 'value': 'Lightweight'}
 
         """
 
 SuffixFilter
----------------
+========================
+back to `Filters`_
 
 .. code-block:: python
 
@@ -862,12 +1415,237 @@ SuffixFilter
 
         >>> # Setup
         >>> import pprint
-        >>> pp = pprint.PrettyPrinter().pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
 
         >>> # Test
         >>> my_filter = SuffixFilter('name', 'Lightweight')
         >>> pp(attrs.asdict(my_filter))
-        {'field': 'name', 'type': 'suffix', 'value': 'Lightweight'}
+        {'type': 'suffix', 'field': 'name', 'value': 'Lightweight'}
+
+        """
+
+Grouping
+------------------------
+back to `Query Syntax`_
+
+The grouping parameter allows you to group the result over fields.
+It can be used to realise queries such as:
+    - Fetch one product for each manufacturer
+    - Fetch one order per day and customer
+
+.. code-block:: python
+
+        >>> # Test Grouping
+        >>> my_criteria = Criteria()
+        >>> my_criteria.limit=5
+        >>> my_criteria.grouping=['active']
+        >>> pp(my_criteria.get_dict())
+        {'limit': 5, 'grouping': ['active']}
+        >>>
+
+ids
+------------------------
+back to `Query Syntax`_
+
+If you want to perform a simple lookup using just the ids of records,
+you can pass a list of those using the ids field:
+
+.. code-block:: python
+
+        >>> # Test ids
+        >>> my_criteria = Criteria()
+        >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
+        >>> pp(my_criteria.get_dict())
+        {'ids': ['012cd563cf8e4f0384eed93b5201cc98',
+                 '075fb241b769444bb72431f797fd5776',
+                 '090fcc2099794771935acf814e3fdb24']}
+
+        >>>
+
+includes
+------------------------
+back to `Query Syntax`_
+
+The includes parameter allows you to restrict the returned fields.
+
+Transfer only what you need - reduces response payload
+Easier to consume for client applications
+When debugging, the response is smaller and you can concentrate on the essential fields
+
+.. code-block:: python
+
+        >>> # Test includes
+        >>> my_criteria = Criteria()
+        >>> my_criteria.includes['product'] = ['id', 'name']
+        >>> pp(my_criteria.get_dict())
+        {'includes': {'product': ['id', 'name']}}
+
+        >>>
+
+All response types come with a apiAlias field which you can use to identify the
+type in your includes field.
+
+If you only want a categories id, add: "category": ["id"].
+
+For entities, this is the entity name: product, product_manufacturer, order_line_item, ...
+
+For other non-entity-types like a listing result or a line item, check the full response.
+This pattern applies not only to simple fields but also to associations.
+
+page & limit
+------------------------
+back to `Query Syntax`_
+
+The page and limit parameters can be used to control pagination. The page parameter is 1-indexed.
+
+.. code-block:: python
+
+        >>> my_criteria = Criteria(page=1, limit=5)
+        >>> pp(my_criteria.get_dict())
+        {'limit': 5, 'page': 1}
+
+        >>>
+
+Query
+------------------------
+back to `Query Syntax`_
+
+Use this parameter to create a weighted search query that returns a _score for each found entity.
+Any filter type can be used for the query. A score has to be defined for each query.
+The sum of the matching queries then results in the total _score value.
+
+.. code-block:: python
+
+    @attrs.define
+    class Query:
+        """
+        see: https://shopware.stoplight.io/docs/store-api/ZG9jOjEwODExNzU2-search-queries#query
+        Enables you to determine a ranking for the search result
+        Use this parameter to create a weighted search query that returns a _score for each found entity.
+        Any filter type can be used for the query. A score has to be defined for each query.
+        The sum of the matching queries then results in the total _score value.
+
+        :parameter
+            score   int
+            query   FilterType
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+
+        >>> # Test
+        >>> my_criteria = Criteria(
+        ...    query=[Query(score=500, query=ContainsFilter(field='name', value='Bronze')),
+        ...           Query(score=500, query=EqualsFilter(field='active', value='true')),
+        ...           Query(score=100, query=EqualsFilter(field='manufacturerId', value='db3c17b1e572432eb4a4c881b6f9d68f'))])
+        >>> pp(my_criteria.get_dict())
+        {'query': [{'score': 500,
+                    'query': {'type': 'contains', 'field': 'name', 'value': 'Bronze'}},
+                   {'score': 500,
+                    'query': {'type': 'equals', 'field': 'active', 'value': 'true'}},
+                   {'score': 100,
+                    'query': {'type': 'equals',
+                              'field': 'manufacturerId',
+                              'value': 'db3c17b1e572432eb4a4c881b6f9d68f'}}]}
+
+        """
+
+Sort
+------------------------
+back to `Query Syntax`_
+
+The sort parameter allows to control the sorting of the result.
+Several sorts can be transferred at the same time.
+
+The field parameter defines which field is to be used for sorting.
+The order parameter defines the sort direction.
+The parameter naturalSorting allows to use a Natural Sorting Algorithm
+
+FieldSorting
+===============
+
+.. code-block:: python
+
+    @attrs.define
+    class FieldSorting:
+        """
+        see: https://shopware.stoplight.io/docs/store-api/ZG9jOjEwODExNzU2-search-queries#sort
+        The sort parameter allows to control the sorting of the result. Several sorts can be transferred at the same time.
+        The field parameter defines which field is to be used for sorting.
+        The order parameter defines the sort direction.
+        The parameter naturalSorting allows to use a Natural Sorting Algorithm
+
+        :parameter
+            field : str
+            order : str "ASC" or "DESC"
+            naturalSorting : Optional[bool]
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+
+        >>> # Test
+        >>> my_sorting = FieldSorting('name', 'ASC', True)
+        >>> pp(attrs.asdict(my_sorting))
+        {'field': 'name', 'order': 'ASC', 'naturalSorting': True}
+
+        """
+
+AscFieldSorting
+===============
+
+.. code-block:: python
+
+    @attrs.define
+    class AscFieldSorting:
+        """
+        see: https://shopware.stoplight.io/docs/store-api/ZG9jOjEwODExNzU2-search-queries#sort
+        The sort parameter allows to control the sorting of the result. Several sorts can be transferred at the same time.
+        The field parameter defines which field is to be used for sorting.
+        The order parameter defines the sort direction.
+        The parameter naturalSorting allows to use a Natural Sorting Algorithm
+
+        :parameter
+            field : str
+            naturalSorting : Optional[bool]
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+
+        >>> # Test
+        >>> my_sorting = AscFieldSorting('name', True)
+        >>> pp(attrs.asdict(my_sorting))
+        {'field': 'name', 'order': 'ASC', 'naturalSorting': True}
+
+        """
+
+DescFieldSorting
+=================
+
+.. code-block:: python
+
+    @attrs.define
+    class DescFieldSorting:
+        """
+        see: https://shopware.stoplight.io/docs/store-api/ZG9jOjEwODExNzU2-search-queries#sort
+        The sort parameter allows to control the sorting of the result. Several sorts can be transferred at the same time.
+        The field parameter defines which field is to be used for sorting.
+        The order parameter defines the sort direction.
+        The parameter naturalSorting allows to use a Natural Sorting Algorithm
+
+        :parameter
+            field : str
+            naturalSorting : Optional[bool]
+
+        >>> # Setup
+        >>> import pprint
+        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+
+        >>> # Test
+        >>> my_sorting = DescFieldSorting('name', True)
+        >>> pp(attrs.asdict(my_sorting))
+        {'field': 'name', 'order': 'DESC', 'naturalSorting': True}
 
         """
 
@@ -998,6 +1776,11 @@ Changelog
 - new MAJOR version for incompatible API changes,
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
+
+v1.3.0
+--------
+2021-12-29:
+    - add Sort, Group, Aggregations, Associations, etc ..
 
 v1.2.0
 --------

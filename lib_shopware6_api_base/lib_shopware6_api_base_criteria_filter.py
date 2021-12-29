@@ -83,19 +83,20 @@ class EqualsFilter:
 
     >>> # Setup
     >>> import pprint
-    >>> pp = pprint.PrettyPrinter().pprint
+    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
 
     >>> # Test
     >>> my_filter = EqualsFilter('stock', 10)
     >>> pp(attrs.asdict(my_filter))
-    {'field': 'stock', 'type': 'equals', 'value': 10}
+    {'type': 'equals', 'field': 'stock', 'value': 10}
+
     """
 
     # EqualsFilter}}}
 
+    type: str = attrs.field(init=False, default="equals")
     field: str = attrs.field(validator=attrs.validators.instance_of(str))
     value: str
-    type: str = attrs.field(init=False, default="equals")
 
 
 # EqualsAnyFilter{{{
@@ -113,13 +114,21 @@ class EqualsAnyFilter:
 
     >>> # Setup
     >>> import pprint
-    >>> pp = pprint.PrettyPrinter().pprint
+    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
 
-    >>> # Test
+    >>> # Test Keyword param
     >>> my_filter = EqualsAnyFilter(field = 'productNumber', value = ["3fed029475fa4d4585f3a119886e0eb1", "77d26d011d914c3aa2c197c81241a45b"])
     >>> pp(attrs.asdict(my_filter))
-    {'field': 'productNumber',
-     'type': 'equals',
+    {'type': 'equals',
+     'field': 'productNumber',
+     'value': ['3fed029475fa4d4585f3a119886e0eb1',
+               '77d26d011d914c3aa2c197c81241a45b']}
+
+    >>> # Test positional param
+    >>> my_filter = EqualsAnyFilter('productNumber', ["3fed029475fa4d4585f3a119886e0eb1", "77d26d011d914c3aa2c197c81241a45b"])
+    >>> pp(attrs.asdict(my_filter))
+    {'type': 'equals',
+     'field': 'productNumber',
      'value': ['3fed029475fa4d4585f3a119886e0eb1',
                '77d26d011d914c3aa2c197c81241a45b']}
 
@@ -128,8 +137,8 @@ class EqualsAnyFilter:
     # EqualsAnyFilter}}}
 
     type: str = attrs.field(init=False, default="equals")
-    field: str = attrs.field(init=True)
-    value: List[str] = attrs.field(init=True)
+    field: str = attrs.field(init=True, validator=attrs.validators.instance_of(str))
+    value: List[str] = attrs.field(init=True, factory=list)
 
 
 # ContainsFilter{{{
@@ -146,20 +155,20 @@ class ContainsFilter:
 
     >>> # Setup
     >>> import pprint
-    >>> pp = pprint.PrettyPrinter().pprint
+    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
 
     >>> # Test
     >>> my_filter = ContainsFilter(field = 'productNumber', value = 'Lightweight')
     >>> pp(attrs.asdict(my_filter))
-    {'field': 'productNumber', 'type': 'contains', 'value': 'Lightweight'}
+    {'type': 'contains', 'field': 'productNumber', 'value': 'Lightweight'}
 
 
     """
 
     # ContainsFilter}}}
     type: str = attrs.field(init=False, default="contains")
-    field: str = attrs.field(init=True)
-    value: List[str] = attrs.field(init=True)
+    field: str = attrs.field(init=True, validator=attrs.validators.instance_of(str))
+    value: List[str] = attrs.field(init=True, factory=list)
 
 
 # RangeFilter{{{
@@ -180,17 +189,17 @@ class RangeFilter:
 
     >>> # Setup
     >>> import pprint
-    >>> pp = pprint.PrettyPrinter().pprint
+    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
 
     >>> # Test (pass range type as string)
     >>> my_filter = RangeFilter(field = 'stock', parameters = {'gte': 20, 'lte': 30})
     >>> pp(attrs.asdict(my_filter))
-    {'field': 'stock', 'parameters': {'gte': 20, 'lte': 30}, 'type': 'range'}
+    {'type': 'range', 'field': 'stock', 'parameters': {'gte': 20, 'lte': 30}}
 
     >>> # Test (pass range type from 'range_filter' object)
     >>> my_filter = RangeFilter(field = 'stock', parameters = {range_filter.gte: 20, range_filter.lte: 30})
     >>> pp(attrs.asdict(my_filter))
-    {'field': 'stock', 'parameters': {'gte': 20, 'lte': 30}, 'type': 'range'}
+    {'type': 'range', 'field': 'stock', 'parameters': {'gte': 20, 'lte': 30}}
 
     >>> # Test (wrong range)
     >>> my_filter = RangeFilter(field = 'stock', parameters = {'gte': 20, 'less': 30})
@@ -202,8 +211,8 @@ class RangeFilter:
 
     # RangeFilter}}}
     type: str = attrs.field(init=False, default="range")
-    field: str = attrs.field()
-    parameters: Dict[str, Union[int, datetime]] = attrs.field(validator=validators.instance_of(dict))
+    field: str = attrs.field(validator=attrs.validators.instance_of(str))
+    parameters: Dict[str, Union[int, datetime]] = attrs.field(validator=validators.instance_of(dict), factory=dict)
 
     @parameters.validator  # noqa
     def check(self, attribute: attrs.Attribute, parameters: Dict[str, Any]) -> None:  # type: ignore
@@ -227,24 +236,23 @@ class NotFilter:
 
     >>> # Setup
     >>> import pprint
-    >>> pp = pprint.PrettyPrinter().pprint
+    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
 
     >>> # Test (pass operator as string)
     >>> my_filter = NotFilter('or', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
     >>> pp(attrs.asdict(my_filter))
-    {'operator': 'or',
-     'queries': [{'field': 'stock', 'type': 'equals', 'value': 1},
-                 {'field': 'availableStock', 'type': 'equals', 'value': 10}],
-     'type': 'not'}
-
+    {'type': 'not',
+     'operator': 'or',
+     'queries': [{'type': 'equals', 'field': 'stock', 'value': 1},
+                 {'type': 'equals', 'field': 'availableStock', 'value': 10}]}
 
     >>> # Test (pass operator from 'not_filter_operator' object)
     >>> my_filter = NotFilter(not_filter_operator.or_, [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
     >>> pp(attrs.asdict(my_filter))
-    {'operator': 'or',
-     'queries': [{'field': 'stock', 'type': 'equals', 'value': 1},
-                 {'field': 'availableStock', 'type': 'equals', 'value': 10}],
-     'type': 'not'}
+    {'type': 'not',
+     'operator': 'or',
+     'queries': [{'type': 'equals', 'field': 'stock', 'value': 1},
+                 {'type': 'equals', 'field': 'availableStock', 'value': 10}]}
 
     >>> # Test unknown operator
     >>> my_filter = NotFilter('duck', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
@@ -275,24 +283,23 @@ class MultiFilter:
 
     >>> # Setup
     >>> import pprint
-    >>> pp = pprint.PrettyPrinter().pprint
+    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
 
     >>> # Test (pass operator as string)
     >>> my_filter = MultiFilter('or', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
     >>> pp(attrs.asdict(my_filter))
-    {'operator': 'or',
-     'queries': [{'field': 'stock', 'type': 'equals', 'value': 1},
-                 {'field': 'availableStock', 'type': 'equals', 'value': 10}],
-     'type': 'multi'}
-
+    {'type': 'multi',
+     'operator': 'or',
+     'queries': [{'type': 'equals', 'field': 'stock', 'value': 1},
+                 {'type': 'equals', 'field': 'availableStock', 'value': 10}]}
 
     >>> # Test (pass operator from 'not_filter_operator' object)
     >>> my_filter = MultiFilter(multi_filter_operator.or_, [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
     >>> pp(attrs.asdict(my_filter))
-    {'operator': 'or',
-     'queries': [{'field': 'stock', 'type': 'equals', 'value': 1},
-                 {'field': 'availableStock', 'type': 'equals', 'value': 10}],
-     'type': 'multi'}
+    {'type': 'multi',
+     'operator': 'or',
+     'queries': [{'type': 'equals', 'field': 'stock', 'value': 1},
+                 {'type': 'equals', 'field': 'availableStock', 'value': 10}]}
 
     >>> # Test unknown operator
     >>> my_filter = MultiFilter('duck', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
@@ -323,12 +330,12 @@ class PrefixFilter:
 
     >>> # Setup
     >>> import pprint
-    >>> pp = pprint.PrettyPrinter().pprint
+    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
 
     >>> # Test
     >>> my_filter = PrefixFilter('name', 'Lightweight')
     >>> pp(attrs.asdict(my_filter))
-    {'field': 'name', 'type': 'prefix', 'value': 'Lightweight'}
+    {'type': 'prefix', 'field': 'name', 'value': 'Lightweight'}
 
     """
 
@@ -353,12 +360,12 @@ class SuffixFilter:
 
     >>> # Setup
     >>> import pprint
-    >>> pp = pprint.PrettyPrinter().pprint
+    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
 
     >>> # Test
     >>> my_filter = SuffixFilter('name', 'Lightweight')
     >>> pp(attrs.asdict(my_filter))
-    {'field': 'name', 'type': 'suffix', 'value': 'Lightweight'}
+    {'type': 'suffix', 'field': 'name', 'value': 'Lightweight'}
 
     """
 

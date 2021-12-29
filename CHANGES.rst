@@ -5,6 +5,11 @@ Changelog
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
 
+v1.3.0
+--------
+2021-12-29:
+    - add Sort, Group, Aggregations, Associations, etc ..
+
 v1.2.0
 --------
 2021-12-28:

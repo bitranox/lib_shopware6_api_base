@@ -3,16 +3,37 @@
 - `Store API`_
 - `Admin API`_
 - `Query Syntax`_
-- `Filters`_
-    - `EqualsFilter`_
-    - `EqualsAnyFilter`_
-    - `ContainsFilter`_
-    - `RangeFilter`_
-    - `NotFilter`_
-    - `MultiFilter`_
-    - `PrefixFilter`_
-    - `SuffixFilter`_
-
+    - `Aggregations`_
+        - `AvgAggregation`_
+        - `CountAggregation`_
+        - `MaxAggregation`_
+        - `MinAggregation`_
+        - `SumAggregation`_
+        - `StatsAggregation`_
+        - `TermsAggregation`_
+        - `FilterAggregation`_
+        - `EntityAggregation`_
+        - `DateHistogramAggregation`_
+        - `NestingAggregations`_
+    - `Associations`_
+    - `Filters`_
+        - `EqualsFilter`_
+        - `EqualsAnyFilter`_
+        - `ContainsFilter`_
+        - `RangeFilter`_
+        - `NotFilter`_
+        - `MultiFilter`_
+        - `PrefixFilter`_
+        - `SuffixFilter`_
+    - `Grouping`_
+    - `ids`_
+    - `includes`_
+    - `page & limit`_
+    - `Query`_
+    - `Sort`_
+        - `FieldSorting`_
+        - `AscFieldSorting`_
+        - `DescFieldSorting`_
 
 configuration
 -------------
@@ -63,6 +84,8 @@ methods which take the parameter 'payload', the payload is of following type :
 .. include:: ../lib_shopware6_api_base/lib_shopware6_api_base.py
     :start-after: # payload_type{{{
     :end-before:  # payload_type}}}
+
+for the definition of "Criteria" see `Query Syntax`_
 
 
 Store API
@@ -203,76 +226,329 @@ a search criteria follows the following schema:
     :end-before:  # criteria}}}
 
 
+Aggregations
+------------
+back to `Query Syntax`_
+
+- `AvgAggregation`_
+- `CountAggregation`_
+- `MaxAggregation`_
+- `MinAggregation`_
+- `SumAggregation`_
+- `StatsAggregation`_
+- `TermsAggregation`_
+- `FilterAggregation`_
+- `EntityAggregation`_
+- `DateHistogramAggregation`_
+- `NestingAggregations`_
+
+
+AvgAggregation
+========================
+back to `Aggregations`_
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_aggregation.py
+    :code: python
+    :start-after: # AvgAggregation{{{
+    :end-before:  # AvgAggregation}}}
+
+CountAggregation
+========================
+back to `Aggregations`_
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_aggregation.py
+    :code: python
+    :start-after: # CountAggregation{{{
+    :end-before:  # CountAggregation}}}
+
+MaxAggregation
+========================
+back to `Aggregations`_
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_aggregation.py
+    :code: python
+    :start-after: # MaxAggregation{{{
+    :end-before:  # MaxAggregation}}}
+
+MinAggregation
+========================
+back to `Aggregations`_
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_aggregation.py
+    :code: python
+    :start-after: # MinAggregation{{{
+    :end-before:  # MinAggregation}}}
+
+SumAggregation
+========================
+back to `Aggregations`_
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_aggregation.py
+    :code: python
+    :start-after: # SumAggregation{{{
+    :end-before:  # SumAggregation}}}
+
+StatsAggregation
+========================
+back to `Aggregations`_
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_aggregation.py
+    :code: python
+    :start-after: # StatsAggregation{{{
+    :end-before:  # StatsAggregation}}}
+
+TermsAggregation
+========================
+back to `Aggregations`_
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_aggregation.py
+    :code: python
+    :start-after: # TermsAggregation{{{
+    :end-before:  # TermsAggregation}}}
+
+FilterAggregation
+========================
+back to `Aggregations`_
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_aggregation.py
+    :code: python
+    :start-after: # FilterAggregation{{{
+    :end-before:  # FilterAggregation}}}
+
+EntityAggregation
+========================
+back to `Aggregations`_
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_aggregation.py
+    :code: python
+    :start-after: # EntityAggregation{{{
+    :end-before:  # EntityAggregation}}}
+
+DateHistogramAggregation
+========================
+back to `Aggregations`_
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_aggregation.py
+    :code: python
+    :start-after: # DateHistogramAggregation{{{
+    :end-before:  # DateHistogramAggregation}}}
+
+NestingAggregations
+========================
+back to `Aggregations`_
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_aggregation.py
+    :code: python
+    :start-after: # NestingAggregations{{{
+    :end-before:  # NestingAggregations}}}
+
+Associations
+------------------------
+back to `Query Syntax`_
+
+The associations parameter allows you to load additional data to the minimal data set
+of an entity without sending an extra request - similar to a SQL Join.
+The key of the parameter is the property name of the association in the entity.
+You can pass a nested criteria just for that association - e.g. to perform a sort
+to or apply filters within the association.
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria.py
+    :code: python
+    :start-after: # Association{{{
+    :end-before:  # Association}}}
+
 Filters
--------
+------------------------
+back to `Query Syntax`_
+
+- `EqualsFilter`_
+- `EqualsAnyFilter`_
+- `ContainsFilter`_
+- `RangeFilter`_
+- `NotFilter`_
+- `MultiFilter`_
+- `PrefixFilter`_
+- `SuffixFilter`_
 
 EqualsFilter
-------------
+========================
+back to `Filters`_
 
 .. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_filter.py
     :code: python
     :start-after: # EqualsFilter{{{
     :end-before:  # EqualsFilter}}}
 
-
 EqualsAnyFilter
----------------
+========================
+back to `Filters`_
 
 .. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_filter.py
     :code: python
     :start-after: # EqualsAnyFilter{{{
     :end-before:  # EqualsAnyFilter}}}
 
-
 ContainsFilter
----------------
+========================
+back to `Filters`_
 
 .. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_filter.py
     :code: python
     :start-after: # ContainsFilter{{{
     :end-before:  # ContainsFilter}}}
 
-
 RangeFilter
----------------
+========================
+back to `Filters`_
 
 .. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_filter.py
     :code: python
     :start-after: # RangeFilter{{{
     :end-before:  # RangeFilter}}}
 
-
 NotFilter
----------------
+========================
+back to `Filters`_
 
 .. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_filter.py
     :code: python
     :start-after: # NotFilter{{{
     :end-before:  # NotFilter}}}
 
-
 MultiFilter
----------------
+========================
+back to `Filters`_
 
 .. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_filter.py
     :code: python
     :start-after: # MultiFilter{{{
     :end-before:  # MultiFilter}}}
 
-
 PrefixFilter
----------------
+========================
+back to `Filters`_
 
 .. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_filter.py
     :code: python
     :start-after: # PrefixFilter{{{
     :end-before:  # PrefixFilter}}}
 
-
 SuffixFilter
----------------
+========================
+back to `Filters`_
 
 .. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_filter.py
     :code: python
     :start-after: # SuffixFilter{{{
     :end-before:  # SuffixFilter}}}
+
+Grouping
+------------------------
+back to `Query Syntax`_
+
+The grouping parameter allows you to group the result over fields.
+It can be used to realise queries such as:
+    - Fetch one product for each manufacturer
+    - Fetch one order per day and customer
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria.py
+    :code: python
+    :start-after: # Grouping{{{
+    :end-before:  # Grouping}}}
+
+ids
+------------------------
+back to `Query Syntax`_
+
+If you want to perform a simple lookup using just the ids of records,
+you can pass a list of those using the ids field:
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria.py
+    :code: python
+    :start-after: # ids{{{
+    :end-before:  # ids}}}
+
+includes
+------------------------
+back to `Query Syntax`_
+
+The includes parameter allows you to restrict the returned fields.
+
+Transfer only what you need - reduces response payload
+Easier to consume for client applications
+When debugging, the response is smaller and you can concentrate on the essential fields
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria.py
+    :code: python
+    :start-after: # includes{{{
+    :end-before:  # includes}}}
+
+All response types come with a apiAlias field which you can use to identify the
+type in your includes field.
+
+If you only want a categories id, add: "category": ["id"].
+
+For entities, this is the entity name: product, product_manufacturer, order_line_item, ...
+
+For other non-entity-types like a listing result or a line item, check the full response.
+This pattern applies not only to simple fields but also to associations.
+
+page & limit
+------------------------
+back to `Query Syntax`_
+
+The page and limit parameters can be used to control pagination. The page parameter is 1-indexed.
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria.py
+    :code: python
+    :start-after: # page&limit{{{
+    :end-before:  # page&limit}}}
+
+Query
+------------------------
+back to `Query Syntax`_
+
+Use this parameter to create a weighted search query that returns a _score for each found entity.
+Any filter type can be used for the query. A score has to be defined for each query.
+The sum of the matching queries then results in the total _score value.
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria.py
+    :code: python
+    :start-after: # Query{{{
+    :end-before:  # Query}}}
+
+Sort
+------------------------
+back to `Query Syntax`_
+
+The sort parameter allows to control the sorting of the result.
+Several sorts can be transferred at the same time.
+
+The field parameter defines which field is to be used for sorting.
+The order parameter defines the sort direction.
+The parameter naturalSorting allows to use a Natural Sorting Algorithm
+
+FieldSorting
+===============
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_sorting.py
+    :code: python
+    :start-after: # FieldSorting{{{
+    :end-before:  # FieldSorting}}}
+
+AscFieldSorting
+===============
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_sorting.py
+    :code: python
+    :start-after: # AscFieldSorting{{{
+    :end-before:  # AscFieldSorting}}}
+
+DescFieldSorting
+=================
+
+.. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria_sorting.py
+    :code: python
+    :start-after: # DescFieldSorting{{{
+    :end-before:  # DescFieldSorting}}}
+
