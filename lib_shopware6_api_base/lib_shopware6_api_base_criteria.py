@@ -252,7 +252,7 @@ class Criteria:
             return True
 
 
-def get_dict(data: Any):
+def get_dict(data: Any) -> Dict[str, Any]:
     """
     alternative to attrs.asdict
 
