@@ -79,7 +79,7 @@ class EqualsFilter:
 
     :parameter:
         field: str
-        value: str  # todo check ! type is str, really ? on examples it seems it can be also int
+        value: Union[str, int]      # probably also bool
 
     >>> # Setup
     >>> import pprint
@@ -96,7 +96,7 @@ class EqualsFilter:
 
     type: str = attrs.field(init=False, default="equals")
     field: str = attrs.field(validator=attrs.validators.instance_of(str))
-    value: str
+    value: Union[str, int]
 
 
 # EqualsAnyFilter{{{
