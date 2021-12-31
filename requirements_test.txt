@@ -8,7 +8,7 @@ coloredlogs
 coverage
 flake8
 mypy ; platform_python_implementation != "PyPy"
-pprint3x
+pprint36
 pytest
 pytest-cov
 pytest-runner
