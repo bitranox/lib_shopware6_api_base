@@ -4,6 +4,13 @@ from typing import Optional, Union
 # EXT
 import attrs
 
+# proj
+try:
+    from lib_shopware6_api_base_helpers import get_pretty_printer
+except ImportError:  # pragma: no cover
+    # Imports for Doctest
+    from .lib_shopware6_api_base_helpers import get_pretty_printer
+
 
 # FieldSorting{{{
 @attrs.define
@@ -21,8 +28,7 @@ class FieldSorting:
         naturalSorting : Optional[bool]
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test
     >>> my_sorting = FieldSorting('name', 'ASC', True)
@@ -52,8 +58,7 @@ class AscFieldSorting:
         naturalSorting : Optional[bool]
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test
     >>> my_sorting = AscFieldSorting('name', True)
@@ -84,8 +89,7 @@ class DescFieldSorting:
         naturalSorting : Optional[bool]
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test
     >>> my_sorting = DescFieldSorting('name', True)

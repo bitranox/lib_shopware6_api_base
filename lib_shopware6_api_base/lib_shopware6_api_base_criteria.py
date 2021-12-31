@@ -1,6 +1,10 @@
 # STDLIB
 from datetime import datetime
+import sys
 from typing import Any, Dict, List, Optional, Union
+
+# OWN
+import lib_detect_testenv
 
 # EXT
 import attrs
@@ -9,11 +13,13 @@ from attrs import validators
 
 # proj
 try:
+    from lib_shopware6_api_base_helpers import get_pretty_printer
     from lib_shopware6_api_base_criteria_aggregation import *
     from lib_shopware6_api_base_criteria_filter import *
     from lib_shopware6_api_base_criteria_sorting import *
 except ImportError:  # pragma: no cover
     # Imports for Doctest
+    from .lib_shopware6_api_base_helpers import get_pretty_printer
     from .lib_shopware6_api_base_criteria_aggregation import *  # type: ignore  # pragma: no cover
     from .lib_shopware6_api_base_criteria_filter import *  # type: ignore  # pragma: no cover
     from .lib_shopware6_api_base_criteria_sorting import *  # type: ignore  # pragma: no cover
@@ -37,8 +43,7 @@ class Query:
         query   FilterType
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test
     >>> my_criteria = Criteria(
@@ -90,8 +95,7 @@ class Criteria:
 
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test empty
     >>> my_criteria = Criteria()
@@ -260,8 +264,7 @@ def get_dict(data: Any) -> Dict[str, Any]:
     :return:
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> my_criteria = Criteria(limit=1, includes={'product':['id', 'name']},
     ...     aggregations=FilterAggregation(name='active-price-avg',

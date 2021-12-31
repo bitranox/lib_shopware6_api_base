@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v1.3.0 as of 2021-12-30 see `Changelog`_
+Version v1.3.0 as of 2021-12-31 see `Changelog`_
 
 |build_badge| |license| |pypi| |black|
 
@@ -64,7 +64,7 @@ automated tests, Travis Matrix, Documentation, Badges, etc. are managed with `Pi
 
 Python version required: 3.6.0 or newer
 
-tested on recent linux with python 3.8, 3.9, 3.10.0, pypy-3.8 - architectures: amd64
+tested on recent linux with python 3.6, 3.7, 3.8, 3.9, 3.10.0, pypy-3.8 - architectures: amd64
 
 `100% code coverage <https://codecov.io/gh/bitranox/lib_shopware6_api_base>`_, flake8 style checking ,mypy static type checking ,
 
@@ -620,8 +620,7 @@ a search criteria follows the following schema:
 
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test empty
         >>> my_criteria = Criteria()
@@ -785,8 +784,7 @@ back to `Aggregations`_
             field: str
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test
         >>> my_aggregation = AvgAggregation('avg-price', 'price')
@@ -841,8 +839,7 @@ back to `Aggregations`_
             field: str
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test
         >>> my_aggregation = MaxAggregation('max-price', 'price')
@@ -869,8 +866,7 @@ back to `Aggregations`_
             field: str
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test
         >>> my_aggregation = MinAggregation('min-price', 'price')
@@ -897,8 +893,7 @@ back to `Aggregations`_
             field: str
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test
         >>> my_aggregation = SumAggregation('sum-price', 'price')
@@ -926,8 +921,7 @@ back to `Aggregations`_
             field: str
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test
         >>> my_aggregation = StatsAggregation('stats-price', 'price')
@@ -965,8 +959,7 @@ back to `Aggregations`_
             aggregation: Optional[]
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test
         >>> my_aggregation = TermsAggregation(name='manufacturer-ids', limit=3, sort=DescFieldSorting('manufacturer.name'), field='manufacturerId')
@@ -1007,8 +1000,7 @@ back to `Aggregations`_
             aggregation : AggregationType
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test
         >>> my_aggregation = FilterAggregation(
@@ -1044,8 +1036,7 @@ back to `Aggregations`_
             field: str
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test
         >>> my_aggregation = EntityAggregation(name='manufacturers', definition='product_manufacturer', field='manufacturerId')
@@ -1078,8 +1069,7 @@ back to `Aggregations`_
             interval: str ,  possible values: 'minute', 'hour', 'day', 'week', 'month', 'quarter', 'year', 'day'
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test
         >>> my_aggregation = DateHistogramAggregation(name='release-dates', field='releaseDate', interval='month')
@@ -1151,11 +1141,10 @@ back to `Filters`_
 
         :parameter:
             field: str
-            value: str  # todo check ! type is str, really ? on examples it seems it can be also int
+            value: Union[str, int]      # probably also bool
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test
         >>> my_filter = EqualsFilter('stock', 10)
@@ -1183,8 +1172,7 @@ back to `Filters`_
             value: List[str]
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test Keyword param
         >>> my_filter = EqualsAnyFilter(field = 'productNumber', value = ["3fed029475fa4d4585f3a119886e0eb1", "77d26d011d914c3aa2c197c81241a45b"])
@@ -1222,8 +1210,7 @@ back to `Filters`_
             value: List[str]
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test
         >>> my_filter = ContainsFilter(field = 'productNumber', value = 'Lightweight')
@@ -1255,8 +1242,7 @@ back to `Filters`_
             parameters: Dict[str, Union[int, datetime]]
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test (pass range type as string)
         >>> my_filter = RangeFilter(field = 'stock', parameters = {'gte': 20, 'lte': 30})
@@ -1295,8 +1281,7 @@ back to `Filters`_
             queries: List[Filter]
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test (pass operator as string)
         >>> my_filter = NotFilter('or', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
@@ -1341,8 +1326,7 @@ back to `Filters`_
             queries: List[Filter]
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test (pass operator as string)
         >>> my_filter = MultiFilter('or', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
@@ -1386,8 +1370,7 @@ back to `Filters`_
             value: str
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test
         >>> my_filter = PrefixFilter('name', 'Lightweight')
@@ -1414,8 +1397,7 @@ back to `Filters`_
             value: str
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test
         >>> my_filter = SuffixFilter('name', 'Lightweight')
@@ -1531,8 +1513,7 @@ The sum of the matching queries then results in the total _score value.
             query   FilterType
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test
         >>> my_criteria = Criteria(
@@ -1582,8 +1563,7 @@ FieldSorting
             naturalSorting : Optional[bool]
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test
         >>> my_sorting = FieldSorting('name', 'ASC', True)
@@ -1611,8 +1591,7 @@ AscFieldSorting
             naturalSorting : Optional[bool]
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test
         >>> my_sorting = AscFieldSorting('name', True)
@@ -1640,8 +1619,7 @@ DescFieldSorting
             naturalSorting : Optional[bool]
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test
         >>> my_sorting = DescFieldSorting('name', True)

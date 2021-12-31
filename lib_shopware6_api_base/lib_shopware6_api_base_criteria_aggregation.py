@@ -8,10 +8,12 @@ from attrs import validators
 
 # proj
 try:
+    from lib_shopware6_api_base_helpers import get_pretty_printer
     from lib_shopware6_api_base_criteria_sorting import *
     from lib_shopware6_api_base_criteria_filter import *
 except ImportError:  # pragma: no cover
     # Imports for Doctest
+    from .lib_shopware6_api_base_helpers import get_pretty_printer
     from .lib_shopware6_api_base_criteria_sorting import *  # type: ignore  # pragma: no cover
     from .lib_shopware6_api_base_criteria_filter import *  # type: ignore  # pragma: no cover
 
@@ -51,8 +53,7 @@ class AvgAggregation:
         field: str
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test
     >>> my_aggregation = AvgAggregation('avg-price', 'price')
@@ -111,8 +112,7 @@ class MaxAggregation:
         field: str
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test
     >>> my_aggregation = MaxAggregation('max-price', 'price')
@@ -141,8 +141,7 @@ class MinAggregation:
         field: str
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test
     >>> my_aggregation = MinAggregation('min-price', 'price')
@@ -171,8 +170,7 @@ class SumAggregation:
         field: str
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test
     >>> my_aggregation = SumAggregation('sum-price', 'price')
@@ -202,8 +200,7 @@ class StatsAggregation:
         field: str
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test
     >>> my_aggregation = StatsAggregation('stats-price', 'price')
@@ -243,8 +240,7 @@ class TermsAggregation:
         aggregation: Optional[]
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test
     >>> my_aggregation = TermsAggregation(name='manufacturer-ids', limit=3, sort=DescFieldSorting('manufacturer.name'), field='manufacturerId')
@@ -290,8 +286,7 @@ class FilterAggregation:
         aggregation : AggregationType
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test
     >>> my_aggregation = FilterAggregation(
@@ -330,8 +325,7 @@ class EntityAggregation:
         field: str
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test
     >>> my_aggregation = EntityAggregation(name='manufacturers', definition='product_manufacturer', field='manufacturerId')
@@ -367,8 +361,7 @@ class DateHistogramAggregation:
         interval: str ,  possible values: 'minute', 'hour', 'day', 'week', 'month', 'quarter', 'year', 'day'
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test
     >>> my_aggregation = DateHistogramAggregation(name='release-dates', field='releaseDate', interval='month')

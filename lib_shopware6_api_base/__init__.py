@@ -6,7 +6,7 @@ if is_testenv_active():  # pragma: no cover
     add_path_to_syspath(__file__)
 
 # put Your imports here
-
+from .lib_shopware6_api_base import *
 
 # __init__conf__ needs to be imported after Your imports, otherwise we would create circular import on the cli script,
 # which is reading some values from __init__conf__

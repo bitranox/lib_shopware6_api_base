@@ -1,11 +1,18 @@
 # STDLIB
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Union
 
 # EXT
 
 import attrs
 from attrs import validators
+
+# proj
+try:
+    from lib_shopware6_api_base_helpers import get_pretty_printer
+except ImportError:  # pragma: no cover
+    # Imports for Doctest
+    from .lib_shopware6_api_base_helpers import get_pretty_printer
 
 
 @attrs.define
@@ -82,8 +89,7 @@ class EqualsFilter:
         value: Union[str, int]      # probably also bool
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test
     >>> my_filter = EqualsFilter('stock', 10)
@@ -113,8 +119,7 @@ class EqualsAnyFilter:
         value: List[str]
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test Keyword param
     >>> my_filter = EqualsAnyFilter(field = 'productNumber', value = ["3fed029475fa4d4585f3a119886e0eb1", "77d26d011d914c3aa2c197c81241a45b"])
@@ -154,8 +159,7 @@ class ContainsFilter:
         value: List[str]
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test
     >>> my_filter = ContainsFilter(field = 'productNumber', value = 'Lightweight')
@@ -188,8 +192,7 @@ class RangeFilter:
         parameters: Dict[str, Union[int, datetime]]
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test (pass range type as string)
     >>> my_filter = RangeFilter(field = 'stock', parameters = {'gte': 20, 'lte': 30})
@@ -235,8 +238,7 @@ class NotFilter:
         queries: List[Filter]
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test (pass operator as string)
     >>> my_filter = NotFilter('or', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
@@ -282,8 +284,7 @@ class MultiFilter:
         queries: List[Filter]
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test (pass operator as string)
     >>> my_filter = MultiFilter('or', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
@@ -329,8 +330,7 @@ class PrefixFilter:
         value: str
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test
     >>> my_filter = PrefixFilter('name', 'Lightweight')
@@ -359,8 +359,7 @@ class SuffixFilter:
         value: str
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test
     >>> my_filter = SuffixFilter('name', 'Lightweight')
