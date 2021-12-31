@@ -79,18 +79,6 @@ jobs:
 
 
           - os: ubuntu-latest
-            python-version: "3.6"
-            env:
-              BUILD_DOCS: "False"
-              DEPLOY_SDIST: "True"
-              DEPLOY_WHEEL: "True"
-              DEPLOY_TEST: "True"
-              MYPY_DO_TESTS: "True"
-              DO_SETUP_INSTALL: "True"
-              DO_SETUP_INSTALL_TEST: "False"
-              DO_CLI_TEST: "True"
-
-          - os: ubuntu-latest
             python-version: "3.7"
             env:
               BUILD_DOCS: "False"

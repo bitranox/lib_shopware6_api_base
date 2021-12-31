@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v1.3.0 as of 2021-12-31 see `Changelog`_
+Version v1.3.1 as of 2021-12-31 see `Changelog`_
 
 |build_badge| |license| |pypi| |black|
 
@@ -64,7 +64,7 @@ automated tests, Travis Matrix, Documentation, Badges, etc. are managed with `Pi
 
 Python version required: 3.6.0 or newer
 
-tested on recent linux with python 3.6, 3.7, 3.8, 3.9, 3.10.0, pypy-3.8 - architectures: amd64
+tested on recent linux with python 3.7, 3.8, 3.9, 3.10.0, pypy-3.8 - architectures: amd64
 
 `100% code coverage <https://codecov.io/gh/bitranox/lib_shopware6_api_base>`_, flake8 style checking ,mypy static type checking ,
 
@@ -1756,20 +1756,21 @@ Changelog
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
 
+v1.3.1
+------
+2021-12-31: implement testing for python 3.7
+
 v1.3.0
 --------
-2021-12-29:
-    - add Sort, Group, Aggregations, Associations, etc ..
+2021-12-29: add Sort, Group, Aggregations, Associations, etc ..
 
 v1.2.0
 --------
-2021-12-28:
-    - add Criteria, Filters
+2021-12-28: add Criteria, Filters
 
 v1.1.0
 --------
-2021-12-27:
-    - add Store Api DELETE/GET/GET LIST/PATCH/PUT methods
+2021-12-27: add Store Api DELETE/GET/GET LIST/PATCH/PUT methods
 
 v1.0.0
 --------

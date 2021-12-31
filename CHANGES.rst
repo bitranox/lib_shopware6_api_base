@@ -7,7 +7,7 @@ Changelog
 
 v1.3.1
 ------
-2021-12-31: implement testing for python 3.6, 3.7
+2021-12-31: implement testing for python 3.7
 
 v1.3.0
 --------
