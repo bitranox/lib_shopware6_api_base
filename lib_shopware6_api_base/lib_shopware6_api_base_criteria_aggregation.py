@@ -82,8 +82,7 @@ class CountAggregation:
         field: str
 
     >>> # Setup
-    >>> import pprint
-    >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+    >>> pp = get_pretty_printer()
 
     >>> # Test
     >>> my_aggregation = CountAggregation('count-manufacturers', 'manufacturerId')
