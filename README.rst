@@ -811,8 +811,7 @@ back to `Aggregations`_
             field: str
 
         >>> # Setup
-        >>> import pprint
-        >>> pp = pprint.PrettyPrinter(sort_dicts=False).pprint
+        >>> pp = get_pretty_printer()
 
         >>> # Test
         >>> my_aggregation = CountAggregation('count-manufacturers', 'manufacturerId')
@@ -1728,6 +1727,7 @@ following modules will be automatically installed :
     cli_exit_tools
     lib_detect_testenv
     oauthlib
+    pprint3x
     requests
     requests_oauthlib
 
