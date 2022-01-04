@@ -5,6 +5,12 @@ Changelog
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
 
+v2.0.0
+------
+2022-01-04:
+    - make it possible to pass None Values to Filters (Bug)
+    - paginated request now respect limits
+
 v1.3.2
 ------
 2022-01-04: improve detection of the dal.Criteria Class

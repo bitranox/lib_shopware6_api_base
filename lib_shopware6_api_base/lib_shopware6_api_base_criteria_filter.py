@@ -96,13 +96,17 @@ class EqualsFilter:
     >>> pp(attrs.asdict(my_filter))
     {'type': 'equals', 'field': 'stock', 'value': 10}
 
+    >>> my_filter = EqualsFilter('stock', None)
+    >>> pp(attrs.asdict(my_filter))
+    {'type': 'equals', 'field': 'stock', 'value': None}
+
     """
 
     # EqualsFilter}}}
 
     type: str = attrs.field(init=False, default="equals")
     field: str = attrs.field(validator=attrs.validators.instance_of(str))
-    value: Union[str, int]
+    value: Union[None, str, int]
 
 
 # EqualsAnyFilter{{{

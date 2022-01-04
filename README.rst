@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v1.3.2 as of 2022-01-04 see `Changelog`_
+Version v2.0.0 as of 2022-01-04 see `Changelog`_
 
 |build_badge| |license| |pypi| |black|
 
@@ -470,10 +470,13 @@ Admin API
 
 .. code-block:: python
 
-        def request_get_paginated(self, request_url: str, payload: PayLoad = None, limit: int = 100) -> Dict[str, Any]:
+        def request_get_paginated(self, request_url: str, payload: PayLoad = None, junk_size: int = 100) -> Dict[str, Any]:
             """
             get the data paginated - metadata 'total' and 'totalCountMode' will be updated
-            if You expect a big number of records, the paginated request reads those records in junks of limit=100 for performance reasons.
+            the paginated request reads those records in junks of junk_size=100 for performance reasons.
+
+            payload "limit" will be respected (meaning we deliver only 'limit' results back)
+            payload "page" will be ignored
 
             parameters:
                 request_url: API Url, without the common api prefix
@@ -486,10 +489,24 @@ Admin API
             >>> # Setup
             >>> my_api_client = Shopware6AdminAPIClientBase()
 
-            >>> # test read product
-            >>> my_response_dict = my_api_client.request_get_paginated(request_url='product', limit=3)
-            >>> # we have got more then 3 items - so pagination is working
-            >>> assert len(my_response_dict['data']) > 3
+            >>> # test read product junk_size=3, limit = 4
+            >>> my_payload={'limit': 4}
+            >>> my_response_dict = my_api_client.request_get_paginated(request_url='product', payload=my_payload, junk_size=3)
+            >>> assert 4 == len(my_response_dict['data'])
+
+            >>> # test read product junk_size=3, no limit
+            >>> my_response_dict = my_api_client.request_get_paginated(request_url='product', junk_size=3)
+            >>> assert 3 < len(my_response_dict['data'])
+
+            >>> # test read product junk_size=3, limit = 2
+            >>> my_payload={'limit': 2}
+            >>> my_response_dict = my_api_client.request_get_paginated(request_url='product', payload=my_payload, junk_size=3)
+            >>> assert 2 == len(my_response_dict['data'])
+
+            >>> # test read product junk_size=3, limit = 4
+            >>> my_payload={'limit': 4}
+            >>> my_response_dict = my_api_client.request_get_paginated(request_url='product', payload=my_payload, junk_size=3)
+            >>> assert 4 == len(my_response_dict['data'])
 
             """
 
@@ -531,15 +548,18 @@ Admin API
 
 .. code-block:: python
 
-        def request_post_paginated(self, request_url: str, payload: PayLoad = None, limit: int = 100) -> Dict[str, Any]:
+        def request_post_paginated(self, request_url: str, payload: PayLoad = None, junk_size: int = 100) -> Dict[str, Any]:
             """
             post the data paginated - metadata 'total' and 'totalCountMode' will be updated
-            if You expect a big number of records, the paginated request reads those records in junks of limit=100 for performance reasons.
+            if You expect a big number of records, the paginated request reads those records in junks of junk_size=100 for performance reasons.
+
+            payload "limit" will be respected (meaning we deliver only 'limit' results back)
+            payload "page" will be ignored
 
             parameters:
                 request_url: API Url, without the common api prefix
                 payload : a dictionary
-                limit : the junk size
+                junk_size : the junk size
 
             :returns
                 response_dict: dictionary with the response as dict
@@ -625,7 +645,19 @@ a search criteria follows the following schema:
         >>> # Test empty
         >>> my_criteria = Criteria()
         >>> pp(my_criteria.get_dict())
-        {}
+        {'limit': None,
+         'page': None,
+         'aggregations': [],
+         'associations': {},
+         'filter': [],
+         'grouping': [],
+         'ids': [],
+         'includes': {},
+         'post_filter': [],
+         'query': [],
+         'sort': [],
+         'term': None,
+         'total_count_mode': None}
 
         >>> # Test Average aggregation
         >>> my_criteria = Criteria()
@@ -634,8 +666,18 @@ a search criteria follows the following schema:
         >>> my_criteria.aggregations = [AvgAggregation('average-price', 'price')]
         >>> pp(my_criteria.get_dict())
         {'limit': 1,
+         'page': None,
          'aggregations': [{'name': 'average-price', 'type': 'avg', 'field': 'price'}],
-         'includes': {'product': ['id', 'name']}}
+         'associations': {},
+         'filter': [],
+         'grouping': [],
+         'ids': [],
+         'includes': {'product': ['id', 'name']},
+         'post_filter': [],
+         'query': [],
+         'sort': [],
+         'term': None,
+         'total_count_mode': None}
 
         >>> # Test Filter aggregation
         >>> my_criteria = Criteria(limit=1, includes={'product':['id', 'name']},
@@ -644,6 +686,7 @@ a search criteria follows the following schema:
         ...                                    aggregation=AvgAggregation(name='avg-price',field='price')))
         >>> pp(my_criteria.get_dict())
         {'limit': 1,
+         'page': None,
          'aggregations': {'name': 'active-price-avg',
                           'type': 'filter',
                           'filter': {'type': 'equals',
@@ -652,17 +695,49 @@ a search criteria follows the following schema:
                           'aggregation': {'name': 'avg-price',
                                           'type': 'avg',
                                           'field': 'price'}},
-         'includes': {'product': ['id', 'name']}}
+         'associations': {},
+         'filter': [],
+         'grouping': [],
+         'ids': [],
+         'includes': {'product': ['id', 'name']},
+         'post_filter': [],
+         'query': [],
+         'sort': [],
+         'term': None,
+         'total_count_mode': None}
 
         >>> # Association{{{
         >>> # Test Association
         >>> my_criteria = Criteria()
         >>> my_criteria.associations['products'] = Criteria(limit=5, filter=[EqualsFilter('active', 'true')])
         >>> pp(my_criteria.get_dict())
-        {'associations': {'products': {'limit': 5,
+        {'limit': None,
+         'page': None,
+         'aggregations': [],
+         'associations': {'products': {'limit': 5,
+                                       'page': None,
+                                       'aggregations': [],
+                                       'associations': {},
                                        'filter': [{'type': 'equals',
                                                    'field': 'active',
-                                                   'value': 'true'}]}}}
+                                                   'value': 'true'}],
+                                       'grouping': [],
+                                       'ids': [],
+                                       'includes': {},
+                                       'post_filter': [],
+                                       'query': [],
+                                       'sort': [],
+                                       'term': None,
+                                       'total_count_mode': None}},
+         'filter': [],
+         'grouping': [],
+         'ids': [],
+         'includes': {},
+         'post_filter': [],
+         'query': [],
+         'sort': [],
+         'term': None,
+         'total_count_mode': None}
         >>> # Association}}}
 
         >>> # Test append filters
@@ -675,17 +750,39 @@ a search criteria follows the following schema:
         >>> pp(my_criteria.get_dict())
         {'limit': 1,
          'page': 0,
+         'aggregations': [],
+         'associations': {},
          'filter': [{'type': 'equals', 'field': 'a', 'value': 'a'},
                     {'type': 'equals', 'field': 'b', 'value': 'b'},
-                    {'type': 'equals', 'field': 'd', 'value': 'd'}]}
+                    {'type': 'equals', 'field': 'd', 'value': 'd'}],
+         'grouping': [],
+         'ids': [],
+         'includes': {},
+         'post_filter': [],
+         'query': [],
+         'sort': [],
+         'term': None,
+         'total_count_mode': None}
 
         >>> # Test set filters
         >>> my_criteria = Criteria()
         >>> my_criteria.filter = [EqualsFilter('a', 'a'), EqualsFilter('b', 'b'), EqualsFilter('d', 'd')]
         >>> pp(my_criteria.get_dict())
-        {'filter': [{'type': 'equals', 'field': 'a', 'value': 'a'},
+        {'limit': None,
+         'page': None,
+         'aggregations': [],
+         'associations': {},
+         'filter': [{'type': 'equals', 'field': 'a', 'value': 'a'},
                     {'type': 'equals', 'field': 'b', 'value': 'b'},
-                    {'type': 'equals', 'field': 'd', 'value': 'd'}]}
+                    {'type': 'equals', 'field': 'd', 'value': 'd'}],
+         'grouping': [],
+         'ids': [],
+         'includes': {},
+         'post_filter': [],
+         'query': [],
+         'sort': [],
+         'term': None,
+         'total_count_mode': None}
 
         >>> # Grouping{{{
         >>> # Test Grouping
@@ -693,7 +790,19 @@ a search criteria follows the following schema:
         >>> my_criteria.limit=5
         >>> my_criteria.grouping=['active']
         >>> pp(my_criteria.get_dict())
-        {'limit': 5, 'grouping': ['active']}
+        {'limit': 5,
+         'page': None,
+         'aggregations': [],
+         'associations': {},
+         'filter': [],
+         'grouping': ['active'],
+         'ids': [],
+         'includes': {},
+         'post_filter': [],
+         'query': [],
+         'sort': [],
+         'term': None,
+         'total_count_mode': None}
         >>> # Grouping}}}
 
         >>> # ids{{{
@@ -701,9 +810,21 @@ a search criteria follows the following schema:
         >>> my_criteria = Criteria()
         >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
         >>> pp(my_criteria.get_dict())
-        {'ids': ['012cd563cf8e4f0384eed93b5201cc98',
+        {'limit': None,
+         'page': None,
+         'aggregations': [],
+         'associations': {},
+         'filter': [],
+         'grouping': [],
+         'ids': ['012cd563cf8e4f0384eed93b5201cc98',
                  '075fb241b769444bb72431f797fd5776',
-                 '090fcc2099794771935acf814e3fdb24']}
+                 '090fcc2099794771935acf814e3fdb24'],
+         'includes': {},
+         'post_filter': [],
+         'query': [],
+         'sort': [],
+         'term': None,
+         'total_count_mode': None}
 
         >>> # ids}}}
 
@@ -712,14 +833,38 @@ a search criteria follows the following schema:
         >>> my_criteria = Criteria()
         >>> my_criteria.includes['product'] = ['id', 'name']
         >>> pp(my_criteria.get_dict())
-        {'includes': {'product': ['id', 'name']}}
+        {'limit': None,
+         'page': None,
+         'aggregations': [],
+         'associations': {},
+         'filter': [],
+         'grouping': [],
+         'ids': [],
+         'includes': {'product': ['id', 'name']},
+         'post_filter': [],
+         'query': [],
+         'sort': [],
+         'term': None,
+         'total_count_mode': None}
 
         >>> # includes}}}
 
         >>> # page&limit{{{
         >>> my_criteria = Criteria(page=1, limit=5)
         >>> pp(my_criteria.get_dict())
-        {'limit': 5, 'page': 1}
+        {'limit': 5,
+         'page': 1,
+         'aggregations': [],
+         'associations': {},
+         'filter': [],
+         'grouping': [],
+         'ids': [],
+         'includes': {},
+         'post_filter': [],
+         'query': [],
+         'sort': [],
+         'term': None,
+         'total_count_mode': None}
 
         >>> # page&limit}}}
 
@@ -729,14 +874,26 @@ a search criteria follows the following schema:
         ...           Query(score=500, query=EqualsFilter(field='active', value='true')),
         ...           Query(score=100, query=EqualsFilter(field='manufacturerId', value='db3c17b1e572432eb4a4c881b6f9d68f'))])
         >>> pp(my_criteria.get_dict())
-        {'query': [{'score': 500,
+        {'limit': None,
+         'page': None,
+         'aggregations': [],
+         'associations': {},
+         'filter': [],
+         'grouping': [],
+         'ids': [],
+         'includes': {},
+         'post_filter': [],
+         'query': [{'score': 500,
                     'query': {'type': 'contains', 'field': 'name', 'value': 'Bronze'}},
                    {'score': 500,
                     'query': {'type': 'equals', 'field': 'active', 'value': 'true'}},
                    {'score': 100,
                     'query': {'type': 'equals',
                               'field': 'manufacturerId',
-                              'value': 'db3c17b1e572432eb4a4c881b6f9d68f'}}]}
+                              'value': 'db3c17b1e572432eb4a4c881b6f9d68f'}}],
+         'sort': [],
+         'term': None,
+         'total_count_mode': None}
 
         >>> # Test Sorting
         >>> my_criteria = Criteria(limit=5,
@@ -744,8 +901,19 @@ a search criteria follows the following schema:
         ...                              DescFieldSorting('active')])
         >>> pp(my_criteria.get_dict())
         {'limit': 5,
+         'page': None,
+         'aggregations': [],
+         'associations': {},
+         'filter': [],
+         'grouping': [],
+         'ids': [],
+         'includes': {},
+         'post_filter': [],
+         'query': [],
          'sort': [{'field': 'name', 'order': 'ASC', 'naturalSorting': True},
-                  {'field': 'active', 'order': 'DESC'}]}
+                  {'field': 'active', 'order': 'DESC', 'naturalSorting': None}],
+         'term': None,
+         'total_count_mode': None}
 
         """
 
@@ -1106,10 +1274,33 @@ to or apply filters within the association.
         >>> my_criteria = Criteria()
         >>> my_criteria.associations['products'] = Criteria(limit=5, filter=[EqualsFilter('active', 'true')])
         >>> pp(my_criteria.get_dict())
-        {'associations': {'products': {'limit': 5,
+        {'limit': None,
+         'page': None,
+         'aggregations': [],
+         'associations': {'products': {'limit': 5,
+                                       'page': None,
+                                       'aggregations': [],
+                                       'associations': {},
                                        'filter': [{'type': 'equals',
                                                    'field': 'active',
-                                                   'value': 'true'}]}}}
+                                                   'value': 'true'}],
+                                       'grouping': [],
+                                       'ids': [],
+                                       'includes': {},
+                                       'post_filter': [],
+                                       'query': [],
+                                       'sort': [],
+                                       'term': None,
+                                       'total_count_mode': None}},
+         'filter': [],
+         'grouping': [],
+         'ids': [],
+         'includes': {},
+         'post_filter': [],
+         'query': [],
+         'sort': [],
+         'term': None,
+         'total_count_mode': None}
         >>>
 
 Filters
@@ -1149,6 +1340,10 @@ back to `Filters`_
         >>> my_filter = EqualsFilter('stock', 10)
         >>> pp(attrs.asdict(my_filter))
         {'type': 'equals', 'field': 'stock', 'value': 10}
+
+        >>> my_filter = EqualsFilter('stock', None)
+        >>> pp(attrs.asdict(my_filter))
+        {'type': 'equals', 'field': 'stock', 'value': None}
 
         """
 
@@ -1422,7 +1617,19 @@ It can be used to realise queries such as:
         >>> my_criteria.limit=5
         >>> my_criteria.grouping=['active']
         >>> pp(my_criteria.get_dict())
-        {'limit': 5, 'grouping': ['active']}
+        {'limit': 5,
+         'page': None,
+         'aggregations': [],
+         'associations': {},
+         'filter': [],
+         'grouping': ['active'],
+         'ids': [],
+         'includes': {},
+         'post_filter': [],
+         'query': [],
+         'sort': [],
+         'term': None,
+         'total_count_mode': None}
         >>>
 
 ids
@@ -1438,9 +1645,21 @@ you can pass a list of those using the ids field:
         >>> my_criteria = Criteria()
         >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
         >>> pp(my_criteria.get_dict())
-        {'ids': ['012cd563cf8e4f0384eed93b5201cc98',
+        {'limit': None,
+         'page': None,
+         'aggregations': [],
+         'associations': {},
+         'filter': [],
+         'grouping': [],
+         'ids': ['012cd563cf8e4f0384eed93b5201cc98',
                  '075fb241b769444bb72431f797fd5776',
-                 '090fcc2099794771935acf814e3fdb24']}
+                 '090fcc2099794771935acf814e3fdb24'],
+         'includes': {},
+         'post_filter': [],
+         'query': [],
+         'sort': [],
+         'term': None,
+         'total_count_mode': None}
 
         >>>
 
@@ -1460,7 +1679,19 @@ When debugging, the response is smaller and you can concentrate on the essential
         >>> my_criteria = Criteria()
         >>> my_criteria.includes['product'] = ['id', 'name']
         >>> pp(my_criteria.get_dict())
-        {'includes': {'product': ['id', 'name']}}
+        {'limit': None,
+         'page': None,
+         'aggregations': [],
+         'associations': {},
+         'filter': [],
+         'grouping': [],
+         'ids': [],
+         'includes': {'product': ['id', 'name']},
+         'post_filter': [],
+         'query': [],
+         'sort': [],
+         'term': None,
+         'total_count_mode': None}
 
         >>>
 
@@ -1484,7 +1715,19 @@ The page and limit parameters can be used to control pagination. The page parame
 
         >>> my_criteria = Criteria(page=1, limit=5)
         >>> pp(my_criteria.get_dict())
-        {'limit': 5, 'page': 1}
+        {'limit': 5,
+         'page': 1,
+         'aggregations': [],
+         'associations': {},
+         'filter': [],
+         'grouping': [],
+         'ids': [],
+         'includes': {},
+         'post_filter': [],
+         'query': [],
+         'sort': [],
+         'term': None,
+         'total_count_mode': None}
 
         >>>
 
@@ -1520,14 +1763,26 @@ The sum of the matching queries then results in the total _score value.
         ...           Query(score=500, query=EqualsFilter(field='active', value='true')),
         ...           Query(score=100, query=EqualsFilter(field='manufacturerId', value='db3c17b1e572432eb4a4c881b6f9d68f'))])
         >>> pp(my_criteria.get_dict())
-        {'query': [{'score': 500,
+        {'limit': None,
+         'page': None,
+         'aggregations': [],
+         'associations': {},
+         'filter': [],
+         'grouping': [],
+         'ids': [],
+         'includes': {},
+         'post_filter': [],
+         'query': [{'score': 500,
                     'query': {'type': 'contains', 'field': 'name', 'value': 'Bronze'}},
                    {'score': 500,
                     'query': {'type': 'equals', 'field': 'active', 'value': 'true'}},
                    {'score': 100,
                     'query': {'type': 'equals',
                               'field': 'manufacturerId',
-                              'value': 'db3c17b1e572432eb4a4c881b6f9d68f'}}]}
+                              'value': 'db3c17b1e572432eb4a4c881b6f9d68f'}}],
+         'sort': [],
+         'term': None,
+         'total_count_mode': None}
 
         """
 
@@ -1755,6 +2010,12 @@ Changelog
 - new MAJOR version for incompatible API changes,
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
+
+v2.0.0
+------
+2022-01-04:
+    - make it possible to pass None Values to Filters (Bug)
+    - paginated request now respect limits
 
 v1.3.2
 ------

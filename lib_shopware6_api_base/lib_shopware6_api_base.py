@@ -410,10 +410,13 @@ class Shopware6AdminAPIClientBase(object):
         return response_dict
 
     # admin_api_get_paginated{{{
-    def request_get_paginated(self, request_url: str, payload: PayLoad = None, limit: int = 100) -> Dict[str, Any]:
+    def request_get_paginated(self, request_url: str, payload: PayLoad = None, junk_size: int = 100) -> Dict[str, Any]:
         """
         get the data paginated - metadata 'total' and 'totalCountMode' will be updated
-        if You expect a big number of records, the paginated request reads those records in junks of limit=100 for performance reasons.
+        the paginated request reads those records in junks of junk_size=100 for performance reasons.
+
+        payload "limit" will be respected (meaning we deliver only 'limit' results back)
+        payload "page" will be ignored
 
         parameters:
             request_url: API Url, without the common api prefix
@@ -426,14 +429,28 @@ class Shopware6AdminAPIClientBase(object):
         >>> # Setup
         >>> my_api_client = Shopware6AdminAPIClientBase()
 
-        >>> # test read product
-        >>> my_response_dict = my_api_client.request_get_paginated(request_url='product', limit=3)
-        >>> # we have got more then 3 items - so pagination is working
-        >>> assert len(my_response_dict['data']) > 3
+        >>> # test read product junk_size=3, limit = 4
+        >>> my_payload={'limit': 4}
+        >>> my_response_dict = my_api_client.request_get_paginated(request_url='product', payload=my_payload, junk_size=3)
+        >>> assert 4 == len(my_response_dict['data'])
+
+        >>> # test read product junk_size=3, no limit
+        >>> my_response_dict = my_api_client.request_get_paginated(request_url='product', junk_size=3)
+        >>> assert 3 < len(my_response_dict['data'])
+
+        >>> # test read product junk_size=3, limit = 2
+        >>> my_payload={'limit': 2}
+        >>> my_response_dict = my_api_client.request_get_paginated(request_url='product', payload=my_payload, junk_size=3)
+        >>> assert 2 == len(my_response_dict['data'])
+
+        >>> # test read product junk_size=3, limit = 4
+        >>> my_payload={'limit': 4}
+        >>> my_response_dict = my_api_client.request_get_paginated(request_url='product', payload=my_payload, junk_size=3)
+        >>> assert 4 == len(my_response_dict['data'])
 
         """
         # admin_api_get_paginated}}}
-        response_dict = self._request_paginated(http_method="get", request_url=request_url, payload=payload, limit=limit)
+        response_dict = self._request_paginated(http_method="get", request_url=request_url, payload=payload, junk_size=junk_size)
         return response_dict
 
     # admin_api_patch{{{
@@ -471,22 +488,25 @@ class Shopware6AdminAPIClientBase(object):
         return response_dict
 
     # admin_api_post_paginated{{{
-    def request_post_paginated(self, request_url: str, payload: PayLoad = None, limit: int = 100) -> Dict[str, Any]:
+    def request_post_paginated(self, request_url: str, payload: PayLoad = None, junk_size: int = 100) -> Dict[str, Any]:
         """
         post the data paginated - metadata 'total' and 'totalCountMode' will be updated
-        if You expect a big number of records, the paginated request reads those records in junks of limit=100 for performance reasons.
+        if You expect a big number of records, the paginated request reads those records in junks of junk_size=100 for performance reasons.
+
+        payload "limit" will be respected (meaning we deliver only 'limit' results back)
+        payload "page" will be ignored
 
         parameters:
             request_url: API Url, without the common api prefix
             payload : a dictionary
-            limit : the junk size
+            junk_size : the junk size
 
         :returns
             response_dict: dictionary with the response as dict
 
         """
         # admin_api_post_paginated}}}
-        response_dict = self._request_paginated(http_method="post", request_url=request_url, payload=payload, limit=limit)
+        response_dict = self._request_paginated(http_method="post", request_url=request_url, payload=payload, junk_size=junk_size)
         return response_dict
 
     # admin_api_put{{{
@@ -525,20 +545,63 @@ class Shopware6AdminAPIClientBase(object):
         response_dict = self._make_request(http_method="delete", request_url=request_url, payload=payload)
         return response_dict
 
-    def _request_paginated(self, http_method: str, request_url: str, payload: PayLoad = None, limit: int = 100) -> Dict[str, Any]:
+    def _request_paginated(self, http_method: str, request_url: str, payload: PayLoad = None, junk_size: int = 100) -> Dict[str, Any]:
+        """
+        request the data paginated - metadata 'total' and 'totalCountMode' will be updated
+        the paginated request reads those records in junks of junk_size=100 for performance reasons.
+
+        payload "limit" will be respected (meaning we deliver only 'limit' results back)
+        "page" will be ignored
+
+        parameters:
+            http_method:
+            request_url: API Url, without the common api prefix
+            payload : a dictionary
+            junk_size : the junk size
+
+        :returns
+            response_dict: dictionary with the response as dict
+
+
+        :param http_method:
+        :param request_url:
+        :param payload:
+        :param junk_size:
+        :return:
+        """
         response_dict: Dict[str, Any] = dict()
         response_dict["data"] = list()
 
         payload_dict = _get_payload_dict(payload)
-        payload_dict["limit"] = str(limit)
+
+        total_limit: Union[None, int]
+        records_left: Union[None, int]
+
+        if "limit" in payload_dict:
+            total_limit = payload_dict["limit"]
+        else:
+            total_limit = None
+
+        if total_limit is None:
+            payload_dict["limit"] = str(junk_size)
+            records_left = 0
+        else:
+            payload_dict["limit"] = min(total_limit, junk_size)
+            records_left = total_limit
+
         page = 1
 
         while True:
-            payload_dict["page"] = str(page)
+            payload_dict["page"] = page
             partial_data = self._make_request(http_method=http_method, request_url=request_url, payload=payload_dict)
             if partial_data["data"]:
                 response_dict["data"] = response_dict["data"] + partial_data["data"]
                 page = page + 1
+                if total_limit is not None:
+                    records_left = records_left - len(partial_data["data"])
+                    if records_left < 1:
+                        response_dict["data"] = response_dict["data"][:total_limit]
+                        break
             else:
                 break
         return response_dict

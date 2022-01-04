@@ -51,14 +51,26 @@ class Query:
     ...           Query(score=500, query=EqualsFilter(field='active', value='true')),
     ...           Query(score=100, query=EqualsFilter(field='manufacturerId', value='db3c17b1e572432eb4a4c881b6f9d68f'))])
     >>> pp(my_criteria.get_dict())
-    {'query': [{'score': 500,
+    {'limit': None,
+     'page': None,
+     'aggregations': [],
+     'associations': {},
+     'filter': [],
+     'grouping': [],
+     'ids': [],
+     'includes': {},
+     'post_filter': [],
+     'query': [{'score': 500,
                 'query': {'type': 'contains', 'field': 'name', 'value': 'Bronze'}},
                {'score': 500,
                 'query': {'type': 'equals', 'field': 'active', 'value': 'true'}},
                {'score': 100,
                 'query': {'type': 'equals',
                           'field': 'manufacturerId',
-                          'value': 'db3c17b1e572432eb4a4c881b6f9d68f'}}]}
+                          'value': 'db3c17b1e572432eb4a4c881b6f9d68f'}}],
+     'sort': [],
+     'term': None,
+     'total_count_mode': None}
 
     """
 
@@ -100,7 +112,19 @@ class Criteria:
     >>> # Test empty
     >>> my_criteria = Criteria()
     >>> pp(my_criteria.get_dict())
-    {}
+    {'limit': None,
+     'page': None,
+     'aggregations': [],
+     'associations': {},
+     'filter': [],
+     'grouping': [],
+     'ids': [],
+     'includes': {},
+     'post_filter': [],
+     'query': [],
+     'sort': [],
+     'term': None,
+     'total_count_mode': None}
 
     >>> # Test Average aggregation
     >>> my_criteria = Criteria()
@@ -109,8 +133,18 @@ class Criteria:
     >>> my_criteria.aggregations = [AvgAggregation('average-price', 'price')]
     >>> pp(my_criteria.get_dict())
     {'limit': 1,
+     'page': None,
      'aggregations': [{'name': 'average-price', 'type': 'avg', 'field': 'price'}],
-     'includes': {'product': ['id', 'name']}}
+     'associations': {},
+     'filter': [],
+     'grouping': [],
+     'ids': [],
+     'includes': {'product': ['id', 'name']},
+     'post_filter': [],
+     'query': [],
+     'sort': [],
+     'term': None,
+     'total_count_mode': None}
 
     >>> # Test Filter aggregation
     >>> my_criteria = Criteria(limit=1, includes={'product':['id', 'name']},
@@ -119,6 +153,7 @@ class Criteria:
     ...                                    aggregation=AvgAggregation(name='avg-price',field='price')))
     >>> pp(my_criteria.get_dict())
     {'limit': 1,
+     'page': None,
      'aggregations': {'name': 'active-price-avg',
                       'type': 'filter',
                       'filter': {'type': 'equals',
@@ -127,17 +162,49 @@ class Criteria:
                       'aggregation': {'name': 'avg-price',
                                       'type': 'avg',
                                       'field': 'price'}},
-     'includes': {'product': ['id', 'name']}}
+     'associations': {},
+     'filter': [],
+     'grouping': [],
+     'ids': [],
+     'includes': {'product': ['id', 'name']},
+     'post_filter': [],
+     'query': [],
+     'sort': [],
+     'term': None,
+     'total_count_mode': None}
 
     >>> # Association{{{
     >>> # Test Association
     >>> my_criteria = Criteria()
     >>> my_criteria.associations['products'] = Criteria(limit=5, filter=[EqualsFilter('active', 'true')])
     >>> pp(my_criteria.get_dict())
-    {'associations': {'products': {'limit': 5,
+    {'limit': None,
+     'page': None,
+     'aggregations': [],
+     'associations': {'products': {'limit': 5,
+                                   'page': None,
+                                   'aggregations': [],
+                                   'associations': {},
                                    'filter': [{'type': 'equals',
                                                'field': 'active',
-                                               'value': 'true'}]}}}
+                                               'value': 'true'}],
+                                   'grouping': [],
+                                   'ids': [],
+                                   'includes': {},
+                                   'post_filter': [],
+                                   'query': [],
+                                   'sort': [],
+                                   'term': None,
+                                   'total_count_mode': None}},
+     'filter': [],
+     'grouping': [],
+     'ids': [],
+     'includes': {},
+     'post_filter': [],
+     'query': [],
+     'sort': [],
+     'term': None,
+     'total_count_mode': None}
     >>> # Association}}}
 
     >>> # Test append filters
@@ -150,17 +217,39 @@ class Criteria:
     >>> pp(my_criteria.get_dict())
     {'limit': 1,
      'page': 0,
+     'aggregations': [],
+     'associations': {},
      'filter': [{'type': 'equals', 'field': 'a', 'value': 'a'},
                 {'type': 'equals', 'field': 'b', 'value': 'b'},
-                {'type': 'equals', 'field': 'd', 'value': 'd'}]}
+                {'type': 'equals', 'field': 'd', 'value': 'd'}],
+     'grouping': [],
+     'ids': [],
+     'includes': {},
+     'post_filter': [],
+     'query': [],
+     'sort': [],
+     'term': None,
+     'total_count_mode': None}
 
     >>> # Test set filters
     >>> my_criteria = Criteria()
     >>> my_criteria.filter = [EqualsFilter('a', 'a'), EqualsFilter('b', 'b'), EqualsFilter('d', 'd')]
     >>> pp(my_criteria.get_dict())
-    {'filter': [{'type': 'equals', 'field': 'a', 'value': 'a'},
+    {'limit': None,
+     'page': None,
+     'aggregations': [],
+     'associations': {},
+     'filter': [{'type': 'equals', 'field': 'a', 'value': 'a'},
                 {'type': 'equals', 'field': 'b', 'value': 'b'},
-                {'type': 'equals', 'field': 'd', 'value': 'd'}]}
+                {'type': 'equals', 'field': 'd', 'value': 'd'}],
+     'grouping': [],
+     'ids': [],
+     'includes': {},
+     'post_filter': [],
+     'query': [],
+     'sort': [],
+     'term': None,
+     'total_count_mode': None}
 
     >>> # Grouping{{{
     >>> # Test Grouping
@@ -168,7 +257,19 @@ class Criteria:
     >>> my_criteria.limit=5
     >>> my_criteria.grouping=['active']
     >>> pp(my_criteria.get_dict())
-    {'limit': 5, 'grouping': ['active']}
+    {'limit': 5,
+     'page': None,
+     'aggregations': [],
+     'associations': {},
+     'filter': [],
+     'grouping': ['active'],
+     'ids': [],
+     'includes': {},
+     'post_filter': [],
+     'query': [],
+     'sort': [],
+     'term': None,
+     'total_count_mode': None}
     >>> # Grouping}}}
 
     >>> # ids{{{
@@ -176,9 +277,21 @@ class Criteria:
     >>> my_criteria = Criteria()
     >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
     >>> pp(my_criteria.get_dict())
-    {'ids': ['012cd563cf8e4f0384eed93b5201cc98',
+    {'limit': None,
+     'page': None,
+     'aggregations': [],
+     'associations': {},
+     'filter': [],
+     'grouping': [],
+     'ids': ['012cd563cf8e4f0384eed93b5201cc98',
              '075fb241b769444bb72431f797fd5776',
-             '090fcc2099794771935acf814e3fdb24']}
+             '090fcc2099794771935acf814e3fdb24'],
+     'includes': {},
+     'post_filter': [],
+     'query': [],
+     'sort': [],
+     'term': None,
+     'total_count_mode': None}
 
     >>> # ids}}}
 
@@ -187,14 +300,38 @@ class Criteria:
     >>> my_criteria = Criteria()
     >>> my_criteria.includes['product'] = ['id', 'name']
     >>> pp(my_criteria.get_dict())
-    {'includes': {'product': ['id', 'name']}}
+    {'limit': None,
+     'page': None,
+     'aggregations': [],
+     'associations': {},
+     'filter': [],
+     'grouping': [],
+     'ids': [],
+     'includes': {'product': ['id', 'name']},
+     'post_filter': [],
+     'query': [],
+     'sort': [],
+     'term': None,
+     'total_count_mode': None}
 
     >>> # includes}}}
 
     >>> # page&limit{{{
     >>> my_criteria = Criteria(page=1, limit=5)
     >>> pp(my_criteria.get_dict())
-    {'limit': 5, 'page': 1}
+    {'limit': 5,
+     'page': 1,
+     'aggregations': [],
+     'associations': {},
+     'filter': [],
+     'grouping': [],
+     'ids': [],
+     'includes': {},
+     'post_filter': [],
+     'query': [],
+     'sort': [],
+     'term': None,
+     'total_count_mode': None}
 
     >>> # page&limit}}}
 
@@ -204,14 +341,26 @@ class Criteria:
     ...           Query(score=500, query=EqualsFilter(field='active', value='true')),
     ...           Query(score=100, query=EqualsFilter(field='manufacturerId', value='db3c17b1e572432eb4a4c881b6f9d68f'))])
     >>> pp(my_criteria.get_dict())
-    {'query': [{'score': 500,
+    {'limit': None,
+     'page': None,
+     'aggregations': [],
+     'associations': {},
+     'filter': [],
+     'grouping': [],
+     'ids': [],
+     'includes': {},
+     'post_filter': [],
+     'query': [{'score': 500,
                 'query': {'type': 'contains', 'field': 'name', 'value': 'Bronze'}},
                {'score': 500,
                 'query': {'type': 'equals', 'field': 'active', 'value': 'true'}},
                {'score': 100,
                 'query': {'type': 'equals',
                           'field': 'manufacturerId',
-                          'value': 'db3c17b1e572432eb4a4c881b6f9d68f'}}]}
+                          'value': 'db3c17b1e572432eb4a4c881b6f9d68f'}}],
+     'sort': [],
+     'term': None,
+     'total_count_mode': None}
 
     >>> # Test Sorting
     >>> my_criteria = Criteria(limit=5,
@@ -219,8 +368,19 @@ class Criteria:
     ...                              DescFieldSorting('active')])
     >>> pp(my_criteria.get_dict())
     {'limit': 5,
+     'page': None,
+     'aggregations': [],
+     'associations': {},
+     'filter': [],
+     'grouping': [],
+     'ids': [],
+     'includes': {},
+     'post_filter': [],
+     'query': [],
      'sort': [{'field': 'name', 'order': 'ASC', 'naturalSorting': True},
-              {'field': 'active', 'order': 'DESC'}]}
+              {'field': 'active', 'order': 'DESC', 'naturalSorting': None}],
+     'term': None,
+     'total_count_mode': None}
 
     """
 
@@ -241,65 +401,5 @@ class Criteria:
     total_count_mode: Optional[int] = None
 
     def get_dict(self) -> Dict[str, Any]:
-        result = attrs.asdict(self, filter=self._is_not_empty)
+        result = attrs.asdict(self)
         return result
-
-    @staticmethod
-    def _is_not_empty(ignore: attrs.Attribute, value: Any) -> bool:  # type: ignore
-        if value is None:
-            return False
-        elif value == dict():
-            return False
-        elif value == list():
-            return False
-        else:
-            return True
-
-
-def get_dict(data: Any) -> Dict[str, Any]:
-    """
-    alternative to attrs.asdict
-
-    :param data:
-    :return:
-
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
-    >>> my_criteria = Criteria(limit=1, includes={'product':['id', 'name']},
-    ...     aggregations=FilterAggregation(name='active-price-avg',
-    ...                                    filter=EqualsFilter(field='active', value=True),
-    ...                                    aggregation=AvgAggregation(name='avg-price',field='price')))
-    >>> pp(get_dict(my_criteria))
-    {'limit': 1,
-     'aggregations': {'name': 'active-price-avg',
-                      'type': 'filter',
-                      'filter': {'type': 'equals',
-                                 'field': 'active',
-                                 'value': True},
-                      'aggregation': {'name': 'avg-price',
-                                      'type': 'avg',
-                                      'field': 'price'}},
-     'includes': {'product': ['id', 'name']}}
-
-    """
-    result_dict = dict()
-    for slot in data.__slots__:
-        if not slot.startswith("_"):
-            value = getattr(data, slot)
-            if hasattr(value, "__slots__"):
-                result_dict[slot] = get_dict(value)
-            elif _is_not_empty(value):
-                result_dict[slot] = value
-    return result_dict
-
-
-def _is_not_empty(value: Any) -> bool:
-    if value is None:
-        return False
-    elif value == dict():
-        return False
-    elif value == list():
-        return False
-    else:
-        return True
