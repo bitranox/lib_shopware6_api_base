@@ -18,6 +18,7 @@ import requests_oauthlib
 try:
     from conf_shopware6_api_base_classes import *
     from lib_shopware6_api_base_criteria import *
+    from lib_shopware6_api_base_criteria import Criteria as Criteria
 except ImportError:  # pragma: no cover
     # Imports for Doctest
     from .conf_shopware6_api_base_classes import *  # type: ignore  # pragma: no cover
@@ -528,17 +529,13 @@ class Shopware6AdminAPIClientBase(object):
         response_dict: Dict[str, Any] = dict()
         response_dict["data"] = list()
 
-        if payload is None:
-            payload = dict()
-        elif isinstance(payload, Criteria):
-            payload = payload.get_dict()
-
-        payload["limit"] = str(limit)
+        payload_dict = _get_payload_dict(payload)
+        payload_dict["limit"] = str(limit)
         page = 1
 
         while True:
-            payload["page"] = str(page)
-            partial_data = self._make_request(http_method=http_method, request_url=request_url, payload=payload)
+            payload_dict["page"] = str(page)
+            partial_data = self._make_request(http_method=http_method, request_url=request_url, payload=payload_dict)
             if partial_data["data"]:
                 response_dict["data"] = response_dict["data"] + partial_data["data"]
                 page = page + 1
@@ -594,15 +591,14 @@ class Shopware6AdminAPIClientBase(object):
 
         """
 
-        if payload is None:
-            payload = dict()
+        payload_dict = _get_payload_dict(payload)
 
         try:
             self._get_session()
-            response = self._request(http_method=http_method, request_url=request_url, payload=payload)
+            response = self._request(http_method=http_method, request_url=request_url, payload=payload_dict)
         except requests_oauthlib.TokenUpdated as exc:
             self._token_saver(token=exc.token)
-            response = self._request(http_method=http_method, request_url=request_url, payload=payload)
+            response = self._request(http_method=http_method, request_url=request_url, payload=payload_dict)
         except TokenExpiredError:
             if self._is_refreshable_token():  # pragma: no cover
                 # this actually should never happen - just in case.
@@ -611,7 +607,7 @@ class Shopware6AdminAPIClientBase(object):
             else:
                 self._get_access_token_by_resource_owner()
             self._get_session()
-            response = self._request(http_method=http_method, request_url=request_url, payload=payload)
+            response = self._request(http_method=http_method, request_url=request_url, payload=payload_dict)
         try:
             response_dict = dict(response.json())
         except Exception:  # noqa
@@ -637,22 +633,19 @@ class Shopware6AdminAPIClientBase(object):
         :param payload:
         :return:
         """
-        if payload is None:
-            payload = dict()
-        elif isinstance(payload, Criteria):
-            payload = payload.get_dict()
+        payload_dict = _get_payload_dict(payload)
 
         response: requests.Response = requests.Response()
         headers = self._get_headers()
 
         if http_method == "get":
-            response = self.session.get(self._format_admin_api_url(request_url), params=payload, headers=headers)
+            response = self.session.get(self._format_admin_api_url(request_url), params=payload_dict, headers=headers)
         elif http_method == "patch":
-            response = self.session.patch(self._format_admin_api_url(request_url), data=json.dumps(payload), headers=headers)
+            response = self.session.patch(self._format_admin_api_url(request_url), data=json.dumps(payload_dict), headers=headers)
         elif http_method == "post":
-            response = self.session.post(self._format_admin_api_url(request_url), data=json.dumps(payload), headers=headers)
+            response = self.session.post(self._format_admin_api_url(request_url), data=json.dumps(payload_dict), headers=headers)
         elif http_method == "put":
-            response = self.session.put(self._format_admin_api_url(request_url), data=json.dumps(payload), headers=headers)
+            response = self.session.put(self._format_admin_api_url(request_url), data=json.dumps(payload_dict), headers=headers)
         elif http_method == "delete":
             response = self.session.delete(self._format_admin_api_url(request_url))
 
@@ -1071,6 +1064,20 @@ def _is_local_docker_container_active() -> bool:
     except requests.exceptions.ConnectionError:  # pragma: no cover
         is_active = False  # pragma: no cover
     return is_active
+
+
+def _is_type_criteria(payload: PayLoad) -> bool:
+    """True if the passes type is Criteria"""
+    return type(payload).__name__ == "Criteria"
+
+
+def _get_payload_dict(payload: PayLoad) -> Dict[str, Any]:
+    """return the payload as dictionary"""
+    if payload is None:
+        payload = dict()
+    elif _is_type_criteria(payload):
+        payload = payload.get_dict()  # type: ignore
+    return payload
 
 
 if __name__ == "__main__":

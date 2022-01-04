@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v1.3.1 as of 2021-12-31 see `Changelog`_
+Version v1.3.2 as of 2022-01-04 see `Changelog`_
 
 
 .. include:: ./badges.rst

@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v1.3.1 as of 2021-12-31 see `Changelog`_
+Version v1.3.2 as of 2022-01-04 see `Changelog`_
 
 |build_badge| |license| |pypi| |black|
 
@@ -1756,9 +1756,13 @@ Changelog
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
 
+v1.3.2
+------
+2022-01-04: improve detection of the dal.Criteria Class
+
 v1.3.1
 ------
-2021-12-31: implement testing for python 3.7
+2021-12-31: implement testing for python 3.6, 3.7
 
 v1.3.0
 --------
