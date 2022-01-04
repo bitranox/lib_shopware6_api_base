@@ -4,7 +4,7 @@ lib_shopware6_api_base
 
 Version v2.0.0 as of 2022-01-04 see `Changelog`_
 
-|build_badge| |license| |pypi| |black|
+|build_badge| |license| |pypi| |pypi-downloads| |black|
 
 |codecov| |better_code| |cc_maintain| |cc_issues| |cc_coverage| |snyk|
 
@@ -47,6 +47,10 @@ Version v2.0.0 as of 2022-01-04 see `Changelog`_
 
 .. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/psf/black
+
+.. |pypi-downloads| image:: https://img.shields.io/pypi/dm/lib-shopware6-api-base
+   :target: https://pypi.org/project/lib-shopware6-api-base/
+   :alt: PyPI - Downloads
 
 this is a basic API client for shopware6 which can be used on windows, Linux, MacOs.
 It supports all available authorisation types to the Admin and Storefront API.
