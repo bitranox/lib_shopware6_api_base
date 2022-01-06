@@ -7,6 +7,7 @@ if is_testenv_active():  # pragma: no cover
 
 # put Your imports here
 from .lib_shopware6_api_base import *
+from .lib_shopware6_api_base_criteria import *
 
 # __init__conf__ needs to be imported after Your imports, otherwise we would create circular import on the cli script,
 # which is reading some values from __init__conf__

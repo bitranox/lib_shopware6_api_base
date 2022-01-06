@@ -5,6 +5,10 @@ Changelog
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
 
+v2.0.1
+------
+2022-01-06: correct import for dal.Criteria
+
 v2.0.0
 ------
 2022-01-04:

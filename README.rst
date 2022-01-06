@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v2.0.0 as of 2022-01-04 see `Changelog`_
+Version v2.0.1 as of 2022-01-06 see `Changelog`_
 
 |build_badge| |license| |pypi| |pypi-downloads| |black|
 
@@ -2014,6 +2014,10 @@ Changelog
 - new MAJOR version for incompatible API changes,
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
+
+v2.0.1
+------
+2022-01-06: correct import for dal.Criteria
 
 v2.0.0
 ------
