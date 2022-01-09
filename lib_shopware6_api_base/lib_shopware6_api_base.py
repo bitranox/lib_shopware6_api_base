@@ -448,6 +448,12 @@ class Shopware6AdminAPIClientBase(object):
         >>> my_response_dict = my_api_client.request_get_paginated(request_url='product', payload=my_payload, junk_size=3)
         >>> assert 4 == len(my_response_dict['data'])
 
+        >>> # test read product junk_size=10, limit = None
+        >>> my_payload=Criteria()
+        >>> my_response_dict = my_api_client.request_get_paginated(request_url='product', payload=my_payload, junk_size=10)
+        >>> assert 5 < len(my_response_dict['data'])
+
+
         """
         # admin_api_get_paginated}}}
         response_dict = self._request_paginated(http_method="get", request_url=request_url, payload=payload, junk_size=junk_size)
@@ -503,6 +509,30 @@ class Shopware6AdminAPIClientBase(object):
 
         :returns
             response_dict: dictionary with the response as dict
+
+        >>> # Setup
+        >>> my_api_client = Shopware6AdminAPIClientBase()
+        >>> my_url = 'search/product'
+
+        >>> # test read product junk_size=10, limit = None
+        >>> my_payload=Criteria()
+        >>> my_response_dict = my_api_client.request_post_paginated(request_url=my_url, payload=my_payload, junk_size=10)
+        >>> assert 5 < len(my_response_dict['data'])
+
+        >>> # test read product junk_size=10, no limit
+        >>> my_payload=None
+        >>> my_response_dict = my_api_client.request_post_paginated(request_url=my_url, payload=my_payload, junk_size=10)
+        >>> assert 10 < len(my_response_dict['data'])
+
+        >>> # test read product junk_size=3, limit = 2
+        >>> my_payload={'limit': 2}
+        >>> my_response_dict = my_api_client.request_post_paginated(request_url=my_url, payload=my_payload, junk_size=3)
+        >>> assert 2 == len(my_response_dict['data'])
+
+        >>> # test read product junk_size=3, limit = 4
+        >>> my_payload={'limit': 4}
+        >>> my_response_dict = my_api_client.request_post_paginated(request_url=my_url, payload=my_payload, junk_size=3)
+        >>> assert 4 == len(my_response_dict['data'])
 
         """
         # admin_api_post_paginated}}}
@@ -571,8 +601,15 @@ class Shopware6AdminAPIClientBase(object):
         """
         response_dict: Dict[str, Any] = dict()
         response_dict["data"] = list()
-
         payload_dict = _get_payload_dict(payload)
+
+        # when 'ids' are given, limit does not apply, so we need to set
+        # 'limit' and 'junk_size' to len(payload.ids)
+        if _is_type_criteria(payload):
+            if payload.ids:  # type: ignore
+                ids_limit = len(payload.ids)  # type: ignore
+                junk_size = ids_limit
+                payload_dict["limit"] = ids_limit
 
         total_limit: Union[None, int]
         records_left: Union[None, int]
@@ -593,6 +630,7 @@ class Shopware6AdminAPIClientBase(object):
 
         while True:
             payload_dict["page"] = page
+
             partial_data = self._make_request(http_method=http_method, request_url=request_url, payload=payload_dict)
             if partial_data["data"]:
                 response_dict["data"] = response_dict["data"] + partial_data["data"]

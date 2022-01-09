@@ -462,7 +462,8 @@ ids
 back to `Query Syntax`_
 
 If you want to perform a simple lookup using just the ids of records,
-you can pass a list of those using the ids field:
+you can pass a list of those using the ids field.
+Please note that as soon as You use ids, limit and page does not apply anymore !
 
 .. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria.py
     :code: python
@@ -499,6 +500,7 @@ page & limit
 back to `Query Syntax`_
 
 The page and limit parameters can be used to control pagination. The page parameter is 1-indexed.
+Please note that as soon as You use ids, limit and page does not apply anymore !
 
 .. include:: ../lib_shopware6_api_base/lib_shopware6_api_base_criteria.py
     :code: python

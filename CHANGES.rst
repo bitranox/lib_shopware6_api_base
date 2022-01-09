@@ -5,6 +5,12 @@ Changelog
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
 
+v2.0.2
+------
+2022-01-09:
+    - handle dal.Criteria 'ids' correctly
+    - remove empty lists and dicts from dal.Criteria
+
 v2.0.1
 ------
 2022-01-06: correct import for dal.Criteria

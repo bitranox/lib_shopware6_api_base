@@ -53,13 +53,6 @@ class Query:
     >>> pp(my_criteria.get_dict())
     {'limit': None,
      'page': None,
-     'aggregations': [],
-     'associations': {},
-     'filter': [],
-     'grouping': [],
-     'ids': [],
-     'includes': {},
-     'post_filter': [],
      'query': [{'score': 500,
                 'query': {'type': 'contains', 'field': 'name', 'value': 'Bronze'}},
                {'score': 500,
@@ -68,7 +61,6 @@ class Query:
                 'query': {'type': 'equals',
                           'field': 'manufacturerId',
                           'value': 'db3c17b1e572432eb4a4c881b6f9d68f'}}],
-     'sort': [],
      'term': None,
      'total_count_mode': None}
 
@@ -112,19 +104,7 @@ class Criteria:
     >>> # Test empty
     >>> my_criteria = Criteria()
     >>> pp(my_criteria.get_dict())
-    {'limit': None,
-     'page': None,
-     'aggregations': [],
-     'associations': {},
-     'filter': [],
-     'grouping': [],
-     'ids': [],
-     'includes': {},
-     'post_filter': [],
-     'query': [],
-     'sort': [],
-     'term': None,
-     'total_count_mode': None}
+    {'limit': None, 'page': None, 'term': None, 'total_count_mode': None}
 
     >>> # Test Average aggregation
     >>> my_criteria = Criteria()
@@ -135,14 +115,7 @@ class Criteria:
     {'limit': 1,
      'page': None,
      'aggregations': [{'name': 'average-price', 'type': 'avg', 'field': 'price'}],
-     'associations': {},
-     'filter': [],
-     'grouping': [],
-     'ids': [],
      'includes': {'product': ['id', 'name']},
-     'post_filter': [],
-     'query': [],
-     'sort': [],
      'term': None,
      'total_count_mode': None}
 
@@ -162,14 +135,7 @@ class Criteria:
                       'aggregation': {'name': 'avg-price',
                                       'type': 'avg',
                                       'field': 'price'}},
-     'associations': {},
-     'filter': [],
-     'grouping': [],
-     'ids': [],
      'includes': {'product': ['id', 'name']},
-     'post_filter': [],
-     'query': [],
-     'sort': [],
      'term': None,
      'total_count_mode': None}
 
@@ -180,29 +146,13 @@ class Criteria:
     >>> pp(my_criteria.get_dict())
     {'limit': None,
      'page': None,
-     'aggregations': [],
      'associations': {'products': {'limit': 5,
                                    'page': None,
-                                   'aggregations': [],
-                                   'associations': {},
                                    'filter': [{'type': 'equals',
                                                'field': 'active',
                                                'value': 'true'}],
-                                   'grouping': [],
-                                   'ids': [],
-                                   'includes': {},
-                                   'post_filter': [],
-                                   'query': [],
-                                   'sort': [],
                                    'term': None,
                                    'total_count_mode': None}},
-     'filter': [],
-     'grouping': [],
-     'ids': [],
-     'includes': {},
-     'post_filter': [],
-     'query': [],
-     'sort': [],
      'term': None,
      'total_count_mode': None}
     >>> # Association}}}
@@ -217,17 +167,9 @@ class Criteria:
     >>> pp(my_criteria.get_dict())
     {'limit': 1,
      'page': 0,
-     'aggregations': [],
-     'associations': {},
      'filter': [{'type': 'equals', 'field': 'a', 'value': 'a'},
                 {'type': 'equals', 'field': 'b', 'value': 'b'},
                 {'type': 'equals', 'field': 'd', 'value': 'd'}],
-     'grouping': [],
-     'ids': [],
-     'includes': {},
-     'post_filter': [],
-     'query': [],
-     'sort': [],
      'term': None,
      'total_count_mode': None}
 
@@ -237,17 +179,9 @@ class Criteria:
     >>> pp(my_criteria.get_dict())
     {'limit': None,
      'page': None,
-     'aggregations': [],
-     'associations': {},
      'filter': [{'type': 'equals', 'field': 'a', 'value': 'a'},
                 {'type': 'equals', 'field': 'b', 'value': 'b'},
                 {'type': 'equals', 'field': 'd', 'value': 'd'}],
-     'grouping': [],
-     'ids': [],
-     'includes': {},
-     'post_filter': [],
-     'query': [],
-     'sort': [],
      'term': None,
      'total_count_mode': None}
 
@@ -259,40 +193,24 @@ class Criteria:
     >>> pp(my_criteria.get_dict())
     {'limit': 5,
      'page': None,
-     'aggregations': [],
-     'associations': {},
-     'filter': [],
      'grouping': ['active'],
-     'ids': [],
-     'includes': {},
-     'post_filter': [],
-     'query': [],
-     'sort': [],
      'term': None,
      'total_count_mode': None}
     >>> # Grouping}}}
 
     >>> # ids{{{
     >>> # Test ids
+    >>> # note that the limit is automatically set to 3, which is for our paginated request
     >>> my_criteria = Criteria()
     >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
     >>> pp(my_criteria.get_dict())
-    {'limit': None,
+    {'limit': 3,
      'page': None,
-     'aggregations': [],
-     'associations': {},
-     'filter': [],
-     'grouping': [],
      'ids': ['012cd563cf8e4f0384eed93b5201cc98',
              '075fb241b769444bb72431f797fd5776',
              '090fcc2099794771935acf814e3fdb24'],
-     'includes': {},
-     'post_filter': [],
-     'query': [],
-     'sort': [],
      'term': None,
      'total_count_mode': None}
-
     >>> # ids}}}
 
     >>> # includes{{{
@@ -302,15 +220,7 @@ class Criteria:
     >>> pp(my_criteria.get_dict())
     {'limit': None,
      'page': None,
-     'aggregations': [],
-     'associations': {},
-     'filter': [],
-     'grouping': [],
-     'ids': [],
      'includes': {'product': ['id', 'name']},
-     'post_filter': [],
-     'query': [],
-     'sort': [],
      'term': None,
      'total_count_mode': None}
 
@@ -319,19 +229,7 @@ class Criteria:
     >>> # page&limit{{{
     >>> my_criteria = Criteria(page=1, limit=5)
     >>> pp(my_criteria.get_dict())
-    {'limit': 5,
-     'page': 1,
-     'aggregations': [],
-     'associations': {},
-     'filter': [],
-     'grouping': [],
-     'ids': [],
-     'includes': {},
-     'post_filter': [],
-     'query': [],
-     'sort': [],
-     'term': None,
-     'total_count_mode': None}
+    {'limit': 5, 'page': 1, 'term': None, 'total_count_mode': None}
 
     >>> # page&limit}}}
 
@@ -343,13 +241,6 @@ class Criteria:
     >>> pp(my_criteria.get_dict())
     {'limit': None,
      'page': None,
-     'aggregations': [],
-     'associations': {},
-     'filter': [],
-     'grouping': [],
-     'ids': [],
-     'includes': {},
-     'post_filter': [],
      'query': [{'score': 500,
                 'query': {'type': 'contains', 'field': 'name', 'value': 'Bronze'}},
                {'score': 500,
@@ -358,7 +249,6 @@ class Criteria:
                 'query': {'type': 'equals',
                           'field': 'manufacturerId',
                           'value': 'db3c17b1e572432eb4a4c881b6f9d68f'}}],
-     'sort': [],
      'term': None,
      'total_count_mode': None}
 
@@ -369,14 +259,6 @@ class Criteria:
     >>> pp(my_criteria.get_dict())
     {'limit': 5,
      'page': None,
-     'aggregations': [],
-     'associations': {},
-     'filter': [],
-     'grouping': [],
-     'ids': [],
-     'includes': {},
-     'post_filter': [],
-     'query': [],
      'sort': [{'field': 'name', 'order': 'ASC', 'naturalSorting': True},
               {'field': 'active', 'order': 'DESC', 'naturalSorting': None}],
      'term': None,
@@ -401,5 +283,22 @@ class Criteria:
     total_count_mode: Optional[int] = None
 
     def get_dict(self) -> Dict[str, Any]:
-        result = attrs.asdict(self)
+        result = attrs.asdict(self, filter=_is_not_empty)
+
+        if self.ids:
+            if self.limit:
+                raise ValueError('You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids')
+            else:
+                result["limit"] = len(self.ids)
+
         return result
+
+
+def _is_not_empty(attribute: Any, value: Any) -> bool:
+    """Filter out empty Lists and Dictionaries"""
+    if value == dict():
+        return False
+    elif value == list():
+        return False
+    else:
+        return True
