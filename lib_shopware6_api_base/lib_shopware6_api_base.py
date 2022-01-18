@@ -18,7 +18,6 @@ import requests_oauthlib
 try:
     from conf_shopware6_api_base_classes import *
     from lib_shopware6_api_base_criteria import *
-    from lib_shopware6_api_base_criteria import Criteria as Criteria
 except ImportError:  # pragma: no cover
     # Imports for Doctest
     from .conf_shopware6_api_base_classes import *  # type: ignore  # pragma: no cover
@@ -1178,7 +1177,7 @@ def _get_payload_dict(payload: PayLoad) -> Dict[str, Any]:
         payload = dict()
     elif _is_type_criteria(payload):
         payload = payload.get_dict()  # type: ignore
-    return payload
+    return payload  # type: ignore
 
 
 if __name__ == "__main__":

@@ -5,6 +5,10 @@ Changelog
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
 
+v2.0.3
+------
+2022-01-18: mypy type adjustments
+
 v2.0.2
 ------
 2022-01-09:

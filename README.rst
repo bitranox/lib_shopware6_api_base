@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v2.0.2 as of 2022-01-09 see `Changelog`_
+Version v2.0.3 as of 2022-01-18 see `Changelog`_
 
 |build_badge| |license| |pypi| |pypi-downloads| |black|
 
@@ -1876,6 +1876,10 @@ Changelog
 - new MAJOR version for incompatible API changes,
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
+
+v2.0.3
+------
+2022-01-18: mypy type adjustments
 
 v2.0.2
 ------
