@@ -804,12 +804,19 @@ class Shopware6AdminAPIClientBase(object):
         - should be used for machine-to-machine communications, such as CLI jobs or automated services
 
         see https://shopware.stoplight.io/docs/admin-api/ZG9jOjEwODA3NjQx-authentication-and-authorisation
-        setup at admin/settings/system/itegrations: "access_id" and "access_secret"
+        setup via Web Administration Interface > settings > system > integration: "access_id" and "access_secret"
+        or directly via URL : https://<fqdn>/admin#/sw/integration/index
+        were <fqdn> is the fully qualified domain name, like https://myshop.mydomain.com/admin#/sw/integration/index
 
         :parameter
             self.shopware_api_url   the api url, like : 'https://shop.yourdomain.com/api'
-            self.client_id          the client ID, set up at setup at admin/settings/system/itegrations/access_id
-            self.client_secret      the client secret, set up at setup at admin/settings/system/itegrations/access_secret
+            self.client_id          the client ID, setup via Web Administration Interface > settings > system > integration: "access_id"
+                                    or directly via URL : https://<fqdn>/admin#/sw/integration/index
+                                    were <fqdn> is the fully qualified domain name, like https://myshop.mydomain.com/admin#/sw/integration/index
+
+            self.client_secret      the client secret, setup via Web Administration Interface > settings > system > integration: "access_secret"
+                                    or directly via URL : https://<fqdn>/admin#/sw/integration/index
+                                    were <fqdn> is the fully qualified domain name, like https://myshop.mydomain.com/admin#/sw/integration/index
 
         :returns
             self.token

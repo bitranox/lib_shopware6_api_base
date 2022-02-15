@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v2.0.3 as of 2022-01-18 see `Changelog`_
+Version v2.0.4 as of 2022-02-15 see `Changelog`_
 
 |build_badge| |license| |pypi| |pypi-downloads| |black|
 
@@ -168,9 +168,11 @@ configuration
         - no refresh token
         - should be used for machine-to-machine communications, such as CLI jobs or automated services
         see https://shopware.stoplight.io/docs/admin-api/ZG9jOjEwODA3NjQx-authentication-and-authorisation
-        setup at admin/settings/system/itegrations: "access_id" and "access_secret"
+        setup via Web Administration Interface > settings > system > integration: "access_id" and "access_secret"
+        or directly via URL : https://<fqdn>/admin#/sw/integration/index
+        were <fqdn> is the fully qualified domain name, like https://myshop.mydomain.com/admin#/sw/integration/index
         """
-        # the client ID, set up at setup at admin/settings/system/itegrations/access_id
+        # the client ID, setup at Web Administration Interface > settings > system > integration > access_id
         client_id: str = ""
         # the client secret, set up at setup at admin/settings/system/itegrations/access_secret
         client_secret: str = ""
@@ -1876,6 +1878,10 @@ Changelog
 - new MAJOR version for incompatible API changes,
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
+
+v2.0.4
+------
+2022-02-15: documentation update
 
 v2.0.3
 ------
