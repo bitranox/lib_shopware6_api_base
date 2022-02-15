@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v2.0.4 as of 2022-02-15 see `Changelog`_
+Version v2.0.5 as of 2022-02-15 see `Changelog`_
 
 |build_badge| |license| |pypi| |pypi-downloads| |black|
 
@@ -174,7 +174,7 @@ configuration
         """
         # the client ID, setup at Web Administration Interface > settings > system > integration > access_id
         client_id: str = ""
-        # the client secret, set up at setup at admin/settings/system/itegrations/access_secret
+        # the client secret, setup at Web Administration Interface > settings > system > integration > access_secret
         client_secret: str = ""
 
         """
@@ -1878,6 +1878,10 @@ Changelog
 - new MAJOR version for incompatible API changes,
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
+
+v2.0.5
+------
+2022-02-15: documentation update
 
 v2.0.4
 ------

@@ -64,7 +64,7 @@ and are only used for testing purposes on the dockware container on github
 """
 # the client ID, setup at Web Administration Interface > settings > system > integration > access_id
 conf_shopware6_api_base.client_id = "SWIACWJOMUTXV1RMNGJUAKTUAA"  # noqa
-# the client secret, set up at setup at admin/settings/system/itegrations/access_secret
+# the client secret, setup at Web Administration Interface > settings > system > integration > access_secret
 conf_shopware6_api_base.client_secret = "UkhvUG1qdmpuMjFudGJCdG1Xc0xMbEt2ck9CQ2xDTUtXMUZHRUQ"  # noqa
 
 # which grant type to use can be either 'user_credentials'- or 'resource_owner'

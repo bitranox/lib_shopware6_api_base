@@ -40,7 +40,7 @@ class ConfShopware6ApiBase(object):
     """
     # the client ID, setup at Web Administration Interface > settings > system > integration > access_id
     client_id: str = ""
-    # the client secret, set up at setup at admin/settings/system/itegrations/access_secret
+    # the client secret, setup at Web Administration Interface > settings > system > integration > access_secret
     client_secret: str = ""
 
     """
