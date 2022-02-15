@@ -36,7 +36,7 @@ class ConfShopware6ApiBase(object):
     see https://shopware.stoplight.io/docs/admin-api/ZG9jOjEwODA3NjQx-authentication-and-authorisation
     setup via Web Administration Interface > settings > system > integration: "access_id" and "access_secret"
     or directly via URL : https://<fqdn>/admin#/sw/integration/index
-    were <fqdn> is the fully qualified domain name, like https://myshop.mydomain.com/admin#/sw/integration/index
+    were <fqdn> is the fully qualified domain name, like https://shop.yourdomain.com/admin#/sw/integration/index
     """
     # the client ID, setup at Web Administration Interface > settings > system > integration > access_id
     client_id: str = ""

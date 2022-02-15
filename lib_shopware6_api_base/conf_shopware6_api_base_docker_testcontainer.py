@@ -57,7 +57,7 @@ for Resource Owner Password Grant Type:
 see https://shopware.stoplight.io/docs/admin-api/ZG9jOjEwODA3NjQx-authentication-and-authorisation
 setup via Web Administration Interface > settings > system > integration: "access_id" and "access_secret"
 or directly via URL : https://<fqdn>/admin#/sw/integration/index
-were <fqdn> is the fully qualified domain name, like https://myshop.mydomain.com/admin#/sw/integration/index
+were <fqdn> is the fully qualified domain name, like https://shop.yourdomain.com/admin#/sw/integration/index
 
 those credentials will be created by the APi on the dockware container (fixed, hardcoded)
 and are only used for testing purposes on the dockware container on github
