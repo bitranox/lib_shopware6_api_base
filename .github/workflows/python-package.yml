@@ -225,4 +225,3 @@ jobs:
       shell: bash
       run: |
         lib_cicd_github deploy
-        ls -l ./dist

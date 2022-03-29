@@ -5,6 +5,10 @@ Changelog
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
 
+v2.0.6
+--------
+2022-03-29: remedy mypy Untyped decorator makes function "cli_info" untyped
+
 v2.0.5
 ------
 2022-02-15: documentation update
