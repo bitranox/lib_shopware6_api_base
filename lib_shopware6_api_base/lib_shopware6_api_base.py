@@ -693,22 +693,41 @@ class Shopware6AdminAPIClientBase(object):
 
         payload_dict = _get_payload_dict(payload)
 
+        retry = 2
+        while True:
+            try:
+                self._get_session()
+                response = self._request(http_method=http_method, request_url=request_url, payload=payload_dict)
+                retry = 0
+            except requests_oauthlib.TokenUpdated as exc:
+                self._token_saver(token=exc.token)
+                response = self._request(http_method=http_method, request_url=request_url, payload=payload_dict)
+                retry = 0
+            except TokenExpiredError:
+                if self._is_refreshable_token():  # pragma: no cover
+                    # this actually should never happen - just in case.
+                    logger.warning("something went wrong - the token should have been automatically refreshed. getting a new token")  # pragma: no cover
+                    self._get_access_token_by_user_credentials()  # pragma: no cover
+                else:
+                    self._get_access_token_by_resource_owner()
+                self._get_session()
+                response = self._request(http_method=http_method, request_url=request_url, payload=payload_dict)
+                retry = 0
+            except ShopwareAPIError as exc:
+                """
+                retry   : how often to retry - sometimes we get error code:9, status:401, The resource owner or authorization server denied the request,
+                detail: Access token could not be verified.
+                But it works if You try again, it seems to be an error in shopware API or race condition
+                """
+                retry = retry - 1
+                if not retry:
+                    raise exc
+
+            if not retry:
+                break
+
         try:
-            self._get_session()
-            response = self._request(http_method=http_method, request_url=request_url, payload=payload_dict)
-        except requests_oauthlib.TokenUpdated as exc:
-            self._token_saver(token=exc.token)
-            response = self._request(http_method=http_method, request_url=request_url, payload=payload_dict)
-        except TokenExpiredError:
-            if self._is_refreshable_token():  # pragma: no cover
-                # this actually should never happen - just in case.
-                logger.warning("something went wrong - the token should have been automatically refreshed. getting a new token")  # pragma: no cover
-                self._get_access_token_by_user_credentials()  # pragma: no cover
-            else:
-                self._get_access_token_by_resource_owner()
-            self._get_session()
-            response = self._request(http_method=http_method, request_url=request_url, payload=payload_dict)
-        try:
+            # noinspection PyUnboundLocalVariable
             response_dict = dict(response.json())
         except Exception:  # noqa
             response_dict = dict()

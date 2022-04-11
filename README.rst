@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v2.0.6 as of 2022-03-29 see `Changelog`_
+Version v2.0.7 as of 2022-04-12 see `Changelog`_
 
 |build_badge| |license| |pypi| |pypi-downloads| |black|
 
@@ -1877,6 +1877,14 @@ Changelog
 - new MAJOR version for incompatible API changes,
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
+
+v2.0.7
+--------
+2022-04-12: retry the request (experimental, but not harmful at all) if failed.
+  - issue https://github.com/bitranox/lib_shopware6_api/issues/1
+  - sometimes (seldom, after about 10 minutes connected) we got: "error code: 9, status: 401
+    The resource owner or authorization server denied the request, detail: Access token could not be verified."
+  - it seems to work when retry the request
 
 v2.0.6
 --------
