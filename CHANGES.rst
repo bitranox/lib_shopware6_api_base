@@ -5,6 +5,10 @@ Changelog
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
 
+v2.0.7.1
+--------
+2022-06-01: update github actions test matrix
+
 v2.0.7
 --------
 2022-04-12: retry the request (experimental, but not harmful at all) if failed.

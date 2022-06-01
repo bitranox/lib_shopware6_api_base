@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v2.0.7 as of 2022-04-12 see `Changelog`_
+Version v2.0.7.1 as of 2022-06-01 see `Changelog`_
 
 |build_badge| |license| |pypi| |pypi-downloads| |black|
 
@@ -68,7 +68,7 @@ automated tests, Travis Matrix, Documentation, Badges, etc. are managed with `Pi
 
 Python version required: 3.6.0 or newer
 
-tested on recent linux with python 3.6, 3.7, 3.8, 3.9, 3.10.0, pypy-3.8 - architectures: amd64
+tested on recent linux with python 3.6, 3.7, 3.8, 3.9, 3.10, pypy-3.8 - architectures: amd64
 
 `100% code coverage <https://codecov.io/gh/bitranox/lib_shopware6_api_base>`_, flake8 style checking ,mypy static type checking ,
 
@@ -1877,6 +1877,10 @@ Changelog
 - new MAJOR version for incompatible API changes,
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
+
+v2.0.7.1
+--------
+2022-06-01: update github actions test matrix
 
 v2.0.7
 --------
