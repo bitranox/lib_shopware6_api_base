@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v2.0.7.1 as of 2022-06-01 see `Changelog`_
+Version v2.0.7.2 as of 2022-06-02 see `Changelog`_
 
 |build_badge| |license| |pypi| |pypi-downloads| |black|
 
@@ -1877,6 +1877,10 @@ Changelog
 - new MAJOR version for incompatible API changes,
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
+
+v2.0.7.2
+---------
+2022-06-02: update to github actions checkout@v3 and setup-python@v3
 
 v2.0.7.1
 --------
