@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v2.0.7.2 as of 2022-06-02 see `Changelog`_
+Version v2.0.7.3 as of 2022-06-30 see `Changelog`_
 
 |build_badge| |license| |pypi| |pypi-downloads| |black|
 
@@ -1844,7 +1844,7 @@ following modules will be automatically installed :
 .. code-block:: bash
 
     ## Project Requirements
-    attrs
+    attrs>=21.3.0
     click
     cli_exit_tools
     lib_detect_testenv
@@ -1877,6 +1877,10 @@ Changelog
 - new MAJOR version for incompatible API changes,
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
+
+v2.0.7.3
+---------
+2022-06-30: specify correct "attr" version in requirements
 
 v2.0.7.2
 ---------
