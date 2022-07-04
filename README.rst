@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v2.0.8 as of 2022-07-04 see `Changelog`_
+Version v2.0.9 as of 2022-07-04 see `Changelog`_
 
 |build_badge| |license| |pypi| |pypi-downloads| |black|
 
@@ -525,7 +525,9 @@ Admin API
 
 .. code-block:: python
 
-        def request_patch(self, request_url: str, payload: PayLoad = None, content_type: str = "json") -> Dict[str, Any]:
+        def request_patch(
+            self, request_url: str, payload: PayLoad = None, content_type: str = "json", additional_query_params: Optional[Dict[str, Any]] = None
+        ) -> Dict[str, Any]:
             """
             makes a patch request
 
@@ -533,6 +535,7 @@ Admin API
                 request_url: API Url, without the common api prefix
                 payload : a dictionary or bytes
                 content_type: any valid content type like json, octet-stream, ...
+                additional_query_params: additional query parameters for patch, post, put, delete
 
             :returns
                 response_dict: dictionary with the response as dict
@@ -543,7 +546,9 @@ Admin API
 
 .. code-block:: python
 
-        def request_post(self, request_url: str, payload: PayLoad = None, content_type: str = "json") -> Dict[str, Any]:
+        def request_post(
+            self, request_url: str, payload: PayLoad = None, content_type: str = "json", additional_query_params: Optional[Dict[str, Any]] = None
+        ) -> Dict[str, Any]:
             """
             makes a post request
 
@@ -551,6 +556,7 @@ Admin API
                 request_url: API Url, without the common api prefix
                 payload : a dictionary or bytes
                 content_type: any valid content type like json, octet-stream, ...
+                additional_query_params: additional query parameters for patch, post, put, delete
 
             :returns
                 response_dict: dictionary with the response as dict
@@ -607,7 +613,9 @@ Admin API
 
 .. code-block:: python
 
-        def request_put(self, request_url: str, payload: PayLoad = None, content_type: str = "json") -> Dict[str, Any]:
+        def request_put(
+            self, request_url: str, payload: PayLoad = None, content_type: str = "json", additional_query_params: Optional[Dict[str, Any]] = None
+        ) -> Dict[str, Any]:
             """
             makes a put request
 
@@ -616,6 +624,7 @@ Admin API
                 request_url: API Url, without the common api prefix
                 payload : a dictionary or bytes
                 content_type: any valid content type like json, octet-stream, ...
+                additional_query_params: additional query parameters for patch, post, put, delete
 
             :returns
                 response_dict: dictionary with the response as dict
@@ -626,7 +635,7 @@ Admin API
 
 .. code-block:: python
 
-        def request_delete(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
+        def request_delete(self, request_url: str, payload: PayLoad = None, additional_query_params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
             """
             makes a delete request
 
@@ -634,6 +643,7 @@ Admin API
                 http_method: get, post, put, delete
                 request_url: API Url, without the common api prefix
                 payload : a dictionary
+                additional_query_params: additional query parameters for patch, post, put, delete
 
             :returns
                 response_dict: dictionary with the response as dict
@@ -1880,6 +1890,10 @@ Changelog
 - new MAJOR version for incompatible API changes,
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
+
+v2.0.9
+---------
+2022-07-04: support additional query parameters for patch, post ,put and delete requests
 
 v2.0.8
 ---------

@@ -5,6 +5,10 @@ Changelog
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
 
+v2.0.9
+---------
+2022-07-04: support additional query parameters for patch, post ,put and delete requests
+
 v2.0.8
 ---------
 2022-07-04: allow different content-types in order to be able to upload documents as octet-stream
