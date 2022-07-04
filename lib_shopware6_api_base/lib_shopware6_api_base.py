@@ -756,6 +756,7 @@ class Shopware6AdminAPIClientBase(object):
         :param payload:
         :return:
         """
+        request_data: Union[str, PayLoad]
         payload_dict = dict()
 
         if _is_type_bytes(payload):
