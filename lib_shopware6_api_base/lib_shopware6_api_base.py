@@ -1064,7 +1064,7 @@ class Shopware6AdminAPIClientBase(object):
         return f"{self.config.shopware_admin_api_url}/{request_url}"
 
     @lru_cache(maxsize=None)
-    def _get_headers(self, content_type="json") -> Dict[str, str]:
+    def _get_headers(self, content_type: str = "json") -> Dict[str, str]:
         """
         content_type can be any valid content type like json, octet-stream,
 
