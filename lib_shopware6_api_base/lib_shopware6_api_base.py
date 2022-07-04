@@ -459,37 +459,39 @@ class Shopware6AdminAPIClientBase(object):
         return response_dict
 
     # admin_api_patch{{{
-    def request_patch(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
+    def request_patch(self, request_url: str, payload: PayLoad = None, content_type: str = "json") -> Dict[str, Any]:
         """
         makes a patch request
 
         parameters:
             request_url: API Url, without the common api prefix
-            payload : a dictionary
+            payload : a dictionary or bytes
+            content_type: any valid content type like json, octet-stream, ...
 
         :returns
             response_dict: dictionary with the response as dict
 
         """
         # admin_api_patch}}}
-        response_dict = self._make_request(http_method="patch", request_url=request_url, payload=payload)
+        response_dict = self._make_request(http_method="patch", request_url=request_url, payload=payload, content_type=content_type)
         return response_dict
 
     # admin_api_post{{{
-    def request_post(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
+    def request_post(self, request_url: str, payload: PayLoad = None, content_type: str = "json") -> Dict[str, Any]:
         """
         makes a post request
 
         parameters:
             request_url: API Url, without the common api prefix
-            payload : a dictionary
+            payload : a dictionary or bytes
+            content_type: any valid content type like json, octet-stream, ...
 
         :returns
             response_dict: dictionary with the response as dict
 
         """
         # admin_api_post}}}
-        response_dict = self._make_request(http_method="post", request_url=request_url, payload=payload)
+        response_dict = self._make_request(http_method="post", request_url=request_url, payload=payload, content_type=content_type)
         return response_dict
 
     # admin_api_post_paginated{{{
@@ -539,21 +541,22 @@ class Shopware6AdminAPIClientBase(object):
         return response_dict
 
     # admin_api_put{{{
-    def request_put(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
+    def request_put(self, request_url: str, payload: PayLoad = None, content_type: str = "json") -> Dict[str, Any]:
         """
         makes a put request
 
         parameters:
             http_method: get, post, put, delete
             request_url: API Url, without the common api prefix
-            payload : a dictionary
+            payload : a dictionary or bytes
+            content_type: any valid content type like json, octet-stream, ...
 
         :returns
             response_dict: dictionary with the response as dict
 
         """
         # admin_api_put}}}
-        response_dict = self._make_request(http_method="put", request_url=request_url, payload=payload)
+        response_dict = self._make_request(http_method="put", request_url=request_url, payload=payload, content_type=content_type)
         return response_dict
 
     # admin_api_delete{{{
@@ -643,14 +646,16 @@ class Shopware6AdminAPIClientBase(object):
                 break
         return response_dict
 
-    def _make_request(self, http_method: str, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
+    def _make_request(self, http_method: str, request_url: str, payload: PayLoad = None, content_type: str = "json") -> Dict[str, Any]:
         """
         makes a request - creates and refresh a token and sessions as needed
 
         parameters:
             http_method: 'get', 'patch', 'post', 'put', 'delete'
             request_url: API Url, without the common api prefix
-            payload : a dictionary
+            payload : a dictionary , a criteria object, or bytes (for file uploads)
+            content_type: any valid content type like json, octet-stream, ...
+
 
         :returns
             response_dict: dictionary with the response as dict
@@ -691,17 +696,15 @@ class Shopware6AdminAPIClientBase(object):
 
         """
 
-        payload_dict = _get_payload_dict(payload)
-
         retry = 2
         while True:
             try:
                 self._get_session()
-                response = self._request(http_method=http_method, request_url=request_url, payload=payload_dict)
+                response = self._request(http_method=http_method, request_url=request_url, payload=payload, content_type=content_type)
                 retry = 0
             except requests_oauthlib.TokenUpdated as exc:
                 self._token_saver(token=exc.token)
-                response = self._request(http_method=http_method, request_url=request_url, payload=payload_dict)
+                response = self._request(http_method=http_method, request_url=request_url, payload=payload, content_type=content_type)
                 retry = 0
             except TokenExpiredError:
                 if self._is_refreshable_token():  # pragma: no cover
@@ -711,7 +714,7 @@ class Shopware6AdminAPIClientBase(object):
                 else:
                     self._get_access_token_by_resource_owner()
                 self._get_session()
-                response = self._request(http_method=http_method, request_url=request_url, payload=payload_dict)
+                response = self._request(http_method=http_method, request_url=request_url, payload=payload, content_type=content_type)
                 retry = 0
             except ShopwareAPIError as exc:
                 """
@@ -733,14 +736,15 @@ class Shopware6AdminAPIClientBase(object):
             response_dict = dict()
         return response_dict
 
-    def _request(self, http_method: str, request_url: str, payload: PayLoad) -> requests.Response:
+    def _request(self, http_method: str, request_url: str, payload: PayLoad, content_type: str = "json") -> requests.Response:
         """
         makes a request, needs a self.session to be set up and authenticated
 
         parameters:
             http_method: 'get', 'patch', 'post', 'put', 'delete'
             request_url: API Url, without the common api prefix
-            payload : a dictionary
+            payload : a dictionary , a criteria object, or bytes (for file uploads)
+            content_type: any valid content type like json, octet-stream, ...
 
         :returns
             response_dict: dictionary with the response as dict
@@ -752,19 +756,27 @@ class Shopware6AdminAPIClientBase(object):
         :param payload:
         :return:
         """
-        payload_dict = _get_payload_dict(payload)
+        payload_dict = dict()
+
+        if _is_type_bytes(payload):
+            request_data = payload
+            if content_type.lower() == "json":
+                raise ShopwareAPIError('Content type "json" does not match the payload data type "bytes"')
+        else:
+            payload_dict = _get_payload_dict(payload)
+            request_data = json.dumps(payload_dict)
 
         response: requests.Response = requests.Response()
-        headers = self._get_headers()
+        headers = self._get_headers(content_type=content_type)
 
         if http_method == "get":
             response = self.session.get(self._format_admin_api_url(request_url), params=payload_dict, headers=headers)
         elif http_method == "patch":
-            response = self.session.patch(self._format_admin_api_url(request_url), data=json.dumps(payload_dict), headers=headers)
+            response = self.session.patch(self._format_admin_api_url(request_url), data=request_data, headers=headers)
         elif http_method == "post":
-            response = self.session.post(self._format_admin_api_url(request_url), data=json.dumps(payload_dict), headers=headers)
+            response = self.session.post(self._format_admin_api_url(request_url), data=request_data, headers=headers)
         elif http_method == "put":
-            response = self.session.put(self._format_admin_api_url(request_url), data=json.dumps(payload_dict), headers=headers)
+            response = self.session.put(self._format_admin_api_url(request_url), data=request_data, headers=headers)
         elif http_method == "delete":
             response = self.session.delete(self._format_admin_api_url(request_url))
 
@@ -1052,15 +1064,26 @@ class Shopware6AdminAPIClientBase(object):
         return f"{self.config.shopware_admin_api_url}/{request_url}"
 
     @lru_cache(maxsize=None)
-    def _get_headers(self) -> Dict[str, str]:
+    def _get_headers(self, content_type="json") -> Dict[str, str]:
         """
+        content_type can be any valid content type like json, octet-stream,
+
         >>> my_api_client = Shopware6AdminAPIClientBase()
         >>> my_api_client._get_headers()    # noqa
         {'Content-Type': 'application/json', 'Accept': 'application/json'}
+
+        >>> my_api_client._get_headers(content_type='json')    # noqa
+        {'Content-Type': 'application/json', 'Accept': 'application/json'}
+
+        >>> my_api_client._get_headers(content_type='octet-stream')    # noqa
+        {'Content-Type': 'application/octet-stream', 'Accept': 'application/json'}
+
+        >>> # Teardown
         >>> my_api_client._get_headers.cache_clear()    # noqa
 
+
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = {"Content-Type": f"application/{content_type.lower()}", "Accept": "application/json"}
         return headers
 
 
@@ -1189,8 +1212,13 @@ def _is_local_docker_container_active() -> bool:
     return is_active
 
 
+def _is_type_bytes(payload: PayLoad) -> bool:
+    """True if the passed type is bytes"""
+    return type(payload).__name__ == "bytes"
+
+
 def _is_type_criteria(payload: PayLoad) -> bool:
-    """True if the passes type is Criteria"""
+    """True if the passed type is Criteria"""
     return type(payload).__name__ == "Criteria"
 
 
