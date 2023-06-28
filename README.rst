@@ -2,11 +2,11 @@ lib_shopware6_api_base
 ======================
 
 
-Version v2.0.9 as of 2022-07-04 see `Changelog`_
+Version v2.0.9 as of 2023-06-28 see `Changelog`_
 
 |build_badge| |license| |pypi| |pypi-downloads| |black|
 
-|codecov| |better_code| |cc_maintain| |cc_issues| |cc_coverage| |snyk|
+|codecov| |cc_maintain| |cc_issues| |cc_coverage| |snyk|
 
 
 
@@ -26,9 +26,6 @@ Version v2.0.9 as of 2022-07-04 see `Changelog`_
 
 .. |codecov| image:: https://img.shields.io/codecov/c/github/bitranox/lib_shopware6_api_base
    :target: https://codecov.io/gh/bitranox/lib_shopware6_api_base
-
-.. |better_code| image:: https://bettercodehub.com/edge/badge/bitranox/lib_shopware6_api_base?branch=master
-   :target: https://bettercodehub.com/results/bitranox/lib_shopware6_api_base
 
 .. |cc_maintain| image:: https://img.shields.io/codeclimate/maintainability-percentage/bitranox/lib_shopware6_api_base?label=CC%20maintainability
    :target: https://codeclimate.com/github/bitranox/lib_shopware6_api_base/maintainability
@@ -63,14 +60,14 @@ On github it can be only tested on linux, because we can not run a docker shopwa
 
 ----
 
-automated tests, Travis Matrix, Documentation, Badges, etc. are managed with `PizzaCutter <https://github
+automated tests, Github Actions, Documentation, Badges, etc. are managed with `PizzaCutter <https://github
 .com/bitranox/PizzaCutter>`_ (cookiecutter on steroids)
 
-Python version required: 3.6.0 or newer
+Python version required: 3.7.0 or newer
 
-tested on recent linux with python 3.6, 3.7, 3.8, 3.9, 3.10, pypy-3.8 - architectures: amd64
+tested on recent linux with python 3.7, 3.8, 3.9, 3.10, 3.11, pypy-3.9 - architectures: amd64
 
-`100% code coverage <https://codecov.io/gh/bitranox/lib_shopware6_api_base>`_, flake8 style checking ,mypy static type checking ,
+`100% code coverage <https://codeclimate.com/github/bitranox/lib_shopware6_api_base/test_coverage>`_, flake8 style checking ,mypy static type checking ,tested under `Linux <https://github.com/bitranox/lib_shopware6_api_base/actions/workflows/python-package.yml>`_, automatic daily builds and monitoring
 
 ----
 
@@ -95,6 +92,7 @@ Usage
 
 - `configuration`_
 - `methods`_
+- `headers`_
 - `Store API`_
 - `Admin API`_
 - `Query Syntax`_
@@ -233,6 +231,27 @@ PayLoad = Union[None, Dict[str, Any], Criteria]
 for the definition of "Criteria" see `Query Syntax`_
 
 
+headers
+-------
+
+.. code-block:: python
+
+    # Endpoints like /api/_action/sync require request specific custom headers to manipulate the api behavior
+    # see : https://shopware.stoplight.io/docs/admin-api/faf8f8e4e13a0-bulk-payloads#performance
+    # see : https://shopware.stoplight.io/docs/admin-api/0612cb5d960ef-bulk-edit-entities
+    # You may pass such custom header fields like that :
+    #      update_header_fields = HEADER_write_in_single_transactions | HEADER_index_asynchronously
+    #   or the same written explicitly:
+    #      update_heater_fields = {'single-operation' : 'true', 'indexing-behavior' : 'use-queue-indexing'}
+    #   and pass those "update_heater_fields" to the request method (mostly request_post, with endpoint "/api/_action/sync")
+    HEADER_write_in_separate_transactions: Dict[str, str] = {'single-operation' : 'false'}  # default
+    HEADER_write_in_single_transactions: Dict[str, str] = {'single-operation' : 'true'}
+    HEADER_index_synchronously: Dict[str, str] = {'indexing-behavior' : 'null'}  # default
+    HEADER_index_asynchronously: Dict[str, str] = {'indexing-behavior' : 'use-queue-indexing'}
+    HEADER_index_disabled: Dict[str, str] = {'indexing-behavior' : 'disable-indexing'}
+    HEADER_fail_on_error: Dict[str, str] = {'fail-on-error' : 'true'}  # default
+    HEADER_do_not_fail_on_error: Dict[str, str] = {'fail-on-error' : 'false'}
+
 Store API
 ---------
 
@@ -265,13 +284,14 @@ Store API
 
 .. code-block:: python
 
-        def request_get(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
+        def request_get(self, request_url: str, payload: PayLoad = None, update_header_fields: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
             """
             make a get request
 
             parameters:
                 request_url: API Url, without the common api prefix
                 payload : a dictionary
+                update_header_fields: allows to modify or add header fields
 
             :returns
                 response_dict: dictionary with the response as dict
@@ -294,13 +314,14 @@ Store API
 
 .. code-block:: python
 
-        def request_get_list(self, request_url: str, payload: PayLoad = None) -> List[Dict[str, Any]]:
+        def request_get_list(self, request_url: str, payload: PayLoad = None, update_header_fields: Optional[Dict[str, str]] = None) -> List[Dict[str, Any]]:
             """
             make a get request, expecting a list of dictionaries as result
 
             parameters:
                 request_url: API Url, without the common api prefix
                 payload : a dictionary
+                update_header_fields: allows to modify or add header fields
 
             :returns
                 List[response_dict]: a list of dictionaries
@@ -324,13 +345,14 @@ Store API
 
 .. code-block:: python
 
-        def request_patch(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
+        def request_patch(self, request_url: str, payload: PayLoad = None, update_header_fields: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
             """
             makes a patch request
 
             parameters:
                 request_url: API Url, without the common api prefix
                 payload : a dictionary
+                update_header_fields: allows to modify or add header fields
 
             :returns
                 response_dict: dictionary with the response as dict
@@ -341,13 +363,14 @@ Store API
 
 .. code-block:: python
 
-        def request_post(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
+        def request_post(self, request_url: str, payload: PayLoad = None, update_header_fields: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
             """
             make a post request
 
             parameters:
                 request_url: API Url, without the common api prefix
                 payload : a dictionary
+                update_header_fields: allows to modify or add header fields
 
             :returns
                 response_dict: dictionary with the response as dict
@@ -372,7 +395,7 @@ Store API
 
 .. code-block:: python
 
-        def request_put(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
+        def request_put(self, request_url: str, payload: PayLoad = None, update_header_fields: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
             """
             make a put request
 
@@ -380,6 +403,7 @@ Store API
                 http_method: get, post, put, delete
                 request_url: API Url, without the common api prefix
                 payload : a dictionary
+                update_header_fields: allows to modify or add header fields
 
             :returns
                 response_dict: dictionary with the response as dict
@@ -390,7 +414,7 @@ Store API
 
 .. code-block:: python
 
-        def request_delete(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
+        def request_delete(self, request_url: str, payload: PayLoad = None, update_header_fields: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
             """
             make a delete request
 
@@ -398,6 +422,7 @@ Store API
                 http_method: get, post, put, delete
                 request_url: API Url, without the common api prefix
                 payload : a dictionary
+                update_header_fields: allows to modify or add header fields
 
             :returns
                 response_dict: dictionary with the response as dict
@@ -431,13 +456,14 @@ Admin API
 
 .. code-block:: python
 
-        def request_get(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
+        def request_get(self, request_url: str, payload: PayLoad = None, update_header_fields: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
             """
             makes a get request
 
             parameters:
                 request_url: API Url, without the common api prefix
                 payload : a dictionary
+                update_header_fields: allows to modify or add header fields
 
             :returns
                 response_dict: dictionary with the response as dict
@@ -475,7 +501,7 @@ Admin API
 
 .. code-block:: python
 
-        def request_get_paginated(self, request_url: str, payload: PayLoad = None, junk_size: int = 100) -> Dict[str, Any]:
+        def request_get_paginated(self, request_url: str, payload: PayLoad = None, junk_size: int = 100, update_header_fields: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
             """
             get the data paginated - metadata 'total' and 'totalCountMode' will be updated
             the paginated request reads those records in junks of junk_size=100 for performance reasons.
@@ -487,6 +513,7 @@ Admin API
                 request_url: API Url, without the common api prefix
                 payload : a dictionary
                 limit : the junk size
+                update_header_fields: allows to modify or add header fields
 
             :returns
                 response_dict: dictionary with the response as dict
@@ -526,7 +553,7 @@ Admin API
 .. code-block:: python
 
         def request_patch(
-            self, request_url: str, payload: PayLoad = None, content_type: str = "json", additional_query_params: Optional[Dict[str, Any]] = None
+            self, request_url: str, payload: PayLoad = None, content_type: str = "json", additional_query_params: Optional[Dict[str, Any]] = None, update_header_fields: Optional[Dict[str, str]] = None
         ) -> Dict[str, Any]:
             """
             makes a patch request
@@ -536,6 +563,7 @@ Admin API
                 payload : a dictionary or bytes
                 content_type: any valid content type like json, octet-stream, ...
                 additional_query_params: additional query parameters for patch, post, put, delete
+                update_header_fields: allows to modify or add header fields
 
             :returns
                 response_dict: dictionary with the response as dict
@@ -547,7 +575,7 @@ Admin API
 .. code-block:: python
 
         def request_post(
-            self, request_url: str, payload: PayLoad = None, content_type: str = "json", additional_query_params: Optional[Dict[str, Any]] = None
+            self, request_url: str, payload: PayLoad = None, content_type: str = "json", additional_query_params: Optional[Dict[str, Any]] = None, update_header_fields: Optional[Dict[str, str]] = None
         ) -> Dict[str, Any]:
             """
             makes a post request
@@ -557,6 +585,7 @@ Admin API
                 payload : a dictionary or bytes
                 content_type: any valid content type like json, octet-stream, ...
                 additional_query_params: additional query parameters for patch, post, put, delete
+                update_header_fields: allows to modify or add header fields
 
             :returns
                 response_dict: dictionary with the response as dict
@@ -567,7 +596,7 @@ Admin API
 
 .. code-block:: python
 
-        def request_post_paginated(self, request_url: str, payload: PayLoad = None, junk_size: int = 100) -> Dict[str, Any]:
+        def request_post_paginated(self, request_url: str, payload: PayLoad = None, junk_size: int = 100, update_header_fields: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
             """
             post the data paginated - metadata 'total' and 'totalCountMode' will be updated
             if You expect a big number of records, the paginated request reads those records in junks of junk_size=100 for performance reasons.
@@ -579,6 +608,7 @@ Admin API
                 request_url: API Url, without the common api prefix
                 payload : a dictionary
                 junk_size : the junk size
+                update_header_fields: allows to modify or add header fields
 
             :returns
                 response_dict: dictionary with the response as dict
@@ -614,7 +644,7 @@ Admin API
 .. code-block:: python
 
         def request_put(
-            self, request_url: str, payload: PayLoad = None, content_type: str = "json", additional_query_params: Optional[Dict[str, Any]] = None
+            self, request_url: str, payload: PayLoad = None, content_type: str = "json", additional_query_params: Optional[Dict[str, Any]] = None, update_header_fields: Optional[Dict[str, str]] = None
         ) -> Dict[str, Any]:
             """
             makes a put request
@@ -625,6 +655,7 @@ Admin API
                 payload : a dictionary or bytes
                 content_type: any valid content type like json, octet-stream, ...
                 additional_query_params: additional query parameters for patch, post, put, delete
+                update_header_fields: allows to modify or add header fields
 
             :returns
                 response_dict: dictionary with the response as dict
@@ -635,7 +666,7 @@ Admin API
 
 .. code-block:: python
 
-        def request_delete(self, request_url: str, payload: PayLoad = None, additional_query_params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        def request_delete(self, request_url: str, payload: PayLoad = None, additional_query_params: Optional[Dict[str, Any]] = None, update_header_fields: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
             """
             makes a delete request
 
@@ -644,6 +675,7 @@ Admin API
                 request_url: API Url, without the common api prefix
                 payload : a dictionary
                 additional_query_params: additional query parameters for patch, post, put, delete
+                update_header_fields: allows to modify or add header fields
 
             :returns
                 response_dict: dictionary with the response as dict

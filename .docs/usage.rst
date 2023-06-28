@@ -1,5 +1,6 @@
 - `configuration`_
 - `methods`_
+- `headers`_
 - `Store API`_
 - `Admin API`_
 - `Query Syntax`_
@@ -86,6 +87,16 @@ methods which take the parameter 'payload', the payload is of following type :
     :end-before:  # payload_type}}}
 
 for the definition of "Criteria" see `Query Syntax`_
+
+
+headers
+-------
+
+
+.. include:: ..//lib_shopware6_api_base/lib_shopware6_api_base.py
+    :code: python
+    :start-after: # headers_for_bulk_operations{{{
+    :end-before:  # headers_for_bulk_operations}}}
 
 
 Store API

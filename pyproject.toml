@@ -1,7 +1,8 @@
 
 [tool.black]
 line-length = 160
-target-version = ['py36']
+#You should include all Python versions that you want your code to run under
+target-version = ['py37', 'py38', 'py39', 'py310', 'py311']
 # Note that you have to use single-quoted strings in TOML for regular expressions
 include = '\.pyi?$'
 exclude = '/(\.eggs|\.git|\.hg|\.mypy_cache|\.nox|\.tox|\.venv|_build|buck-out|build|dist)/'

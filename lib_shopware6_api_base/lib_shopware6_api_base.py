@@ -30,6 +30,24 @@ logger = logging.getLogger(__name__)
 PayLoad = Union[None, Dict[str, Any], Criteria]
 # payload_type}}}
 
+# headers_for_bulk_operations{{{
+# Endpoints like /api/_action/sync require request specific custom headers to manipulate the api behavior
+# see : https://shopware.stoplight.io/docs/admin-api/faf8f8e4e13a0-bulk-payloads#performance
+# see : https://shopware.stoplight.io/docs/admin-api/0612cb5d960ef-bulk-edit-entities
+# You may pass such custom header fields like that :
+#      update_header_fields = HEADER_write_in_single_transactions | HEADER_index_asynchronously
+#   or the same written explicitly:
+#      update_heater_fields = {'single-operation' : 'true', 'indexing-behavior' : 'use-queue-indexing'}
+#   and pass those "update_heater_fields" to the request method (mostly request_post, with endpoint "/api/_action/sync")
+HEADER_write_in_separate_transactions: Dict[str, str] = {"single-operation": "false"}  # default
+HEADER_write_in_single_transactions: Dict[str, str] = {"single-operation": "true"}
+HEADER_index_synchronously: Dict[str, str] = {"indexing-behavior": "null"}  # default
+HEADER_index_asynchronously: Dict[str, str] = {"indexing-behavior": "use-queue-indexing"}
+HEADER_index_disabled: Dict[str, str] = {"indexing-behavior": "disable-indexing"}
+HEADER_fail_on_error: Dict[str, str] = {"fail-on-error": "true"}  # default
+HEADER_do_not_fail_on_error: Dict[str, str] = {"fail-on-error": "false"}
+# headers_for_bulk_operations}}}
+
 
 # store_api{{{
 class Shopware6StoreFrontClientBase(object):
@@ -63,7 +81,7 @@ class Shopware6StoreFrontClientBase(object):
         self.config = config
 
     # store_api_delete{{{
-    def request_delete(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
+    def request_delete(self, request_url: str, payload: PayLoad = None, update_header_fields: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
         """
         make a delete request
 
@@ -71,23 +89,25 @@ class Shopware6StoreFrontClientBase(object):
             http_method: get, post, put, delete
             request_url: API Url, without the common api prefix
             payload : a dictionary
+            update_header_fields: allows to modify or add header fields
 
         :returns
             response_dict: dictionary with the response as dict
 
         """
         # store_api_delete}}}
-        response_dict = self._request_dict(http_method="delete", request_url=request_url, payload=payload)
+        response_dict = self._request_dict(http_method="delete", request_url=request_url, payload=payload, update_header_fields=update_header_fields)
         return response_dict
 
     # store_api_get{{{
-    def request_get(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
+    def request_get(self, request_url: str, payload: PayLoad = None, update_header_fields: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
         """
         make a get request
 
         parameters:
             request_url: API Url, without the common api prefix
             payload : a dictionary
+            update_header_fields: allows to modify or add header fields
 
         :returns
             response_dict: dictionary with the response as dict
@@ -106,17 +126,18 @@ class Shopware6StoreFrontClientBase(object):
 
         """
         # store_api_get}}}
-        response_dict = self._request_dict(http_method="get", request_url=request_url, payload=payload)
+        response_dict = self._request_dict(http_method="get", request_url=request_url, payload=payload, update_header_fields=update_header_fields)
         return response_dict
 
     # store_api_get_list{{{
-    def request_get_list(self, request_url: str, payload: PayLoad = None) -> List[Dict[str, Any]]:
+    def request_get_list(self, request_url: str, payload: PayLoad = None, update_header_fields: Optional[Dict[str, str]] = None) -> List[Dict[str, Any]]:
         """
         make a get request, expecting a list of dictionaries as result
 
         parameters:
             request_url: API Url, without the common api prefix
             payload : a dictionary
+            update_header_fields: allows to modify or add header fields
 
         :returns
             List[response_dict]: a list of dictionaries
@@ -136,34 +157,36 @@ class Shopware6StoreFrontClientBase(object):
 
         """
         # store_api_get_list}}}
-        response_l_dict = self._request_list(http_method="get", request_url=request_url, payload=payload)
+        response_l_dict = self._request_list(http_method="get", request_url=request_url, payload=payload, update_header_fields=update_header_fields)
         return response_l_dict
 
     # store_api_patch{{{
-    def request_patch(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
+    def request_patch(self, request_url: str, payload: PayLoad = None, update_header_fields: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
         """
         makes a patch request
 
         parameters:
             request_url: API Url, without the common api prefix
             payload : a dictionary
+            update_header_fields: allows to modify or add header fields
 
         :returns
             response_dict: dictionary with the response as dict
 
         """
         # store_api_patch}}}
-        response_dict = self._request_dict(http_method="patch", request_url=request_url, payload=payload)
+        response_dict = self._request_dict(http_method="patch", request_url=request_url, payload=payload, update_header_fields=update_header_fields)
         return response_dict
 
     # store_api_post{{{
-    def request_post(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
+    def request_post(self, request_url: str, payload: PayLoad = None, update_header_fields: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
         """
         make a post request
 
         parameters:
             request_url: API Url, without the common api prefix
             payload : a dictionary
+            update_header_fields: allows to modify or add header fields
 
         :returns
             response_dict: dictionary with the response as dict
@@ -185,11 +208,11 @@ class Shopware6StoreFrontClientBase(object):
         """
         # store_api_post}}}
 
-        response_dict = self._request_dict(http_method="post", request_url=request_url, payload=payload)
+        response_dict = self._request_dict(http_method="post", request_url=request_url, payload=payload, update_header_fields=update_header_fields)
         return response_dict
 
     # store_api_put{{{
-    def request_put(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
+    def request_put(self, request_url: str, payload: PayLoad = None, update_header_fields: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
         """
         make a put request
 
@@ -197,24 +220,28 @@ class Shopware6StoreFrontClientBase(object):
             http_method: get, post, put, delete
             request_url: API Url, without the common api prefix
             payload : a dictionary
+            update_header_fields: allows to modify or add header fields
 
         :returns
             response_dict: dictionary with the response as dict
 
         """
         # store_api_put}}}
-        response_dict = self._request_dict(http_method="put", request_url=request_url, payload=payload)
+        response_dict = self._request_dict(http_method="put", request_url=request_url, payload=payload, update_header_fields=update_header_fields)
         return response_dict
 
-    def _request_dict(self, http_method: str, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
+    def _request_dict(
+        self, http_method: str, request_url: str, payload: PayLoad = None, update_header_fields: Optional[Dict[str, str]] = None
+    ) -> Dict[str, Any]:
         """
         http requests a dictionary. raises ShopwareAPIError if the result is not a dictionary
         :param http_method:
         :param request_url:
         :param payload:
+        :param update_header_fields: allows to modify or add header fields
         :return:
         """
-        response = self._request(http_method=http_method, request_url=request_url, payload=payload)
+        response = self._request(http_method=http_method, request_url=request_url, payload=payload, update_header_fields=update_header_fields)
         if hasattr(response, "json"):  # pragma: no cover
             response_json = response.json()  # type: ignore
             if isinstance(response_json, list):
@@ -224,15 +251,18 @@ class Shopware6StoreFrontClientBase(object):
             response_dict = dict()  # pragma: no cover
         return response_dict
 
-    def _request_list(self, http_method: str, request_url: str, payload: PayLoad = None) -> List[Dict[str, Any]]:
+    def _request_list(
+        self, http_method: str, request_url: str, payload: PayLoad = None, update_header_fields: Optional[Dict[str, str]] = None
+    ) -> List[Dict[str, Any]]:
         """
         http requests a list of dictionaries. raises ShopwareAPIError if the result is not a list
         :param http_method:
         :param request_url:
         :param payload:
+        :param update_header_fields: allows to modify or add header fields
         :return:
         """
-        response = self._request(http_method=http_method, request_url=request_url, payload=payload)
+        response = self._request(http_method=http_method, request_url=request_url, payload=payload, update_header_fields=update_header_fields)
         if hasattr(response, "json"):  # pragma: no cover
             response_json = response.json()  # type: ignore
             if isinstance(response_json, dict):
@@ -242,7 +272,9 @@ class Shopware6StoreFrontClientBase(object):
             response_l_dict = list()  # pragma: no cover
         return response_l_dict
 
-    def _request(self, http_method: str, request_url: str, payload: PayLoad = None) -> Optional[requests.Response]:
+    def _request(
+        self, http_method: str, request_url: str, payload: PayLoad = None, update_header_fields: Optional[Dict[str, str]] = None
+    ) -> Optional[requests.Response]:
         """
         makes a request, using the conf.store_api_sw_access_key for authentication
 
@@ -250,6 +282,7 @@ class Shopware6StoreFrontClientBase(object):
             http_method: 'get', 'patch', 'post', 'put', 'delete'
             request_url: API Url, without the common api prefix
             payload : a dictionary
+            update_header_fields : allows to modify or add header fields
 
         :returns
             response_dict: dictionary with the response as dict
@@ -282,7 +315,7 @@ class Shopware6StoreFrontClientBase(object):
             payload = payload.get_dict()
         formatted_request_url = self._format_storefront_api_url(request_url)
         response: requests.Response = requests.Response()
-        headers = self._get_headers()
+        headers = self._get_headers(update_header_fields=update_header_fields)
 
         if http_method == "get":
             response = requests.request("GET", formatted_request_url, params=payload, headers=headers)
@@ -305,16 +338,26 @@ class Shopware6StoreFrontClientBase(object):
             raise ShopwareAPIError(f"{exc}{detailed_error}")
         return response
 
-    @lru_cache(maxsize=None)
-    def _get_headers(self) -> Dict[str, str]:
+    def _get_headers(self, update_header_fields: Optional[Dict[str, str]] = None) -> Dict[str, str]:
         """
+        parameters:
+            update_header_fields : allows to modify or add header fields
+
+        :returns the default header fields
+
+
         >>> my_api_client = Shopware6StoreFrontClientBase()
         >>> my_api_client._get_headers()
         {'Content-Type': 'application/json', 'Accept': 'application/json', 'sw-access-key': '...'}
-        >>> my_api_client._get_headers.cache_clear()
+        >>> my_api_client._get_headers(update_header_fields = {'single-operation': '1', 'indexing-behavior': 'use-queue-indexing'})
+        {'Content-Type': 'application/json', 'Accept': 'application/json', 'sw-access-key': '...', 'single-operation': '1', 'indexing-behavior': '...'}
+        >>> my_api_client._get_headers(update_header_fields = {'single-operation': '1', 'sw-access-key': 'xyz'})
+        {'Content-Type': 'application/json', 'Accept': 'application/json', 'sw-access-key': 'xyz', 'single-operation': '1'}
 
         """
         headers = {"Content-Type": "application/json", "Accept": "application/json", "sw-access-key": self.config.store_api_sw_access_key}
+        if update_header_fields is not None:
+            headers.update(update_header_fields)
         return headers
 
     def _format_storefront_api_url(self, request_url: str) -> str:
@@ -365,13 +408,14 @@ class Shopware6AdminAPIClientBase(object):
         self.session: requests_oauthlib.OAuth2Session = requests_oauthlib.OAuth2Session()
 
     # admin_api_get{{{
-    def request_get(self, request_url: str, payload: PayLoad = None) -> Dict[str, Any]:
+    def request_get(self, request_url: str, payload: PayLoad = None, update_header_fields: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
         """
         makes a get request
 
         parameters:
             request_url: API Url, without the common api prefix
             payload : a dictionary
+            update_header_fields: allows to modify or add header fields
 
         :returns
             response_dict: dictionary with the response as dict
@@ -405,11 +449,13 @@ class Shopware6AdminAPIClientBase(object):
 
         """
         # admin_api_get}}}
-        response_dict = self._make_request(http_method="get", request_url=request_url, payload=payload)
+        response_dict = self._make_request(http_method="get", request_url=request_url, payload=payload, update_header_fields=update_header_fields)
         return response_dict
 
     # admin_api_get_paginated{{{
-    def request_get_paginated(self, request_url: str, payload: PayLoad = None, junk_size: int = 100) -> Dict[str, Any]:
+    def request_get_paginated(
+        self, request_url: str, payload: PayLoad = None, junk_size: int = 100, update_header_fields: Optional[Dict[str, str]] = None
+    ) -> Dict[str, Any]:
         """
         get the data paginated - metadata 'total' and 'totalCountMode' will be updated
         the paginated request reads those records in junks of junk_size=100 for performance reasons.
@@ -421,6 +467,7 @@ class Shopware6AdminAPIClientBase(object):
             request_url: API Url, without the common api prefix
             payload : a dictionary
             limit : the junk size
+            update_header_fields: allows to modify or add header fields
 
         :returns
             response_dict: dictionary with the response as dict
@@ -455,12 +502,19 @@ class Shopware6AdminAPIClientBase(object):
 
         """
         # admin_api_get_paginated}}}
-        response_dict = self._request_paginated(http_method="get", request_url=request_url, payload=payload, junk_size=junk_size)
+        response_dict = self._request_paginated(
+            http_method="get", request_url=request_url, payload=payload, junk_size=junk_size, update_header_fields=update_header_fields
+        )
         return response_dict
 
     # admin_api_patch{{{
     def request_patch(
-        self, request_url: str, payload: PayLoad = None, content_type: str = "json", additional_query_params: Optional[Dict[str, Any]] = None
+        self,
+        request_url: str,
+        payload: PayLoad = None,
+        content_type: str = "json",
+        additional_query_params: Optional[Dict[str, Any]] = None,
+        update_header_fields: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
         """
         makes a patch request
@@ -470,6 +524,7 @@ class Shopware6AdminAPIClientBase(object):
             payload : a dictionary or bytes
             content_type: any valid content type like json, octet-stream, ...
             additional_query_params: additional query parameters for patch, post, put, delete
+            update_header_fields: allows to modify or add header fields
 
         :returns
             response_dict: dictionary with the response as dict
@@ -477,13 +532,23 @@ class Shopware6AdminAPIClientBase(object):
         """
         # admin_api_patch}}}
         response_dict = self._make_request(
-            http_method="patch", request_url=request_url, payload=payload, content_type=content_type, additional_query_params=additional_query_params
+            http_method="patch",
+            request_url=request_url,
+            payload=payload,
+            content_type=content_type,
+            additional_query_params=additional_query_params,
+            update_header_fields=update_header_fields,
         )
         return response_dict
 
     # admin_api_post{{{
     def request_post(
-        self, request_url: str, payload: PayLoad = None, content_type: str = "json", additional_query_params: Optional[Dict[str, Any]] = None
+        self,
+        request_url: str,
+        payload: PayLoad = None,
+        content_type: str = "json",
+        additional_query_params: Optional[Dict[str, Any]] = None,
+        update_header_fields: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
         """
         makes a post request
@@ -493,6 +558,7 @@ class Shopware6AdminAPIClientBase(object):
             payload : a dictionary or bytes
             content_type: any valid content type like json, octet-stream, ...
             additional_query_params: additional query parameters for patch, post, put, delete
+            update_header_fields: allows to modify or add header fields
 
         :returns
             response_dict: dictionary with the response as dict
@@ -500,12 +566,19 @@ class Shopware6AdminAPIClientBase(object):
         """
         # admin_api_post}}}
         response_dict = self._make_request(
-            http_method="post", request_url=request_url, payload=payload, content_type=content_type, additional_query_params=additional_query_params
+            http_method="post",
+            request_url=request_url,
+            payload=payload,
+            content_type=content_type,
+            additional_query_params=additional_query_params,
+            update_header_fields=update_header_fields,
         )
         return response_dict
 
     # admin_api_post_paginated{{{
-    def request_post_paginated(self, request_url: str, payload: PayLoad = None, junk_size: int = 100) -> Dict[str, Any]:
+    def request_post_paginated(
+        self, request_url: str, payload: PayLoad = None, junk_size: int = 100, update_header_fields: Optional[Dict[str, str]] = None
+    ) -> Dict[str, Any]:
         """
         post the data paginated - metadata 'total' and 'totalCountMode' will be updated
         if You expect a big number of records, the paginated request reads those records in junks of junk_size=100 for performance reasons.
@@ -517,6 +590,7 @@ class Shopware6AdminAPIClientBase(object):
             request_url: API Url, without the common api prefix
             payload : a dictionary
             junk_size : the junk size
+            update_header_fields: allows to modify or add header fields
 
         :returns
             response_dict: dictionary with the response as dict
@@ -547,12 +621,19 @@ class Shopware6AdminAPIClientBase(object):
 
         """
         # admin_api_post_paginated}}}
-        response_dict = self._request_paginated(http_method="post", request_url=request_url, payload=payload, junk_size=junk_size)
+        response_dict = self._request_paginated(
+            http_method="post", request_url=request_url, payload=payload, junk_size=junk_size, update_header_fields=update_header_fields
+        )
         return response_dict
 
     # admin_api_put{{{
     def request_put(
-        self, request_url: str, payload: PayLoad = None, content_type: str = "json", additional_query_params: Optional[Dict[str, Any]] = None
+        self,
+        request_url: str,
+        payload: PayLoad = None,
+        content_type: str = "json",
+        additional_query_params: Optional[Dict[str, Any]] = None,
+        update_header_fields: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
         """
         makes a put request
@@ -563,6 +644,7 @@ class Shopware6AdminAPIClientBase(object):
             payload : a dictionary or bytes
             content_type: any valid content type like json, octet-stream, ...
             additional_query_params: additional query parameters for patch, post, put, delete
+            update_header_fields: allows to modify or add header fields
 
         :returns
             response_dict: dictionary with the response as dict
@@ -570,12 +652,23 @@ class Shopware6AdminAPIClientBase(object):
         """
         # admin_api_put}}}
         response_dict = self._make_request(
-            http_method="put", request_url=request_url, payload=payload, content_type=content_type, additional_query_params=additional_query_params
+            http_method="put",
+            request_url=request_url,
+            payload=payload,
+            content_type=content_type,
+            additional_query_params=additional_query_params,
+            update_header_fields=update_header_fields,
         )
         return response_dict
 
     # admin_api_delete{{{
-    def request_delete(self, request_url: str, payload: PayLoad = None, additional_query_params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def request_delete(
+        self,
+        request_url: str,
+        payload: PayLoad = None,
+        additional_query_params: Optional[Dict[str, Any]] = None,
+        update_header_fields: Optional[Dict[str, str]] = None,
+    ) -> Dict[str, Any]:
         """
         makes a delete request
 
@@ -584,16 +677,25 @@ class Shopware6AdminAPIClientBase(object):
             request_url: API Url, without the common api prefix
             payload : a dictionary
             additional_query_params: additional query parameters for patch, post, put, delete
+            update_header_fields: allows to modify or add header fields
 
         :returns
             response_dict: dictionary with the response as dict
 
         """
         # admin_api_delete}}}
-        response_dict = self._make_request(http_method="delete", request_url=request_url, payload=payload, additional_query_params=additional_query_params)
+        response_dict = self._make_request(
+            http_method="delete",
+            request_url=request_url,
+            payload=payload,
+            additional_query_params=additional_query_params,
+            update_header_fields=update_header_fields,
+        )
         return response_dict
 
-    def _request_paginated(self, http_method: str, request_url: str, payload: PayLoad = None, junk_size: int = 100) -> Dict[str, Any]:
+    def _request_paginated(
+        self, http_method: str, request_url: str, payload: PayLoad = None, junk_size: int = 100, update_header_fields: Optional[Dict[str, str]] = None
+    ) -> Dict[str, Any]:
         """
         request the data paginated - metadata 'total' and 'totalCountMode' will be updated
         the paginated request reads those records in junks of junk_size=100 for performance reasons.
@@ -606,6 +708,7 @@ class Shopware6AdminAPIClientBase(object):
             request_url: API Url, without the common api prefix
             payload : a dictionary
             junk_size : the junk size
+            update_header_fields: allows to modify or add header fields
 
         :returns
             response_dict: dictionary with the response as dict
@@ -649,7 +752,7 @@ class Shopware6AdminAPIClientBase(object):
         while True:
             payload_dict["page"] = page
 
-            partial_data = self._make_request(http_method=http_method, request_url=request_url, payload=payload_dict)
+            partial_data = self._make_request(http_method=http_method, request_url=request_url, payload=payload_dict, update_header_fields=update_header_fields)
             if partial_data["data"]:
                 response_dict["data"] = response_dict["data"] + partial_data["data"]
                 page = page + 1
@@ -663,7 +766,13 @@ class Shopware6AdminAPIClientBase(object):
         return response_dict
 
     def _make_request(
-        self, http_method: str, request_url: str, payload: PayLoad = None, content_type: str = "json", additional_query_params: Optional[Dict[str, Any]] = None
+        self,
+        http_method: str,
+        request_url: str,
+        payload: PayLoad = None,
+        content_type: str = "json",
+        additional_query_params: Optional[Dict[str, Any]] = None,
+        update_header_fields: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
         """
         makes a request - creates and refresh a token and sessions as needed
@@ -674,6 +783,7 @@ class Shopware6AdminAPIClientBase(object):
             payload : a dictionary , a criteria object, or bytes (for file uploads)
             content_type: any valid content type like json, octet-stream, ...
             additional_query_params: additional query parameters for patch, post, put, delete
+            update_header_fields: allows to modify or add header fields
 
         :returns
             response_dict: dictionary with the response as dict
@@ -724,6 +834,7 @@ class Shopware6AdminAPIClientBase(object):
                     payload=payload,
                     content_type=content_type,
                     additional_query_params=additional_query_params,
+                    update_header_fields=update_header_fields,
                 )
                 retry = 0
             except requests_oauthlib.TokenUpdated as exc:
@@ -734,6 +845,7 @@ class Shopware6AdminAPIClientBase(object):
                     payload=payload,
                     content_type=content_type,
                     additional_query_params=additional_query_params,
+                    update_header_fields=update_header_fields,
                 )
                 retry = 0
             except TokenExpiredError:
@@ -750,6 +862,7 @@ class Shopware6AdminAPIClientBase(object):
                     payload=payload,
                     content_type=content_type,
                     additional_query_params=additional_query_params,
+                    update_header_fields=update_header_fields,
                 )
                 retry = 0
             except ShopwareAPIError as exc:
@@ -773,7 +886,13 @@ class Shopware6AdminAPIClientBase(object):
         return response_dict
 
     def _request(
-        self, http_method: str, request_url: str, payload: PayLoad, content_type: str = "json", additional_query_params: Optional[Dict[str, Any]] = None
+        self,
+        http_method: str,
+        request_url: str,
+        payload: PayLoad,
+        content_type: str = "json",
+        additional_query_params: Optional[Dict[str, Any]] = None,
+        update_header_fields: Optional[Dict[str, str]] = None,
     ) -> requests.Response:
         """
         makes a request, needs a self.session to be set up and authenticated
@@ -784,6 +903,7 @@ class Shopware6AdminAPIClientBase(object):
             payload : a dictionary , a criteria object, or bytes (for file uploads)
             content_type: any valid content type like json, octet-stream, ...
             additional_query_params: additional query parameters for patch, post, put, delete
+            update_header_fields: allows to modify or add header fields
 
         :returns
             response_dict: dictionary with the response as dict
@@ -806,7 +926,7 @@ class Shopware6AdminAPIClientBase(object):
             additional_query_params = dict()
 
         response: requests.Response = requests.Response()
-        headers = self._get_headers(content_type=content_type)
+        headers = self._get_headers(content_type=content_type, update_header_fields=update_header_fields)
 
         if http_method == "get":
             if additional_query_params:
@@ -1104,27 +1224,33 @@ class Shopware6AdminAPIClientBase(object):
         request_url = request_url.lstrip("/")
         return f"{self.config.shopware_admin_api_url}/{request_url}"
 
-    @lru_cache(maxsize=None)
-    def _get_headers(self, content_type: str = "json") -> Dict[str, str]:
+    @staticmethod
+    def _get_headers(content_type: str = "json", update_header_fields: Optional[Dict[str, str]] = None) -> Dict[str, str]:
         """
         content_type can be any valid content type like json, octet-stream,
 
+        parameters:
+            update_header_fields: allows to modify or add header fields
+
+
         >>> my_api_client = Shopware6AdminAPIClientBase()
-        >>> my_api_client._get_headers()    # noqa
+        >>> my_api_client._get_headers()
         {'Content-Type': 'application/json', 'Accept': 'application/json'}
 
-        >>> my_api_client._get_headers(content_type='json')    # noqa
+        >>> my_api_client._get_headers(content_type='json')
         {'Content-Type': 'application/json', 'Accept': 'application/json'}
 
-        >>> my_api_client._get_headers(content_type='octet-stream')    # noqa
+        >>> my_api_client._get_headers(content_type='octet-stream')
         {'Content-Type': 'application/octet-stream', 'Accept': 'application/json'}
 
-        >>> # Teardown
-        >>> my_api_client._get_headers.cache_clear()    # noqa
-
+        >>> my_update_header_fields = HEADER_index_asynchronously | HEADER_write_in_single_transactions
+        >>> my_api_client._get_headers(content_type='json', update_header_fields=my_update_header_fields)
+        {'Content-Type': 'application/json', 'Accept': 'application/json', 'indexing-behavior': 'use-queue-indexing', 'single-operation': 'true'}
 
         """
         headers = {"Content-Type": f"application/{content_type.lower()}", "Accept": "application/json"}
+        if update_header_fields is not None:
+            headers.update(update_header_fields)
         return headers
 
 

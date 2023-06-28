@@ -76,6 +76,7 @@ jobs:
       matrix:
         include:
           # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-software
+          # https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#available-versions-of-python-and-pypy
 
 
           - os: ubuntu-latest
@@ -117,13 +118,13 @@ jobs:
           - os: ubuntu-latest
             python-version: "3.10"
             env:
-              BUILD_DOCS: "True"
+              BUILD_DOCS: "False"
               DEPLOY_SDIST: "True"
               DEPLOY_WHEEL: "True"
               DEPLOY_TEST: "True"
               MYPY_DO_TESTS: "True"
               DO_SETUP_INSTALL: "True"
-              DO_SETUP_INSTALL_TEST: "True"
+              DO_SETUP_INSTALL_TEST: "False"
               DO_CLI_TEST: "True"
 
           - os: ubuntu-latest
@@ -139,7 +140,7 @@ jobs:
               DO_CLI_TEST: "True"
 
           - os: ubuntu-latest
-            python-version: "pypy-3.8"
+            python-version: "pypy-3.9"
             env:
               BUILD_DOCS: "False"
               DEPLOY_SDIST: "True"
@@ -158,6 +159,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Setting up Python ${{ matrix.python-version }}
+      # see: https://github.com/actions/setup-python
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}

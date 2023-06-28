@@ -5,6 +5,13 @@ Changelog
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
 
+v2.1.0
+---------
+2023-06-28:
+    - get rid of TRAVIS
+    - update github actions
+    - introduce additional header fields
+
 v2.0.9
 ---------
 2022-07-04: support additional query parameters for patch, post ,put and delete requests
