@@ -108,15 +108,15 @@ You may pass such custom header fields like that :
     update_header_fields = HEADER_write_in_single_transactions | HEADER_index_asynchronously
 
     #   or the same for python 3.7:
-    my_update_header_fields: dict = dict()
-    my_update_header_fields.update(HEADER_index_asynchronously)
-    my_update_header_fields.update(HEADER_write_in_single_transactions)
+    update_header_fields: dict = dict()
+    update_header_fields.update(HEADER_index_asynchronously)
+    update_header_fields.update(HEADER_write_in_single_transactions)
 
     #   or the same written explicitly for python 3.7:
     update_heater_fields = {'single-operation' : 'true', 'indexing-behavior' : 'use-queue-indexing'}
 
-    #   and pass those "update_heater_fields" to the request method
-    # (mostly request_post, with endpoint "/api/_action/sync")
+    # and pass those "update_heater_fields" to the request method parameter
+    # (mostly "request_post", with endpoint "/api/_action/sync")
 
 
 following header fields are pre-defined :
