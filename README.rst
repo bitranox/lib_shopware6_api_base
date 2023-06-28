@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v2.0.9 as of 2023-06-28 see `Changelog`_
+Version v2.1.0 as of 2023-06-28 see `Changelog`_
 
 |build_badge| |license| |pypi| |pypi-downloads| |black|
 
@@ -234,23 +234,44 @@ for the definition of "Criteria" see `Query Syntax`_
 headers
 -------
 
+
+Endpoints like ``/api/_action/sync`` require request specific custom headers to manipulate the api behavior
+
+see : `Bulk Payloads Performance`_  and `Bulk edit entities`_ in the Admin API Documentation
+
+.. _`Bulk Payloads Performance`: https://shopware.stoplight.io/docs/admin-api/faf8f8e4e13a0-bulk-payloads#performance
+.. _`Bulk edit entities`: https://shopware.stoplight.io/docs/admin-api/0612cb5d960ef-bulk-edit-entities
+
+You may pass such custom header fields like that :
+
+.. code-block::
+
+    # only for python version >= 3.8:
+    update_header_fields = HEADER_write_in_single_transactions | HEADER_index_asynchronously
+
+    #   or the same for python 3.7:
+    my_update_header_fields: dict = dict()
+    my_update_header_fields.update(HEADER_index_asynchronously)
+    my_update_header_fields.update(HEADER_write_in_single_transactions)
+
+    #   or the same written explicitly for python 3.7:
+    update_heater_fields = {'single-operation' : 'true', 'indexing-behavior' : 'use-queue-indexing'}
+
+    #   and pass those "update_heater_fields" to the request method
+    # (mostly request_post, with endpoint "/api/_action/sync")
+
+
+following header fields are pre-defined :
+
 .. code-block:: python
 
-    # Endpoints like /api/_action/sync require request specific custom headers to manipulate the api behavior
-    # see : https://shopware.stoplight.io/docs/admin-api/faf8f8e4e13a0-bulk-payloads#performance
-    # see : https://shopware.stoplight.io/docs/admin-api/0612cb5d960ef-bulk-edit-entities
-    # You may pass such custom header fields like that :
-    #      update_header_fields = HEADER_write_in_single_transactions | HEADER_index_asynchronously
-    #   or the same written explicitly:
-    #      update_heater_fields = {'single-operation' : 'true', 'indexing-behavior' : 'use-queue-indexing'}
-    #   and pass those "update_heater_fields" to the request method (mostly request_post, with endpoint "/api/_action/sync")
-    HEADER_write_in_separate_transactions: Dict[str, str] = {'single-operation' : 'false'}  # default
-    HEADER_write_in_single_transactions: Dict[str, str] = {'single-operation' : 'true'}
-    HEADER_index_synchronously: Dict[str, str] = {'indexing-behavior' : 'null'}  # default
-    HEADER_index_asynchronously: Dict[str, str] = {'indexing-behavior' : 'use-queue-indexing'}
-    HEADER_index_disabled: Dict[str, str] = {'indexing-behavior' : 'disable-indexing'}
-    HEADER_fail_on_error: Dict[str, str] = {'fail-on-error' : 'true'}  # default
-    HEADER_do_not_fail_on_error: Dict[str, str] = {'fail-on-error' : 'false'}
+    HEADER_write_in_separate_transactions: Dict[str, str] = {"single-operation": "false"}  # default
+    HEADER_write_in_single_transactions: Dict[str, str] = {"single-operation": "true"}
+    HEADER_index_synchronously: Dict[str, str] = {"indexing-behavior": "null"}  # default
+    HEADER_index_asynchronously: Dict[str, str] = {"indexing-behavior": "use-queue-indexing"}
+    HEADER_index_disabled: Dict[str, str] = {"indexing-behavior": "disable-indexing"}
+    HEADER_fail_on_error: Dict[str, str] = {"fail-on-error": "true"}  # default
+    HEADER_do_not_fail_on_error: Dict[str, str] = {"fail-on-error": "false"}
 
 Store API
 ---------
@@ -501,7 +522,9 @@ Admin API
 
 .. code-block:: python
 
-        def request_get_paginated(self, request_url: str, payload: PayLoad = None, junk_size: int = 100, update_header_fields: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+        def request_get_paginated(
+            self, request_url: str, payload: PayLoad = None, junk_size: int = 100, update_header_fields: Optional[Dict[str, str]] = None
+        ) -> Dict[str, Any]:
             """
             get the data paginated - metadata 'total' and 'totalCountMode' will be updated
             the paginated request reads those records in junks of junk_size=100 for performance reasons.
@@ -553,7 +576,12 @@ Admin API
 .. code-block:: python
 
         def request_patch(
-            self, request_url: str, payload: PayLoad = None, content_type: str = "json", additional_query_params: Optional[Dict[str, Any]] = None, update_header_fields: Optional[Dict[str, str]] = None
+            self,
+            request_url: str,
+            payload: PayLoad = None,
+            content_type: str = "json",
+            additional_query_params: Optional[Dict[str, Any]] = None,
+            update_header_fields: Optional[Dict[str, str]] = None,
         ) -> Dict[str, Any]:
             """
             makes a patch request
@@ -575,7 +603,12 @@ Admin API
 .. code-block:: python
 
         def request_post(
-            self, request_url: str, payload: PayLoad = None, content_type: str = "json", additional_query_params: Optional[Dict[str, Any]] = None, update_header_fields: Optional[Dict[str, str]] = None
+            self,
+            request_url: str,
+            payload: PayLoad = None,
+            content_type: str = "json",
+            additional_query_params: Optional[Dict[str, Any]] = None,
+            update_header_fields: Optional[Dict[str, str]] = None,
         ) -> Dict[str, Any]:
             """
             makes a post request
@@ -596,7 +629,9 @@ Admin API
 
 .. code-block:: python
 
-        def request_post_paginated(self, request_url: str, payload: PayLoad = None, junk_size: int = 100, update_header_fields: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+        def request_post_paginated(
+            self, request_url: str, payload: PayLoad = None, junk_size: int = 100, update_header_fields: Optional[Dict[str, str]] = None
+        ) -> Dict[str, Any]:
             """
             post the data paginated - metadata 'total' and 'totalCountMode' will be updated
             if You expect a big number of records, the paginated request reads those records in junks of junk_size=100 for performance reasons.
@@ -644,7 +679,12 @@ Admin API
 .. code-block:: python
 
         def request_put(
-            self, request_url: str, payload: PayLoad = None, content_type: str = "json", additional_query_params: Optional[Dict[str, Any]] = None, update_header_fields: Optional[Dict[str, str]] = None
+            self,
+            request_url: str,
+            payload: PayLoad = None,
+            content_type: str = "json",
+            additional_query_params: Optional[Dict[str, Any]] = None,
+            update_header_fields: Optional[Dict[str, str]] = None,
         ) -> Dict[str, Any]:
             """
             makes a put request
@@ -666,7 +706,13 @@ Admin API
 
 .. code-block:: python
 
-        def request_delete(self, request_url: str, payload: PayLoad = None, additional_query_params: Optional[Dict[str, Any]] = None, update_header_fields: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+        def request_delete(
+            self,
+            request_url: str,
+            payload: PayLoad = None,
+            additional_query_params: Optional[Dict[str, Any]] = None,
+            update_header_fields: Optional[Dict[str, str]] = None,
+        ) -> Dict[str, Any]:
             """
             makes a delete request
 
@@ -1922,6 +1968,13 @@ Changelog
 - new MAJOR version for incompatible API changes,
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
+
+v2.1.0
+---------
+2023-06-28:
+    - get rid of TRAVIS
+    - update github actions
+    - introduce additional header fields
 
 v2.0.9
 ---------
