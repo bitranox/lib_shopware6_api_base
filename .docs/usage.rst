@@ -93,6 +93,34 @@ headers
 -------
 
 
+Endpoints like ``/api/_action/sync`` require request specific custom headers to manipulate the api behavior
+
+see : `Bulk Payloads Performance`_  and `Bulk edit entities`_ in the Admin API Documentation
+
+.. _`Bulk Payloads Performance`: https://shopware.stoplight.io/docs/admin-api/faf8f8e4e13a0-bulk-payloads#performance
+.. _`Bulk edit entities`: https://shopware.stoplight.io/docs/admin-api/0612cb5d960ef-bulk-edit-entities
+
+You may pass such custom header fields like that :
+
+.. code-block::
+
+    # only for python version >= 3.8:
+    update_header_fields = HEADER_write_in_single_transactions | HEADER_index_asynchronously
+
+    #   or the same for python 3.7:
+    my_update_header_fields: dict = dict()
+    my_update_header_fields.update(HEADER_index_asynchronously)
+    my_update_header_fields.update(HEADER_write_in_single_transactions)
+
+    #   or the same written explicitly for python 3.7:
+    update_heater_fields = {'single-operation' : 'true', 'indexing-behavior' : 'use-queue-indexing'}
+
+    #   and pass those "update_heater_fields" to the request method
+    # (mostly request_post, with endpoint "/api/_action/sync")
+
+
+following header fields are pre-defined :
+
 .. include:: ..//lib_shopware6_api_base/lib_shopware6_api_base.py
     :code: python
     :start-after: # headers_for_bulk_operations{{{

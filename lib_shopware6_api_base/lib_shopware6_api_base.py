@@ -30,15 +30,16 @@ logger = logging.getLogger(__name__)
 PayLoad = Union[None, Dict[str, Any], Criteria]
 # payload_type}}}
 
-# headers_for_bulk_operations{{{
 # Endpoints like /api/_action/sync require request specific custom headers to manipulate the api behavior
 # see : https://shopware.stoplight.io/docs/admin-api/faf8f8e4e13a0-bulk-payloads#performance
 # see : https://shopware.stoplight.io/docs/admin-api/0612cb5d960ef-bulk-edit-entities
 # You may pass such custom header fields like that :
+#       only for python version >= 3.8 :
 #      update_header_fields = HEADER_write_in_single_transactions | HEADER_index_asynchronously
-#   or the same written explicitly:
+#   or the same written explicitly for python 3.7 :
 #      update_heater_fields = {'single-operation' : 'true', 'indexing-behavior' : 'use-queue-indexing'}
 #   and pass those "update_heater_fields" to the request method (mostly request_post, with endpoint "/api/_action/sync")
+# headers_for_bulk_operations{{{
 HEADER_write_in_separate_transactions: Dict[str, str] = {"single-operation": "false"}  # default
 HEADER_write_in_single_transactions: Dict[str, str] = {"single-operation": "true"}
 HEADER_index_synchronously: Dict[str, str] = {"indexing-behavior": "null"}  # default
@@ -349,10 +350,23 @@ class Shopware6StoreFrontClientBase(object):
         >>> my_api_client = Shopware6StoreFrontClientBase()
         >>> my_api_client._get_headers()
         {'Content-Type': 'application/json', 'Accept': 'application/json', 'sw-access-key': '...'}
+        >>> # add keys
         >>> my_api_client._get_headers(update_header_fields = {'single-operation': '1', 'indexing-behavior': 'use-queue-indexing'})
         {'Content-Type': 'application/json', 'Accept': 'application/json', 'sw-access-key': '...', 'single-operation': '1', 'indexing-behavior': '...'}
+        >>> # add and update keys
         >>> my_api_client._get_headers(update_header_fields = {'single-operation': '1', 'sw-access-key': 'xyz'})
         {'Content-Type': 'application/json', 'Accept': 'application/json', 'sw-access-key': 'xyz', 'single-operation': '1'}
+
+        >>> # only for python >= 3.8:
+        >>> # my_update_header_fields = HEADER_index_asynchronously | HEADER_write_in_single_transactions
+
+        >>> # for python <= 3.7:
+        >>> my_update_header_fields: dict = dict()
+        >>> my_update_header_fields.update(HEADER_index_asynchronously)
+        >>> my_update_header_fields.update(HEADER_write_in_single_transactions)
+        >>> my_api_client._get_headers(update_header_fields=my_update_header_fields)
+        {'Content-Type': 'application/json', 'Accept': 'application/json', 'sw-access-key': '...', 'indexing-behavior': 'use-queue-indexing',
+        'single-operation': 'true'}
 
         """
         headers = {"Content-Type": "application/json", "Accept": "application/json", "sw-access-key": self.config.store_api_sw_access_key}
@@ -1243,7 +1257,13 @@ class Shopware6AdminAPIClientBase(object):
         >>> my_api_client._get_headers(content_type='octet-stream')
         {'Content-Type': 'application/octet-stream', 'Accept': 'application/json'}
 
-        >>> my_update_header_fields = HEADER_index_asynchronously | HEADER_write_in_single_transactions
+        >>> # only for python >= 3.8:
+        >>> # my_update_header_fields = HEADER_index_asynchronously | HEADER_write_in_single_transactions
+
+        >>> # for python <= 3.7:
+        >>> my_update_header_fields: dict = dict()
+        >>> my_update_header_fields.update(HEADER_index_asynchronously)
+        >>> my_update_header_fields.update(HEADER_write_in_single_transactions)
         >>> my_api_client._get_headers(content_type='json', update_header_fields=my_update_header_fields)
         {'Content-Type': 'application/json', 'Accept': 'application/json', 'indexing-behavior': 'use-queue-indexing', 'single-operation': 'true'}
 
