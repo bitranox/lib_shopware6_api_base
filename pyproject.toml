@@ -10,7 +10,7 @@ authors = [
 ]
 description = "python3 base API client for shopware6"
 readme = "README.rst"
-requires-python = ">=3.7.0"
+requires-python = ">=3.8.0"
 keywords = [
 ]
 license = {text = "MIT"}
@@ -35,7 +35,7 @@ dependencies = [
     "requests",
     "requests_oauthlib",
 ]
-version = "v2.1.1"
+version = "v2.1.2"
 # seems to be not allowed anymore
 # zip-save = false
 
@@ -57,6 +57,7 @@ test = [
     "pytest",
     "pytest-cov",
     "pytest-runner",
+    "readme_renderer",
 ]
 
 [project.scripts]
