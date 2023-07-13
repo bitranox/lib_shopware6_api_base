@@ -11,3 +11,4 @@ pprint3x
 pytest
 pytest-cov
 pytest-runner
+readme_renderer

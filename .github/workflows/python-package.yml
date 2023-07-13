@@ -83,57 +83,52 @@ jobs:
             python-version: "3.7"
             env:
               BUILD_DOCS: "False"
-              DEPLOY_SDIST: "True"
-              DEPLOY_WHEEL: "True"
-              DEPLOY_TEST: "True"
+              BUILD: "True"  
+              BUILD_TEST: "True"
               MYPY_DO_TESTS: "True"
               DO_SETUP_INSTALL: "True"
-              DO_SETUP_INSTALL_TEST: "False"
+              DO_SETUP_INSTALL_TEST: "True"
               DO_CLI_TEST: "True"
 
           - os: ubuntu-latest
             python-version: "3.8"
             env:
               BUILD_DOCS: "False"
-              DEPLOY_SDIST: "True"
-              DEPLOY_WHEEL: "True"
-              DEPLOY_TEST: "True"
+              BUILD: "True"  
+              BUILD_TEST: "True"
               MYPY_DO_TESTS: "True"
               DO_SETUP_INSTALL: "True"
-              DO_SETUP_INSTALL_TEST: "False"
+              DO_SETUP_INSTALL_TEST: "True"
               DO_CLI_TEST: "True"
 
           - os: ubuntu-latest
             python-version: "3.9"
             env:
               BUILD_DOCS: "False"
-              DEPLOY_SDIST: "True"
-              DEPLOY_WHEEL: "True"
-              DEPLOY_TEST: "True"
+              BUILD: "True"  
+              BUILD_TEST: "True"
               MYPY_DO_TESTS: "True"
               DO_SETUP_INSTALL: "True"
-              DO_SETUP_INSTALL_TEST: "False"
+              DO_SETUP_INSTALL_TEST: "True"
               DO_CLI_TEST: "True"
 
           - os: ubuntu-latest
             python-version: "3.10"
             env:
               BUILD_DOCS: "False"
-              DEPLOY_SDIST: "True"
-              DEPLOY_WHEEL: "True"
-              DEPLOY_TEST: "True"
+              BUILD: "True"  
+              BUILD_TEST: "True"
               MYPY_DO_TESTS: "True"
               DO_SETUP_INSTALL: "True"
-              DO_SETUP_INSTALL_TEST: "False"
+              DO_SETUP_INSTALL_TEST: "True"
               DO_CLI_TEST: "True"
 
           - os: ubuntu-latest
             python-version: "3.11"
             env:
               BUILD_DOCS: "True"
-              DEPLOY_SDIST: "True"
-              DEPLOY_WHEEL: "True"
-              DEPLOY_TEST: "True"
+              BUILD: "True"  
+              BUILD_TEST: "True"
               MYPY_DO_TESTS: "True"
               DO_SETUP_INSTALL: "True"
               DO_SETUP_INSTALL_TEST: "True"
@@ -143,12 +138,11 @@ jobs:
             python-version: "pypy-3.9"
             env:
               BUILD_DOCS: "False"
-              DEPLOY_SDIST: "True"
-              DEPLOY_WHEEL: "True"
-              DEPLOY_TEST: "True"
+              BUILD: "True"  
+              BUILD_TEST: "True"
               MYPY_DO_TESTS: "False"
               DO_SETUP_INSTALL: "True"
-              DO_SETUP_INSTALL_TEST: "False"
+              DO_SETUP_INSTALL_TEST: "True"
               DO_CLI_TEST: "True"
 
 

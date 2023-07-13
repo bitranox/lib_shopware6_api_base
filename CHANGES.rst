@@ -5,6 +5,16 @@ Changelog
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
 
+v2.1.1
+---------
+2023-07-13:
+    - introduce PEP517 packaging standard
+    - introduce pyproject.toml build-system
+    - remove setup.cfg
+    - remove setup.py
+    - update black config
+    - clean ./tests/test_cli.py
+
 v2.1.0
 ---------
 2023-06-28:

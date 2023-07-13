@@ -168,9 +168,23 @@ function run_pytest() {
 }
 
 
-function install_pip_requirements_venv() {
+function run_pytest_venv() {
+  # run pytest, accepts additional pytest parameters like --disable-warnings and so on
+  my_banner "running pytest with settings from pytest.ini, mypy.ini and conftest.py"
+  if ! ~/venv/local/bin/python3 -m pytest "${project_root_dir}" "$@" --cov="${project_root_dir}" --cov-config=.coveragerc; then
+    my_banner_warning "pytest ERROR"
+    beep
+    sleep "${sleeptime_on_error}"
+    return 1
+  fi
+}
+
+
+# todo wip delete me
+function install_pip_requirements_venv_old() {
   # install the requirements in the virtual environment
   if test -f "${project_root_dir}/requirements.txt on virtual environment"; then
+    my_banner_warning "install_pip_requirements_venv is deprecated - setup_install_venv installiert requirements ohnehin"
     my_banner "pip install -r requirements.txt"
     install_clean_virtual_environment
     if ! ~/venv/local/bin/python3 -m pip install -r "${project_root_dir}/requirements.txt"; then
@@ -184,12 +198,12 @@ function install_pip_requirements_venv() {
 
 
 function setup_install_venv() {
-  if test -f "${project_root_dir}/setup.py"; then
-    my_banner "setup.py install on virtual environment"
+  if test -f "${project_root_dir}/pyproject.toml"; then
+    my_banner "install via pip and pyproject.toml on virtual environment"
     install_clean_virtual_environment
     cd "${project_root_dir}" || exit
-    if ! ~/venv/local/bin/python3 "${project_root_dir}/setup.py" install; then
-      my_banner_warning "setup.py install ERROR"
+    if ! ~/venv/local/bin/python3 -m pip install -e ".[test]"; then
+      my_banner_warning "pip install [test] ERROR"
       beep
       sleep "${sleeptime_on_error}"
       return 1
@@ -198,8 +212,10 @@ function setup_install_venv() {
 }
 
 
-function setup_test_venv() {
+# todo wip delete me
+function setup_test_venv_old() {
   if test -f "${project_root_dir}/setup.py"; then
+    my_banner_warning "setup_test_venv is deprecated - benutze run_pytest_venv"
     my_banner "setup.py test on virtual environment"
     install_clean_virtual_environment
     cd "${project_root_dir}" || exit
@@ -214,7 +230,6 @@ function setup_test_venv() {
 
 
 function test_commandline_interface_venv() {
-  # this will fail if rotek lib directory is in the path - keep this as a reminder
   my_banner "test commandline interface on virtual environment"
 
   clr_green "issuing command : /usr/local/bin/lib_shopware6_api_base --version"
@@ -240,8 +255,8 @@ function test_commandline_interface_venv_old() {
   fi
 }
 
-
-function test_setup_test_venv() {
+# todo wip delete me
+function test_setup_test_venv_old() {
   if test -f "${project_root_dir}/setup.py"; then
     my_banner "setup.py test"
     install_clean_virtual_environment
