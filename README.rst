@@ -1992,6 +1992,20 @@ v2.1.2
     - require minimum python 3.8
     - remove python 3.7 tests
 
+v2.1.3
+---------
+2023-07-14:
+    - add codeql badge
+    - move 3rd_party_stubs outside the src directory to ``./.3rd_party_stubs``
+    - add pypy 3.10 tests
+    - add python 3.12-dev tests
+
+v2.1.2
+---------
+2023-07-13:
+    - require minimum python 3.8
+    - remove python 3.7 tests
+
 v2.1.1
 ---------
 2023-07-13:
