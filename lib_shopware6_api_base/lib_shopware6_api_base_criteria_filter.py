@@ -128,7 +128,7 @@ class EqualsAnyFilter:
     >>> # Test Keyword param
     >>> my_filter = EqualsAnyFilter(field = 'productNumber', value = ["3fed029475fa4d4585f3a119886e0eb1", "77d26d011d914c3aa2c197c81241a45b"])
     >>> pp(attrs.asdict(my_filter))
-    {'type': 'equals',
+    {'type': 'equalsAny',
      'field': 'productNumber',
      'value': ['3fed029475fa4d4585f3a119886e0eb1',
                '77d26d011d914c3aa2c197c81241a45b']}
@@ -136,7 +136,7 @@ class EqualsAnyFilter:
     >>> # Test positional param
     >>> my_filter = EqualsAnyFilter('productNumber', ["3fed029475fa4d4585f3a119886e0eb1", "77d26d011d914c3aa2c197c81241a45b"])
     >>> pp(attrs.asdict(my_filter))
-    {'type': 'equals',
+    {'type': 'equalsAny',
      'field': 'productNumber',
      'value': ['3fed029475fa4d4585f3a119886e0eb1',
                '77d26d011d914c3aa2c197c81241a45b']}
@@ -145,7 +145,7 @@ class EqualsAnyFilter:
 
     # EqualsAnyFilter}}}
 
-    type: str = attrs.field(init=False, default="equals")
+    type: str = attrs.field(init=False, default="equalsAny")
     field: str = attrs.field(init=True, validator=attrs.validators.instance_of(str))
     value: List[str] = attrs.field(init=True, factory=list)
 

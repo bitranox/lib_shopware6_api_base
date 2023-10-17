@@ -6,7 +6,7 @@ codecov
 coloredlogs
 coverage
 flake8
-mypy ; platform_python_implementation != "PyPy"
+mypy
 pprint3x
 pytest
 pytest-cov

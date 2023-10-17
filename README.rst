@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v2.1.3 as of 2023-07-14 see `Changelog`_
+Version v2.1.4 as of 2023-10-18 see `Changelog`_
 
 |build_badge| |codeql| |license| |pypi|
 |pypi-downloads| |black| |codecov| |cc_maintain| |cc_issues| |cc_coverage| |snyk|
@@ -26,7 +26,10 @@ Version v2.1.3 as of 2023-07-14 see `Changelog`_
 .. |pypi| image:: https://img.shields.io/pypi/status/lib-shopware6-api-base?label=PyPI%20Package
    :target: https://badge.fury.io/py/lib_shopware6_api_base
 
-.. |codecov| image:: https://img.shields.io/codecov/c/github/bitranox/lib_shopware6_api_base
+.. badge until 2023-10-08:
+.. https://img.shields.io/codecov/c/github/bitranox/lib_shopware6_api_base
+.. badge from 2023-10-08:
+.. |codecov| image:: https://codecov.io/gh/bitranox/lib_shopware6_api_base/graph/badge.svg
    :target: https://codecov.io/gh/bitranox/lib_shopware6_api_base
 
 .. |cc_maintain| image:: https://img.shields.io/codeclimate/maintainability-percentage/bitranox/lib_shopware6_api_base?label=CC%20maintainability
@@ -1373,7 +1376,7 @@ back to `Filters`_
         >>> # Test Keyword param
         >>> my_filter = EqualsAnyFilter(field = 'productNumber', value = ["3fed029475fa4d4585f3a119886e0eb1", "77d26d011d914c3aa2c197c81241a45b"])
         >>> pp(attrs.asdict(my_filter))
-        {'type': 'equals',
+        {'type': 'equalsAny',
          'field': 'productNumber',
          'value': ['3fed029475fa4d4585f3a119886e0eb1',
                    '77d26d011d914c3aa2c197c81241a45b']}
@@ -1381,7 +1384,7 @@ back to `Filters`_
         >>> # Test positional param
         >>> my_filter = EqualsAnyFilter('productNumber', ["3fed029475fa4d4585f3a119886e0eb1", "77d26d011d914c3aa2c197c81241a45b"])
         >>> pp(attrs.asdict(my_filter))
-        {'type': 'equals',
+        {'type': 'equalsAny',
          'field': 'productNumber',
          'value': ['3fed029475fa4d4585f3a119886e0eb1',
                    '77d26d011d914c3aa2c197c81241a45b']}
@@ -1977,6 +1980,11 @@ Changelog
 - new MAJOR version for incompatible API changes,
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
+
+v2.1.4
+---------
+2023-10-18:
+    -correct EqualsAnyFilter, thanks to Patrik Hofmann for finding that bug.
 
 v2.1.3
 ---------

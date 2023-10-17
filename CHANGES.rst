@@ -5,6 +5,11 @@ Changelog
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
 
+v2.1.4
+---------
+2023-10-18:
+    -correct EqualsAnyFilter, thanks to Patrik Hofmann for finding that bug.
+
 v2.1.3
 ---------
 2023-07-14:
