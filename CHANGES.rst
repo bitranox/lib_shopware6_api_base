@@ -8,7 +8,7 @@ Changelog
 v2.1.4
 ---------
 2023-10-18:
-    -correct EqualsAnyFilter, thanks to Patrik Hofmann for finding that bug.
+    - correct EqualsAnyFilter, thanks to Patrik Hofmann for finding that bug.
 
 v2.1.3
 ---------
