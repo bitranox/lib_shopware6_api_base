@@ -9,8 +9,9 @@ v2.1.7
 ---------
 2023-10-18:
     - validator for "Criteria.ids" and "Criteria.limit"
-      if "Criteria.ids" are passed, set limits to the number of ids and page to 1
-      bump up coverage a bit
+      if "Criteria.ids" are passed, set "limits" to the number of ids
+      prevent that "Criteria.limits" and "Criteria.ids" are set simultaneous
+      bump up coverage
 
 v2.1.6
 ---------
