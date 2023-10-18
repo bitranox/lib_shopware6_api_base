@@ -207,7 +207,16 @@ class Criteria:
     >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
     Traceback (most recent call last):
         ...
-    ValueError: You can use either "limit" or "ids", but not both, ...
+    ValueError: You can use either "limit/page" or "ids", but not both, ...
+
+    >>> # Test ids with a page already set, which should fail
+    >>> # You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids
+    >>> my_criteria = Criteria()
+    >>> my_criteria.page = 1
+    >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
+    Traceback (most recent call last):
+        ...
+    ValueError: You can use either "limit/page" or "ids", but not both, ...
 
     >>> # Test to set limit after ids are passed, which should fail
     >>> # You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids
@@ -216,7 +225,16 @@ class Criteria:
     >>> my_criteria.limit = 2
     Traceback (most recent call last):
         ...
-    ValueError: You can use either "limit" or "ids", but not both, ...
+    ValueError: You can use either "limit/page" or "ids", but not both, ...
+
+    >>> # Test to set page after ids are passed, which should fail
+    >>> # You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids
+    >>> my_criteria = Criteria()
+    >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
+    >>> my_criteria.page = 3
+    Traceback (most recent call last):
+        ...
+    ValueError: You can use either "limit/page" or "ids", but not both, ...
 
     >>> # ids}}}
 
@@ -293,7 +311,13 @@ class Criteria:
     @limit.validator      # noqa
     def check_if_ids_are_set(self, attribute: attrs.Attribute, value: int) -> None:     # type: ignore  # noqa
         if value is not None and len(self.ids):
-            raise ValueError('You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids')
+            raise ValueError('You can use either "limit/page" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids')
+
+
+    @page.validator      # noqa
+    def check_if_ids_are_set(self, attribute: attrs.Attribute, value: int) -> None:     # type: ignore  # noqa
+        if value is not None and len(self.ids):
+            raise ValueError('You can use either "limit/page" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids')
 
 
     @ids.validator      # noqa
@@ -302,8 +326,8 @@ class Criteria:
         set "self.limit" and "self.page" if ids are given.
         """
         if len(value):
-            if self.limit:
-                raise ValueError('You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids')
+            if self.limit or self.page:
+                raise ValueError('You can use either "limit/page" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids')
             self.limit = len(value)
             self.page = 1
 
