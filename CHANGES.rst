@@ -10,6 +10,7 @@ v2.1.7
 2023-10-18:
     - validator for "Criteria.ids" and "Criteria.limit"
       if "Criteria.ids" are passed, set limits to the number of ids and page to 1
+      bump up coverage a bit
 
 v2.1.6
 ---------

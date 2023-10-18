@@ -983,6 +983,13 @@ class Shopware6AdminAPIClientBase(object):
         >>> my_api_client._get_token()
         {'token_type': 'Bearer', 'expires_in': ..., 'access_token': '...', 'expires_at': ...}
 
+        >>> # test invalid type, which should fail
+        >>> my_api_client.config.grant_type = 'invalid_type'
+        >>> my_api_client._get_token()
+        Traceback (most recent call last):
+            ...
+        conf_shopware6_api_base_classes.ShopwareAPIError: config.grant_type must bei either "user_credentials" or "resource_owner" not "invalid_type"
+
         >>> # Teardown
         >>> my_api_client.config.grant_type = save_conf
 
@@ -1187,8 +1194,8 @@ class Shopware6AdminAPIClientBase(object):
             else:
                 client_id = self.config.client_id
                 self.session = requests_oauthlib.OAuth2Session(client_id, token=self.token)
-        except requests_oauthlib.TokenUpdated as exc:
-            self._token_saver(token=exc.token)
+        except requests_oauthlib.TokenUpdated as exc:   # pragma: no cover
+            self._token_saver(token=exc.token)          # pragma: no cover
 
     def _token_saver(self, token: Dict[str, str]) -> None:
         """

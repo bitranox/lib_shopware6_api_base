@@ -886,16 +886,7 @@ a search criteria follows the following schema:
         >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
         Traceback (most recent call last):
             ...
-        ValueError: You can use either "limit/page" or "ids", but not both, ...
-
-        >>> # Test ids with a page already set, which should fail
-        >>> # You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids
-        >>> my_criteria = Criteria()
-        >>> my_criteria.page = 1
-        >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
-        Traceback (most recent call last):
-            ...
-        ValueError: You can use either "limit/page" or "ids", but not both, ...
+        ValueError: You can use either "limit" or "ids", but not both, ...
 
         >>> # Test to set limit after ids are passed, which should fail
         >>> # You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids
@@ -904,16 +895,7 @@ a search criteria follows the following schema:
         >>> my_criteria.limit = 2
         Traceback (most recent call last):
             ...
-        ValueError: You can use either "limit/page" or "ids", but not both, ...
-
-        >>> # Test to set page after ids are passed, which should fail
-        >>> # You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids
-        >>> my_criteria = Criteria()
-        >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
-        >>> my_criteria.page = 3
-        Traceback (most recent call last):
-            ...
-        ValueError: You can use either "limit/page" or "ids", but not both, ...
+        ValueError: You can use either "limit" or "ids", but not both, ...
 
         >>> # ids}}}
 
@@ -1636,16 +1618,7 @@ Please note that as soon as You use ids, limit and page does not apply anymore !
         >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
         Traceback (most recent call last):
             ...
-        ValueError: You can use either "limit/page" or "ids", but not both, ...
-
-        >>> # Test ids with a page already set, which should fail
-        >>> # You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids
-        >>> my_criteria = Criteria()
-        >>> my_criteria.page = 1
-        >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
-        Traceback (most recent call last):
-            ...
-        ValueError: You can use either "limit/page" or "ids", but not both, ...
+        ValueError: You can use either "limit" or "ids", but not both, ...
 
         >>> # Test to set limit after ids are passed, which should fail
         >>> # You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids
@@ -1654,16 +1627,7 @@ Please note that as soon as You use ids, limit and page does not apply anymore !
         >>> my_criteria.limit = 2
         Traceback (most recent call last):
             ...
-        ValueError: You can use either "limit/page" or "ids", but not both, ...
-
-        >>> # Test to set page after ids are passed, which should fail
-        >>> # You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids
-        >>> my_criteria = Criteria()
-        >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
-        >>> my_criteria.page = 3
-        Traceback (most recent call last):
-            ...
-        ValueError: You can use either "limit/page" or "ids", but not both, ...
+        ValueError: You can use either "limit" or "ids", but not both, ...
 
         >>>
 
@@ -1988,6 +1952,7 @@ v2.1.7
 2023-10-18:
     - validator for "Criteria.ids" and "Criteria.limit"
       if "Criteria.ids" are passed, set limits to the number of ids and page to 1
+      bump up coverage a bit
 
 v2.1.6
 ---------
