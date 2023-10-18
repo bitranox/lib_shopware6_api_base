@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional, Union     # noqa
 
 # EXT
 import attrs    # noqa
+import attrs.validators
 
 # proj
 try:
@@ -12,7 +13,7 @@ try:
     from lib_shopware6_api_base_criteria_sorting import *
 except ImportError:  # pragma: no cover
     # Imports for Doctest
-    from .lib_shopware6_api_base_helpers import pprint_attrs
+    from .lib_shopware6_api_base_helpers import pprint_attrs  # type: ignore  # pragma: no cover
     from .lib_shopware6_api_base_criteria_aggregation import *  # type: ignore  # pragma: no cover
     from .lib_shopware6_api_base_criteria_filter import *  # type: ignore  # pragma: no cover
     from .lib_shopware6_api_base_criteria_sorting import *  # type: ignore  # pragma: no cover
@@ -40,6 +41,7 @@ class Query:
     ...    query=[Query(score=500, query=ContainsFilter(field='name', value='Bronze')),
     ...           Query(score=500, query=EqualsFilter(field='active', value='true')),
     ...           Query(score=100, query=EqualsFilter(field='manufacturerId', value='db3c17b1e572432eb4a4c881b6f9d68f'))])
+
     >>> pprint_attrs(my_criteria)
     {'limit': None,
      'page': None,
@@ -85,7 +87,6 @@ class Criteria:
     term          Optional[str]                        text search on all records based on their data model and weighting
                                                        Don't use term parameters together with query parameters.
     total-count-mode    Optional[int]                  Defines whether a total must be determined
-
 
 
     >>> # Test empty
@@ -187,16 +188,36 @@ class Criteria:
 
     >>> # ids{{{
     >>> # Test ids
+    >>> # note that the limit is automatically set to 3, and page to 1, which is for our paginated request
     >>> my_criteria = Criteria()
     >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
     >>> pprint_attrs(my_criteria)
-    {'limit': None,
-     'page': None,
+    {'limit': 3,
+     'page': 1,
      'ids': ['012cd563cf8e4f0384eed93b5201cc98',
              '075fb241b769444bb72431f797fd5776',
              '090fcc2099794771935acf814e3fdb24'],
      'term': None,
      'total_count_mode': None}
+
+    >>> # Test ids with a limit already set, which should fail
+    >>> # You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids
+    >>> my_criteria = Criteria()
+    >>> my_criteria.limit = 5
+    >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
+    Traceback (most recent call last):
+        ...
+    ValueError: You can use either "limit" or "ids", but not both, ...
+
+    >>> # Test to set limit after ids are passed, which should fail
+    >>> # You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids
+    >>> my_criteria = Criteria()
+    >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
+    >>> my_criteria.limit = 2
+    Traceback (most recent call last):
+        ...
+    ValueError: You can use either "limit" or "ids", but not both, ...
+
     >>> # ids}}}
 
     >>> # includes{{{
@@ -254,8 +275,8 @@ class Criteria:
 
     # criteria}}}
 
-    limit: Optional[int] = None
-    page: Optional[int] = None
+    limit: Optional[int] = attrs.field(default=None)
+    page: Optional[int] = attrs.field(default=None)
     aggregations: List["AggregationType"] = attrs.field(factory=list)
     associations: Dict[str, "Criteria"] = attrs.field(factory=dict)
     filter: List[FilterType] = attrs.field(factory=list)
@@ -268,18 +289,29 @@ class Criteria:
     term: Optional[str] = None
     total_count_mode: Optional[int] = None
 
+
+    @limit.validator      # noqa
+    def check_if_ids_are_set(self, attribute: attrs.Attribute, value: int) -> None:
+        if value is not None and len(self.ids):
+            raise ValueError('You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids')
+
+
+    @ids.validator      # noqa
+    def set_limit_to_ids_length(self, attribute: attrs.Attribute, value: List[str]) -> None:
+        """
+        set self.limit and self.page if ids are given.
+        """
+        if len(value):
+            if self.limit:
+                raise ValueError('You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids')
+            self.limit = len(value)
+            self.page = 1
+
     def get_dict(self) -> Dict[str, Any]:
         """ returns the data of the attrs dataclass as a dictionary.
             empty lists and empty dictionaries will be filtered out
         """
         result = attrs.asdict(self, filter=_is_not_empty)   # noqa
-
-        if self.ids:
-            if self.limit:
-                raise ValueError('You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids')
-            else:
-                result["limit"] = len(self.ids)
-
         return result
 
 
