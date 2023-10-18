@@ -192,8 +192,8 @@ class Criteria:
     >>> my_criteria = Criteria()
     >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
     >>> pprint_attrs(my_criteria)
-    {'limit': 3,
-     'page': 1,
+    {'limit': None,
+     'page': None,
      'ids': ['012cd563cf8e4f0384eed93b5201cc98',
              '075fb241b769444bb72431f797fd5776',
              '090fcc2099794771935acf814e3fdb24'],
