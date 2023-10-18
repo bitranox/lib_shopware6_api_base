@@ -291,15 +291,15 @@ class Criteria:
 
 
     @limit.validator      # noqa
-    def check_if_ids_are_set(self, attribute: attrs.Attribute, value: int) -> None:
+    def check_if_ids_are_set(self, attribute: attrs.Attribute, value: int) -> None:     # type: ignore  # noqa
         if value is not None and len(self.ids):
             raise ValueError('You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids')
 
 
     @ids.validator      # noqa
-    def set_limit_to_ids_length(self, attribute: attrs.Attribute, value: List[str]) -> None:
+    def set_limit_to_ids_length(self, attribute: attrs.Attribute, value: List[str]) -> None:    # type: ignore  # noqa
         """
-        set self.limit and self.page if ids are given.
+        set "self.limit" and "self.page" if ids are given.
         """
         if len(value):
             if self.limit:

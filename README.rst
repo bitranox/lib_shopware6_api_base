@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v2.1.6 as of 2023-10-18 see `Changelog`_
+Version v2.1.7 as of 2023-10-18 see `Changelog`_
 
 |build_badge| |codeql| |license| |pypi|
 |pypi-downloads| |black| |codecov| |cc_maintain| |cc_issues| |cc_coverage| |snyk|
@@ -768,7 +768,6 @@ a search criteria follows the following schema:
         total-count-mode    Optional[int]                  Defines whether a total must be determined
 
 
-
         >>> # Test empty
         >>> my_criteria = Criteria()
         >>> pprint_attrs(my_criteria)
@@ -868,16 +867,36 @@ a search criteria follows the following schema:
 
         >>> # ids{{{
         >>> # Test ids
+        >>> # note that the limit is automatically set to 3, and page to 1, which is for our paginated request
         >>> my_criteria = Criteria()
         >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
         >>> pprint_attrs(my_criteria)
-        {'limit': None,
-         'page': None,
+        {'limit': 3,
+         'page': 1,
          'ids': ['012cd563cf8e4f0384eed93b5201cc98',
                  '075fb241b769444bb72431f797fd5776',
                  '090fcc2099794771935acf814e3fdb24'],
          'term': None,
          'total_count_mode': None}
+
+        >>> # Test ids with a limit already set, which should fail
+        >>> # You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids
+        >>> my_criteria = Criteria()
+        >>> my_criteria.limit = 5
+        >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
+        Traceback (most recent call last):
+            ...
+        ValueError: You can use either "limit" or "ids", but not both, ...
+
+        >>> # Test to set limit after ids are passed, which should fail
+        >>> # You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids
+        >>> my_criteria = Criteria()
+        >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
+        >>> my_criteria.limit = 2
+        Traceback (most recent call last):
+            ...
+        ValueError: You can use either "limit" or "ids", but not both, ...
+
         >>> # ids}}}
 
         >>> # includes{{{
@@ -1580,16 +1599,36 @@ Please note that as soon as You use ids, limit and page does not apply anymore !
 .. code-block:: python
 
         >>> # Test ids
+        >>> # note that the limit is automatically set to 3, and page to 1, which is for our paginated request
         >>> my_criteria = Criteria()
         >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
         >>> pprint_attrs(my_criteria)
-        {'limit': None,
-         'page': None,
+        {'limit': 3,
+         'page': 1,
          'ids': ['012cd563cf8e4f0384eed93b5201cc98',
                  '075fb241b769444bb72431f797fd5776',
                  '090fcc2099794771935acf814e3fdb24'],
          'term': None,
          'total_count_mode': None}
+
+        >>> # Test ids with a limit already set, which should fail
+        >>> # You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids
+        >>> my_criteria = Criteria()
+        >>> my_criteria.limit = 5
+        >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
+        Traceback (most recent call last):
+            ...
+        ValueError: You can use either "limit" or "ids", but not both, ...
+
+        >>> # Test to set limit after ids are passed, which should fail
+        >>> # You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids
+        >>> my_criteria = Criteria()
+        >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
+        >>> my_criteria.limit = 2
+        Traceback (most recent call last):
+            ...
+        ValueError: You can use either "limit" or "ids", but not both, ...
+
         >>>
 
 includes
@@ -1669,6 +1708,7 @@ The sum of the matching queries then results in the total _score value.
         ...    query=[Query(score=500, query=ContainsFilter(field='name', value='Bronze')),
         ...           Query(score=500, query=EqualsFilter(field='active', value='true')),
         ...           Query(score=100, query=EqualsFilter(field='manufacturerId', value='db3c17b1e572432eb4a4c881b6f9d68f'))])
+
         >>> pprint_attrs(my_criteria)
         {'limit': None,
          'page': None,
@@ -1906,6 +1946,12 @@ Changelog
 - new MAJOR version for incompatible API changes,
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
+
+v2.1.7
+---------
+2023-10-18:
+    - validator for "Criteria.ids" and "Criteria.limit"
+      if "Criteria.ids" are passed, set limits to the number of ids and page to 1
 
 v2.1.6
 ---------
