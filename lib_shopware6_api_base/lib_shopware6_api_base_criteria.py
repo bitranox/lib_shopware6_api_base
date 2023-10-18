@@ -291,21 +291,22 @@ class Criteria:
 
 
     @limit.validator      # noqa
-    def on_set_limit_check_if_ids_are_set(self, attribute: attrs.Attribute, value: int) -> None:     # type: ignore  # noqa
-        if value is not None and len(self.ids):
+    def on_set_limit_check_if_ids_are_set(self, attribute: attrs.Attribute, limit: int) -> None:     # type: ignore  # noqa
+        """
+        check "self.ids" if "self.limit" is set
+        """
+        if limit is not None and len(self.ids):
             raise ValueError('You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids')
 
 
     @ids.validator      # noqa
-    def set_limit_to_ids_length(self, attribute: attrs.Attribute, value: List[str]) -> None:    # type: ignore  # noqa
+    def on_set_ids_check_if_limit_is_set(self, attribute: attrs.Attribute, ids: List[str]) -> None:    # type: ignore  # noqa
         """
-        set "self.limit" and "self.page" if ids are given.
+        check "self.limit" if "self.ids" is set
         """
-        if len(value):
+        if len(ids):
             if self.limit:
                 raise ValueError('You can use either "limit" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids')
-            self.limit = len(value)
-            self.page = 1
 
     def get_dict(self) -> Dict[str, Any]:
         """ returns the data of the attrs dataclass as a dictionary.
