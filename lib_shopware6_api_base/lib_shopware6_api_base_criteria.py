@@ -13,13 +13,13 @@ from attrs import validators
 
 # proj
 try:
-    from lib_shopware6_api_base_helpers import get_pretty_printer
+    from lib_shopware6_api_base_helpers import pprint_attrs
     from lib_shopware6_api_base_criteria_aggregation import *
     from lib_shopware6_api_base_criteria_filter import *
     from lib_shopware6_api_base_criteria_sorting import *
 except ImportError:  # pragma: no cover
     # Imports for Doctest
-    from .lib_shopware6_api_base_helpers import get_pretty_printer
+    from .lib_shopware6_api_base_helpers import pprint_attrs
     from .lib_shopware6_api_base_criteria_aggregation import *  # type: ignore  # pragma: no cover
     from .lib_shopware6_api_base_criteria_filter import *  # type: ignore  # pragma: no cover
     from .lib_shopware6_api_base_criteria_sorting import *  # type: ignore  # pragma: no cover
@@ -42,15 +42,12 @@ class Query:
         score   int
         query   FilterType
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test
     >>> my_criteria = Criteria(
     ...    query=[Query(score=500, query=ContainsFilter(field='name', value='Bronze')),
     ...           Query(score=500, query=EqualsFilter(field='active', value='true')),
     ...           Query(score=100, query=EqualsFilter(field='manufacturerId', value='db3c17b1e572432eb4a4c881b6f9d68f'))])
-    >>> pp(my_criteria.get_dict())
+    >>> pprint_attrs(my_criteria)
     {'limit': None,
      'page': None,
      'query': [{'score': 500,
@@ -98,12 +95,9 @@ class Criteria:
 
 
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test empty
     >>> my_criteria = Criteria()
-    >>> pp(my_criteria.get_dict())
+    >>> pprint_attrs(my_criteria)
     {'limit': None, 'page': None, 'term': None, 'total_count_mode': None}
 
     >>> # Test Average aggregation
@@ -111,7 +105,7 @@ class Criteria:
     >>> my_criteria.limit=1
     >>> my_criteria.includes['product'] = ['id', 'name']
     >>> my_criteria.aggregations = [AvgAggregation('average-price', 'price')]
-    >>> pp(my_criteria.get_dict())
+    >>> pprint_attrs(my_criteria)
     {'limit': 1,
      'page': None,
      'aggregations': [{'name': 'average-price', 'type': 'avg', 'field': 'price'}],
@@ -124,7 +118,7 @@ class Criteria:
     ...     aggregations=FilterAggregation(name='active-price-avg',
     ...                                    filter=EqualsFilter(field='active', value=True),
     ...                                    aggregation=AvgAggregation(name='avg-price',field='price')))
-    >>> pp(my_criteria.get_dict())
+    >>> pprint_attrs(my_criteria)
     {'limit': 1,
      'page': None,
      'aggregations': {'name': 'active-price-avg',
@@ -143,7 +137,7 @@ class Criteria:
     >>> # Test Association
     >>> my_criteria = Criteria()
     >>> my_criteria.associations['products'] = Criteria(limit=5, filter=[EqualsFilter('active', 'true')])
-    >>> pp(my_criteria.get_dict())
+    >>> pprint_attrs(my_criteria)
     {'limit': None,
      'page': None,
      'associations': {'products': {'limit': 5,
@@ -164,7 +158,7 @@ class Criteria:
     >>> my_criteria.filter.append(EqualsFilter('a', 'a'))
     >>> my_criteria.filter.append(EqualsFilter('b', 'b'))
     >>> my_criteria.filter.append(EqualsFilter('d', 'd'))
-    >>> pp(my_criteria.get_dict())
+    >>> pprint_attrs(my_criteria)
     {'limit': 1,
      'page': 0,
      'filter': [{'type': 'equals', 'field': 'a', 'value': 'a'},
@@ -176,7 +170,7 @@ class Criteria:
     >>> # Test set filters
     >>> my_criteria = Criteria()
     >>> my_criteria.filter = [EqualsFilter('a', 'a'), EqualsFilter('b', 'b'), EqualsFilter('d', 'd')]
-    >>> pp(my_criteria.get_dict())
+    >>> pprint_attrs(my_criteria)
     {'limit': None,
      'page': None,
      'filter': [{'type': 'equals', 'field': 'a', 'value': 'a'},
@@ -190,7 +184,7 @@ class Criteria:
     >>> my_criteria = Criteria()
     >>> my_criteria.limit=5
     >>> my_criteria.grouping=['active']
-    >>> pp(my_criteria.get_dict())
+    >>> pprint_attrs(my_criteria)
     {'limit': 5,
      'page': None,
      'grouping': ['active'],
@@ -200,11 +194,10 @@ class Criteria:
 
     >>> # ids{{{
     >>> # Test ids
-    >>> # note that the limit is automatically set to 3, which is for our paginated request
     >>> my_criteria = Criteria()
     >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
-    >>> pp(my_criteria.get_dict())
-    {'limit': 3,
+    >>> pprint_attrs(my_criteria)
+    {'limit': None,
      'page': None,
      'ids': ['012cd563cf8e4f0384eed93b5201cc98',
              '075fb241b769444bb72431f797fd5776',
@@ -217,7 +210,7 @@ class Criteria:
     >>> # Test includes
     >>> my_criteria = Criteria()
     >>> my_criteria.includes['product'] = ['id', 'name']
-    >>> pp(my_criteria.get_dict())
+    >>> pprint_attrs(my_criteria)
     {'limit': None,
      'page': None,
      'includes': {'product': ['id', 'name']},
@@ -228,7 +221,7 @@ class Criteria:
 
     >>> # page&limit{{{
     >>> my_criteria = Criteria(page=1, limit=5)
-    >>> pp(my_criteria.get_dict())
+    >>> pprint_attrs(my_criteria)
     {'limit': 5, 'page': 1, 'term': None, 'total_count_mode': None}
 
     >>> # page&limit}}}
@@ -238,7 +231,7 @@ class Criteria:
     ...    query=[Query(score=500, query=ContainsFilter(field='name', value='Bronze')),
     ...           Query(score=500, query=EqualsFilter(field='active', value='true')),
     ...           Query(score=100, query=EqualsFilter(field='manufacturerId', value='db3c17b1e572432eb4a4c881b6f9d68f'))])
-    >>> pp(my_criteria.get_dict())
+    >>> pprint_attrs(my_criteria)
     {'limit': None,
      'page': None,
      'query': [{'score': 500,
@@ -256,7 +249,7 @@ class Criteria:
     >>> my_criteria = Criteria(limit=5,
     ...                        sort=[FieldSorting('name', 'ASC', True),
     ...                              DescFieldSorting('active')])
-    >>> pp(my_criteria.get_dict())
+    >>> pprint_attrs(my_criteria)
     {'limit': 5,
      'page': None,
      'sort': [{'field': 'name', 'order': 'ASC', 'naturalSorting': True},
@@ -283,7 +276,10 @@ class Criteria:
     total_count_mode: Optional[int] = None
 
     def get_dict(self) -> Dict[str, Any]:
-        result = attrs.asdict(self, filter=_is_not_empty)
+        """ returns the data of the attrs dataclass as a dictionary.
+            empty lists and empty dictionaries will be filtered out
+        """
+        result = attrs.asdict(self, filter=_is_not_empty)   # noqa
 
         if self.ids:
             if self.limit:

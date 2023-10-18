@@ -4,6 +4,5 @@ click
 cli_exit_tools
 lib_detect_testenv
 oauthlib
-pprint3x
 requests
 requests_oauthlib

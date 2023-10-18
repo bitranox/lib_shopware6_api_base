@@ -1,14 +1,21 @@
 # STDLIB
-import sys
-from typing import Any, Callable
+import pprint
+from typing import Any
+
+# EXT
+import attrs
 
 
-def get_pretty_printer() -> Callable[[Any], str]:
-    # this is only needed for Python3.6, Python3.7
-    is_before_python38 = (sys.version_info.major, sys.version_info.minor) < (3, 8)
-    if is_before_python38:
-        import pprint3x as pprint  # type: ignore
+def pprint_attrs(attrs_instance: Any):
+    # pretty print attributes
+    pprint.PrettyPrinter(sort_dicts=False).pprint(attrs.asdict(attrs_instance, filter=_is_not_empty))
+
+
+def _is_not_empty(attribute: Any, value: Any) -> bool:
+    """Filter out empty Lists and Dictionaries"""
+    if value == dict():
+        return False
+    elif value == list():
+        return False
     else:
-        import pprint  # type: ignore
-    pp = pprint.PrettyPrinter(sort_dicts=False).pprint  # type: ignore
-    return pp  # type: ignore
+        return True

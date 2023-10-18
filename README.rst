@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v2.1.4 as of 2023-10-18 see `Changelog`_
+Version v2.1.5 as of 2023-10-18 see `Changelog`_
 
 |build_badge| |codeql| |license| |pypi|
 |pypi-downloads| |black| |codecov| |cc_maintain| |cc_issues| |cc_coverage| |snyk|
@@ -770,12 +770,9 @@ a search criteria follows the following schema:
 
 
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test empty
         >>> my_criteria = Criteria()
-        >>> pp(my_criteria.get_dict())
+        >>> pprint_attrs(my_criteria)
         {'limit': None, 'page': None, 'term': None, 'total_count_mode': None}
 
         >>> # Test Average aggregation
@@ -783,7 +780,7 @@ a search criteria follows the following schema:
         >>> my_criteria.limit=1
         >>> my_criteria.includes['product'] = ['id', 'name']
         >>> my_criteria.aggregations = [AvgAggregation('average-price', 'price')]
-        >>> pp(my_criteria.get_dict())
+        >>> pprint_attrs(my_criteria)
         {'limit': 1,
          'page': None,
          'aggregations': [{'name': 'average-price', 'type': 'avg', 'field': 'price'}],
@@ -796,7 +793,7 @@ a search criteria follows the following schema:
         ...     aggregations=FilterAggregation(name='active-price-avg',
         ...                                    filter=EqualsFilter(field='active', value=True),
         ...                                    aggregation=AvgAggregation(name='avg-price',field='price')))
-        >>> pp(my_criteria.get_dict())
+        >>> pprint_attrs(my_criteria)
         {'limit': 1,
          'page': None,
          'aggregations': {'name': 'active-price-avg',
@@ -815,7 +812,7 @@ a search criteria follows the following schema:
         >>> # Test Association
         >>> my_criteria = Criteria()
         >>> my_criteria.associations['products'] = Criteria(limit=5, filter=[EqualsFilter('active', 'true')])
-        >>> pp(my_criteria.get_dict())
+        >>> pprint_attrs(my_criteria)
         {'limit': None,
          'page': None,
          'associations': {'products': {'limit': 5,
@@ -836,7 +833,7 @@ a search criteria follows the following schema:
         >>> my_criteria.filter.append(EqualsFilter('a', 'a'))
         >>> my_criteria.filter.append(EqualsFilter('b', 'b'))
         >>> my_criteria.filter.append(EqualsFilter('d', 'd'))
-        >>> pp(my_criteria.get_dict())
+        >>> pprint_attrs(my_criteria)
         {'limit': 1,
          'page': 0,
          'filter': [{'type': 'equals', 'field': 'a', 'value': 'a'},
@@ -848,7 +845,7 @@ a search criteria follows the following schema:
         >>> # Test set filters
         >>> my_criteria = Criteria()
         >>> my_criteria.filter = [EqualsFilter('a', 'a'), EqualsFilter('b', 'b'), EqualsFilter('d', 'd')]
-        >>> pp(my_criteria.get_dict())
+        >>> pprint_attrs(my_criteria)
         {'limit': None,
          'page': None,
          'filter': [{'type': 'equals', 'field': 'a', 'value': 'a'},
@@ -862,7 +859,7 @@ a search criteria follows the following schema:
         >>> my_criteria = Criteria()
         >>> my_criteria.limit=5
         >>> my_criteria.grouping=['active']
-        >>> pp(my_criteria.get_dict())
+        >>> pprint_attrs(my_criteria)
         {'limit': 5,
          'page': None,
          'grouping': ['active'],
@@ -872,11 +869,10 @@ a search criteria follows the following schema:
 
         >>> # ids{{{
         >>> # Test ids
-        >>> # note that the limit is automatically set to 3, which is for our paginated request
         >>> my_criteria = Criteria()
         >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
-        >>> pp(my_criteria.get_dict())
-        {'limit': 3,
+        >>> pprint_attrs(my_criteria)
+        {'limit': None,
          'page': None,
          'ids': ['012cd563cf8e4f0384eed93b5201cc98',
                  '075fb241b769444bb72431f797fd5776',
@@ -889,7 +885,7 @@ a search criteria follows the following schema:
         >>> # Test includes
         >>> my_criteria = Criteria()
         >>> my_criteria.includes['product'] = ['id', 'name']
-        >>> pp(my_criteria.get_dict())
+        >>> pprint_attrs(my_criteria)
         {'limit': None,
          'page': None,
          'includes': {'product': ['id', 'name']},
@@ -900,7 +896,7 @@ a search criteria follows the following schema:
 
         >>> # page&limit{{{
         >>> my_criteria = Criteria(page=1, limit=5)
-        >>> pp(my_criteria.get_dict())
+        >>> pprint_attrs(my_criteria)
         {'limit': 5, 'page': 1, 'term': None, 'total_count_mode': None}
 
         >>> # page&limit}}}
@@ -910,7 +906,7 @@ a search criteria follows the following schema:
         ...    query=[Query(score=500, query=ContainsFilter(field='name', value='Bronze')),
         ...           Query(score=500, query=EqualsFilter(field='active', value='true')),
         ...           Query(score=100, query=EqualsFilter(field='manufacturerId', value='db3c17b1e572432eb4a4c881b6f9d68f'))])
-        >>> pp(my_criteria.get_dict())
+        >>> pprint_attrs(my_criteria)
         {'limit': None,
          'page': None,
          'query': [{'score': 500,
@@ -928,7 +924,7 @@ a search criteria follows the following schema:
         >>> my_criteria = Criteria(limit=5,
         ...                        sort=[FieldSorting('name', 'ASC', True),
         ...                              DescFieldSorting('active')])
-        >>> pp(my_criteria.get_dict())
+        >>> pprint_attrs(my_criteria)
         {'limit': 5,
          'page': None,
          'sort': [{'field': 'name', 'order': 'ASC', 'naturalSorting': True},
@@ -972,12 +968,9 @@ back to `Aggregations`_
             name: str
             field: str
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test
         >>> my_aggregation = AvgAggregation('avg-price', 'price')
-        >>> pp(attrs.asdict(my_aggregation))
+        >>> pprint_attrs(my_aggregation)
         {'name': 'avg-price', 'type': 'avg', 'field': 'price'}
 
         """
@@ -999,12 +992,9 @@ back to `Aggregations`_
             name: str
             field: str
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test
         >>> my_aggregation = CountAggregation('count-manufacturers', 'manufacturerId')
-        >>> pp(attrs.asdict(my_aggregation))
+        >>> pprint_attrs(my_aggregation)
         {'name': 'count-manufacturers', 'type': 'count', 'field': 'manufacturerId'}
 
         """
@@ -1026,12 +1016,9 @@ back to `Aggregations`_
             name: str
             field: str
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test
         >>> my_aggregation = MaxAggregation('max-price', 'price')
-        >>> pp(attrs.asdict(my_aggregation))
+        >>> pprint_attrs(my_aggregation)
         {'name': 'max-price', 'type': 'max', 'field': 'price'}
 
         """
@@ -1053,12 +1040,9 @@ back to `Aggregations`_
             name: str
             field: str
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test
         >>> my_aggregation = MinAggregation('min-price', 'price')
-        >>> pp(attrs.asdict(my_aggregation))
+        >>> pprint_attrs(my_aggregation)
         {'name': 'min-price', 'type': 'min', 'field': 'price'}
 
         """
@@ -1080,12 +1064,9 @@ back to `Aggregations`_
             name: str
             field: str
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test
         >>> my_aggregation = SumAggregation('sum-price', 'price')
-        >>> pp(attrs.asdict(my_aggregation))
+        >>> pprint_attrs(my_aggregation)
         {'name': 'sum-price', 'type': 'sum', 'field': 'price'}
 
         """
@@ -1108,12 +1089,9 @@ back to `Aggregations`_
             name: str
             field: str
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test
         >>> my_aggregation = StatsAggregation('stats-price', 'price')
-        >>> pp(attrs.asdict(my_aggregation))
+        >>> pprint_attrs(my_aggregation)
         {'name': 'stats-price', 'type': 'stats', 'field': 'price'}
 
         """
@@ -1146,12 +1124,9 @@ back to `Aggregations`_
             limit: Optional[int]
             aggregation: Optional[]
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test
         >>> my_aggregation = TermsAggregation(name='manufacturer-ids', limit=3, sort=DescFieldSorting('manufacturer.name'), field='manufacturerId')
-        >>> pp(attrs.asdict(my_aggregation))
+        >>> pprint_attrs(my_aggregation)
         {'name': 'manufacturer-ids',
          'type': 'terms',
          'field': 'manufacturerId',
@@ -1187,15 +1162,12 @@ back to `Aggregations`_
             filter: FilterType
             aggregation : AggregationType
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test
         >>> my_aggregation = FilterAggregation(
         ...     name='active-price-avg',
         ...     filter=EqualsFilter(field='active', value=True),
         ...     aggregation=AvgAggregation(name='avg-price',field='price'))
-        >>> pp(attrs.asdict(my_aggregation))
+        >>> pprint_attrs(my_aggregation)
         {'name': 'active-price-avg',
          'type': 'filter',
          'filter': {'type': 'equals', 'field': 'active', 'value': True},
@@ -1223,12 +1195,9 @@ back to `Aggregations`_
             definition: str
             field: str
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test
         >>> my_aggregation = EntityAggregation(name='manufacturers', definition='product_manufacturer', field='manufacturerId')
-        >>> pp(attrs.asdict(my_aggregation))
+        >>> pprint_attrs(my_aggregation)
         {'name': 'manufacturers',
          'type': 'entity',
          'definition': 'product_manufacturer',
@@ -1256,12 +1225,9 @@ back to `Aggregations`_
             field: str
             interval: str ,  possible values: 'minute', 'hour', 'day', 'week', 'month', 'quarter', 'year', 'day'
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test
         >>> my_aggregation = DateHistogramAggregation(name='release-dates', field='releaseDate', interval='month')
-        >>> pp(attrs.asdict(my_aggregation))
+        >>> pprint_attrs(my_aggregation)
         {'name': 'release-dates',
          'type': 'histogram',
          'field': 'releaseDate',
@@ -1294,7 +1260,7 @@ to or apply filters within the association.
         >>> # Test Association
         >>> my_criteria = Criteria()
         >>> my_criteria.associations['products'] = Criteria(limit=5, filter=[EqualsFilter('active', 'true')])
-        >>> pp(my_criteria.get_dict())
+        >>> pprint_attrs(my_criteria)
         {'limit': None,
          'page': None,
          'associations': {'products': {'limit': 5,
@@ -1338,16 +1304,13 @@ back to `Filters`_
             field: str
             value: Union[str, int]      # probably also bool
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test
         >>> my_filter = EqualsFilter('stock', 10)
-        >>> pp(attrs.asdict(my_filter))
+        >>> pprint_attrs(my_filter)
         {'type': 'equals', 'field': 'stock', 'value': 10}
 
         >>> my_filter = EqualsFilter('stock', None)
-        >>> pp(attrs.asdict(my_filter))
+        >>> pprint_attrs(my_filter)
         {'type': 'equals', 'field': 'stock', 'value': None}
 
         """
@@ -1370,12 +1333,9 @@ back to `Filters`_
             field: str
             value: List[str]
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test Keyword param
         >>> my_filter = EqualsAnyFilter(field = 'productNumber', value = ["3fed029475fa4d4585f3a119886e0eb1", "77d26d011d914c3aa2c197c81241a45b"])
-        >>> pp(attrs.asdict(my_filter))
+        >>> pprint_attrs(my_filter)
         {'type': 'equalsAny',
          'field': 'productNumber',
          'value': ['3fed029475fa4d4585f3a119886e0eb1',
@@ -1383,7 +1343,7 @@ back to `Filters`_
 
         >>> # Test positional param
         >>> my_filter = EqualsAnyFilter('productNumber', ["3fed029475fa4d4585f3a119886e0eb1", "77d26d011d914c3aa2c197c81241a45b"])
-        >>> pp(attrs.asdict(my_filter))
+        >>> pprint_attrs(my_filter)
         {'type': 'equalsAny',
          'field': 'productNumber',
          'value': ['3fed029475fa4d4585f3a119886e0eb1',
@@ -1408,14 +1368,10 @@ back to `Filters`_
             field: str
             value: List[str]
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test
         >>> my_filter = ContainsFilter(field = 'productNumber', value = 'Lightweight')
-        >>> pp(attrs.asdict(my_filter))
+        >>> pprint_attrs(my_filter)
         {'type': 'contains', 'field': 'productNumber', 'value': 'Lightweight'}
-
 
         """
 
@@ -1440,17 +1396,14 @@ back to `Filters`_
             field: str
             parameters: Dict[str, Union[int, datetime]]
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test (pass range type as string)
         >>> my_filter = RangeFilter(field = 'stock', parameters = {'gte': 20, 'lte': 30})
-        >>> pp(attrs.asdict(my_filter))
+        >>> pprint_attrs(my_filter)
         {'type': 'range', 'field': 'stock', 'parameters': {'gte': 20, 'lte': 30}}
 
         >>> # Test (pass range type from 'range_filter' object)
         >>> my_filter = RangeFilter(field = 'stock', parameters = {range_filter.gte: 20, range_filter.lte: 30})
-        >>> pp(attrs.asdict(my_filter))
+        >>> pprint_attrs(my_filter)
         {'type': 'range', 'field': 'stock', 'parameters': {'gte': 20, 'lte': 30}}
 
         >>> # Test (wrong range)
@@ -1472,19 +1425,16 @@ back to `Filters`_
         """
         see filter reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/filters-reference
         The Not Filter is a container which allows to negate any kind of filter.
-        The operator allows you to define the combination of queries within the NOT filter (OR and AND).
+        The operator allows you to define the combination of queries within the NOT filter ("OR" and "AND").
         The following SQL statement is executed in the background: WHERE !(stock = 1 OR availableStock = 1):
 
         :parameter:
             operator: 'or' | 'and'
             queries: List[Filter]
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test (pass operator as string)
         >>> my_filter = NotFilter('or', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
-        >>> pp(attrs.asdict(my_filter))
+        >>> pprint_attrs(my_filter)
         {'type': 'not',
          'operator': 'or',
          'queries': [{'type': 'equals', 'field': 'stock', 'value': 1},
@@ -1492,7 +1442,7 @@ back to `Filters`_
 
         >>> # Test (pass operator from 'not_filter_operator' object)
         >>> my_filter = NotFilter(not_filter_operator.or_, [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
-        >>> pp(attrs.asdict(my_filter))
+        >>> pprint_attrs(my_filter)
         {'type': 'not',
          'operator': 'or',
          'queries': [{'type': 'equals', 'field': 'stock', 'value': 1},
@@ -1502,7 +1452,7 @@ back to `Filters`_
         >>> my_filter = NotFilter('duck', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
         Traceback (most recent call last):
             ...
-        ValueError: 'operator' must be in ['and', 'or'] (got 'duck')
+        ValueError: ("'operator' must be in ['and', 'or'] (got 'duck')", ...)
 
         """
 
@@ -1517,19 +1467,16 @@ back to `Filters`_
         """
         see filter reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/filters-reference
         The Multi Filter is a container, which allows to set logical links between filters.
-        The operator allows you to define the links between the queries within the Multi filter (OR and AND).
+        The operator allows you to define the links between the queries within the Multi filter ("OR" and "AND").
         The following SQL statement is executed in the background: WHERE (stock = 1 OR availableStock = 1)
 
         :parameter:
             operator: 'or' | 'and'
             queries: List[Filter]
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test (pass operator as string)
         >>> my_filter = MultiFilter('or', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
-        >>> pp(attrs.asdict(my_filter))
+        >>> pprint_attrs(my_filter)
         {'type': 'multi',
          'operator': 'or',
          'queries': [{'type': 'equals', 'field': 'stock', 'value': 1},
@@ -1537,7 +1484,7 @@ back to `Filters`_
 
         >>> # Test (pass operator from 'not_filter_operator' object)
         >>> my_filter = MultiFilter(multi_filter_operator.or_, [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
-        >>> pp(attrs.asdict(my_filter))
+        >>> pprint_attrs(my_filter)
         {'type': 'multi',
          'operator': 'or',
          'queries': [{'type': 'equals', 'field': 'stock', 'value': 1},
@@ -1547,7 +1494,7 @@ back to `Filters`_
         >>> my_filter = MultiFilter('duck', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
         Traceback (most recent call last):
             ...
-        ValueError: 'operator' must be in ['and', 'or'] (got 'duck')
+        ValueError: ("'operator' must be in ['and', 'or'] (got 'duck')", ...)
 
         """
 
@@ -1568,12 +1515,9 @@ back to `Filters`_
             field: str
             value: str
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test
         >>> my_filter = PrefixFilter('name', 'Lightweight')
-        >>> pp(attrs.asdict(my_filter))
+        >>> pprint_attrs(my_filter)
         {'type': 'prefix', 'field': 'name', 'value': 'Lightweight'}
 
         """
@@ -1595,12 +1539,9 @@ back to `Filters`_
             field: str
             value: str
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test
         >>> my_filter = SuffixFilter('name', 'Lightweight')
-        >>> pp(attrs.asdict(my_filter))
+        >>> pprint_attrs(my_filter)
         {'type': 'suffix', 'field': 'name', 'value': 'Lightweight'}
 
         """
@@ -1621,7 +1562,7 @@ It can be used to realise queries such as:
         >>> my_criteria = Criteria()
         >>> my_criteria.limit=5
         >>> my_criteria.grouping=['active']
-        >>> pp(my_criteria.get_dict())
+        >>> pprint_attrs(my_criteria)
         {'limit': 5,
          'page': None,
          'grouping': ['active'],
@@ -1640,11 +1581,10 @@ Please note that as soon as You use ids, limit and page does not apply anymore !
 .. code-block:: python
 
         >>> # Test ids
-        >>> # note that the limit is automatically set to 3, which is for our paginated request
         >>> my_criteria = Criteria()
         >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
-        >>> pp(my_criteria.get_dict())
-        {'limit': 3,
+        >>> pprint_attrs(my_criteria)
+        {'limit': None,
          'page': None,
          'ids': ['012cd563cf8e4f0384eed93b5201cc98',
                  '075fb241b769444bb72431f797fd5776',
@@ -1668,7 +1608,7 @@ When debugging, the response is smaller and you can concentrate on the essential
         >>> # Test includes
         >>> my_criteria = Criteria()
         >>> my_criteria.includes['product'] = ['id', 'name']
-        >>> pp(my_criteria.get_dict())
+        >>> pprint_attrs(my_criteria)
         {'limit': None,
          'page': None,
          'includes': {'product': ['id', 'name']},
@@ -1697,7 +1637,7 @@ Please note that as soon as You use ids, limit and page does not apply anymore !
 .. code-block:: python
 
         >>> my_criteria = Criteria(page=1, limit=5)
-        >>> pp(my_criteria.get_dict())
+        >>> pprint_attrs(my_criteria)
         {'limit': 5, 'page': 1, 'term': None, 'total_count_mode': None}
 
         >>>
@@ -1725,15 +1665,12 @@ The sum of the matching queries then results in the total _score value.
             score   int
             query   FilterType
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test
         >>> my_criteria = Criteria(
         ...    query=[Query(score=500, query=ContainsFilter(field='name', value='Bronze')),
         ...           Query(score=500, query=EqualsFilter(field='active', value='true')),
         ...           Query(score=100, query=EqualsFilter(field='manufacturerId', value='db3c17b1e572432eb4a4c881b6f9d68f'))])
-        >>> pp(my_criteria.get_dict())
+        >>> pprint_attrs(my_criteria)
         {'limit': None,
          'page': None,
          'query': [{'score': 500,
@@ -1779,12 +1716,9 @@ FieldSorting
             order : str "ASC" or "DESC"
             naturalSorting : Optional[bool]
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test
         >>> my_sorting = FieldSorting('name', 'ASC', True)
-        >>> pp(attrs.asdict(my_sorting))
+        >>> pprint_attrs(my_sorting)
         {'field': 'name', 'order': 'ASC', 'naturalSorting': True}
 
         """
@@ -1807,12 +1741,9 @@ AscFieldSorting
             field : str
             naturalSorting : Optional[bool]
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test
         >>> my_sorting = AscFieldSorting('name', True)
-        >>> pp(attrs.asdict(my_sorting))
+        >>> pprint_attrs(my_sorting)
         {'field': 'name', 'order': 'ASC', 'naturalSorting': True}
 
         """
@@ -1835,12 +1766,9 @@ DescFieldSorting
             field : str
             naturalSorting : Optional[bool]
 
-        >>> # Setup
-        >>> pp = get_pretty_printer()
-
         >>> # Test
         >>> my_sorting = DescFieldSorting('name', True)
-        >>> pp(attrs.asdict(my_sorting))
+        >>> pprint_attrs(my_sorting)
         {'field': 'name', 'order': 'DESC', 'naturalSorting': True}
 
         """
@@ -1952,7 +1880,6 @@ following modules will be automatically installed :
     cli_exit_tools
     lib_detect_testenv
     oauthlib
-    pprint3x
     requests
     requests_oauthlib
 
@@ -1980,6 +1907,11 @@ Changelog
 - new MAJOR version for incompatible API changes,
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
+
+v2.1.5
+---------
+    - get rid of special pretty printer version for python 3.7 and below
+    - correct type for filter "ContainsFilter"
 
 v2.1.4
 ---------

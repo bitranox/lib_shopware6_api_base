@@ -8,12 +8,12 @@ from attrs import validators
 
 # proj
 try:
-    from lib_shopware6_api_base_helpers import get_pretty_printer
+    from lib_shopware6_api_base_helpers import pprint_attrs
     from lib_shopware6_api_base_criteria_sorting import *
     from lib_shopware6_api_base_criteria_filter import *
 except ImportError:  # pragma: no cover
     # Imports for Doctest
-    from .lib_shopware6_api_base_helpers import get_pretty_printer
+    from .lib_shopware6_api_base_helpers import pprint_attrs
     from .lib_shopware6_api_base_criteria_sorting import *  # type: ignore  # pragma: no cover
     from .lib_shopware6_api_base_criteria_filter import *  # type: ignore  # pragma: no cover
 
@@ -52,12 +52,9 @@ class AvgAggregation:
         name: str
         field: str
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test
     >>> my_aggregation = AvgAggregation('avg-price', 'price')
-    >>> pp(attrs.asdict(my_aggregation))
+    >>> pprint_attrs(my_aggregation)
     {'name': 'avg-price', 'type': 'avg', 'field': 'price'}
 
     """
@@ -81,12 +78,9 @@ class CountAggregation:
         name: str
         field: str
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test
     >>> my_aggregation = CountAggregation('count-manufacturers', 'manufacturerId')
-    >>> pp(attrs.asdict(my_aggregation))
+    >>> pprint_attrs(my_aggregation)
     {'name': 'count-manufacturers', 'type': 'count', 'field': 'manufacturerId'}
 
     """
@@ -110,12 +104,9 @@ class MaxAggregation:
         name: str
         field: str
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test
     >>> my_aggregation = MaxAggregation('max-price', 'price')
-    >>> pp(attrs.asdict(my_aggregation))
+    >>> pprint_attrs(my_aggregation)
     {'name': 'max-price', 'type': 'max', 'field': 'price'}
 
     """
@@ -139,12 +130,9 @@ class MinAggregation:
         name: str
         field: str
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test
     >>> my_aggregation = MinAggregation('min-price', 'price')
-    >>> pp(attrs.asdict(my_aggregation))
+    >>> pprint_attrs(my_aggregation)
     {'name': 'min-price', 'type': 'min', 'field': 'price'}
 
     """
@@ -168,12 +156,9 @@ class SumAggregation:
         name: str
         field: str
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test
     >>> my_aggregation = SumAggregation('sum-price', 'price')
-    >>> pp(attrs.asdict(my_aggregation))
+    >>> pprint_attrs(my_aggregation)
     {'name': 'sum-price', 'type': 'sum', 'field': 'price'}
 
     """
@@ -198,12 +183,9 @@ class StatsAggregation:
         name: str
         field: str
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test
     >>> my_aggregation = StatsAggregation('stats-price', 'price')
-    >>> pp(attrs.asdict(my_aggregation))
+    >>> pprint_attrs(my_aggregation)
     {'name': 'stats-price', 'type': 'stats', 'field': 'price'}
 
     """
@@ -238,12 +220,9 @@ class TermsAggregation:
         limit: Optional[int]
         aggregation: Optional[]
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test
     >>> my_aggregation = TermsAggregation(name='manufacturer-ids', limit=3, sort=DescFieldSorting('manufacturer.name'), field='manufacturerId')
-    >>> pp(attrs.asdict(my_aggregation))
+    >>> pprint_attrs(my_aggregation)
     {'name': 'manufacturer-ids',
      'type': 'terms',
      'field': 'manufacturerId',
@@ -284,15 +263,12 @@ class FilterAggregation:
         filter: FilterType
         aggregation : AggregationType
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test
     >>> my_aggregation = FilterAggregation(
     ...     name='active-price-avg',
     ...     filter=EqualsFilter(field='active', value=True),
     ...     aggregation=AvgAggregation(name='avg-price',field='price'))
-    >>> pp(attrs.asdict(my_aggregation))
+    >>> pprint_attrs(my_aggregation)
     {'name': 'active-price-avg',
      'type': 'filter',
      'filter': {'type': 'equals', 'field': 'active', 'value': True},
@@ -323,12 +299,9 @@ class EntityAggregation:
         definition: str
         field: str
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test
     >>> my_aggregation = EntityAggregation(name='manufacturers', definition='product_manufacturer', field='manufacturerId')
-    >>> pp(attrs.asdict(my_aggregation))
+    >>> pprint_attrs(my_aggregation)
     {'name': 'manufacturers',
      'type': 'entity',
      'definition': 'product_manufacturer',
@@ -359,12 +332,9 @@ class DateHistogramAggregation:
         field: str
         interval: str ,  possible values: 'minute', 'hour', 'day', 'week', 'month', 'quarter', 'year', 'day'
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test
     >>> my_aggregation = DateHistogramAggregation(name='release-dates', field='releaseDate', interval='month')
-    >>> pp(attrs.asdict(my_aggregation))
+    >>> pprint_attrs(my_aggregation)
     {'name': 'release-dates',
      'type': 'histogram',
      'field': 'releaseDate',

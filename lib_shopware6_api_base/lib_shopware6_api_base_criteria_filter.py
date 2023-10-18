@@ -9,10 +9,10 @@ from attrs import validators
 
 # proj
 try:
-    from lib_shopware6_api_base_helpers import get_pretty_printer
+    from lib_shopware6_api_base_helpers import pprint_attrs
 except ImportError:  # pragma: no cover
     # Imports for Doctest
-    from .lib_shopware6_api_base_helpers import get_pretty_printer
+    from .lib_shopware6_api_base_helpers import pprint_attrs
 
 
 @attrs.define
@@ -88,16 +88,13 @@ class EqualsFilter:
         field: str
         value: Union[str, int]      # probably also bool
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test
     >>> my_filter = EqualsFilter('stock', 10)
-    >>> pp(attrs.asdict(my_filter))
+    >>> pprint_attrs(my_filter)
     {'type': 'equals', 'field': 'stock', 'value': 10}
 
     >>> my_filter = EqualsFilter('stock', None)
-    >>> pp(attrs.asdict(my_filter))
+    >>> pprint_attrs(my_filter)
     {'type': 'equals', 'field': 'stock', 'value': None}
 
     """
@@ -122,12 +119,9 @@ class EqualsAnyFilter:
         field: str
         value: List[str]
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test Keyword param
     >>> my_filter = EqualsAnyFilter(field = 'productNumber', value = ["3fed029475fa4d4585f3a119886e0eb1", "77d26d011d914c3aa2c197c81241a45b"])
-    >>> pp(attrs.asdict(my_filter))
+    >>> pprint_attrs(my_filter)
     {'type': 'equalsAny',
      'field': 'productNumber',
      'value': ['3fed029475fa4d4585f3a119886e0eb1',
@@ -135,7 +129,7 @@ class EqualsAnyFilter:
 
     >>> # Test positional param
     >>> my_filter = EqualsAnyFilter('productNumber', ["3fed029475fa4d4585f3a119886e0eb1", "77d26d011d914c3aa2c197c81241a45b"])
-    >>> pp(attrs.asdict(my_filter))
+    >>> pprint_attrs(my_filter)
     {'type': 'equalsAny',
      'field': 'productNumber',
      'value': ['3fed029475fa4d4585f3a119886e0eb1',
@@ -162,21 +156,17 @@ class ContainsFilter:
         field: str
         value: List[str]
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test
     >>> my_filter = ContainsFilter(field = 'productNumber', value = 'Lightweight')
-    >>> pp(attrs.asdict(my_filter))
+    >>> pprint_attrs(my_filter)
     {'type': 'contains', 'field': 'productNumber', 'value': 'Lightweight'}
-
 
     """
 
     # ContainsFilter}}}
     type: str = attrs.field(init=False, default="contains")
     field: str = attrs.field(init=True, validator=attrs.validators.instance_of(str))
-    value: List[str] = attrs.field(init=True, factory=list)
+    value: str = attrs.field(init=True, validator=attrs.validators.instance_of(str))
 
 
 # RangeFilter{{{
@@ -195,17 +185,14 @@ class RangeFilter:
         field: str
         parameters: Dict[str, Union[int, datetime]]
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test (pass range type as string)
     >>> my_filter = RangeFilter(field = 'stock', parameters = {'gte': 20, 'lte': 30})
-    >>> pp(attrs.asdict(my_filter))
+    >>> pprint_attrs(my_filter)
     {'type': 'range', 'field': 'stock', 'parameters': {'gte': 20, 'lte': 30}}
 
     >>> # Test (pass range type from 'range_filter' object)
     >>> my_filter = RangeFilter(field = 'stock', parameters = {range_filter.gte: 20, range_filter.lte: 30})
-    >>> pp(attrs.asdict(my_filter))
+    >>> pprint_attrs(my_filter)
     {'type': 'range', 'field': 'stock', 'parameters': {'gte': 20, 'lte': 30}}
 
     >>> # Test (wrong range)
@@ -222,7 +209,7 @@ class RangeFilter:
     parameters: Dict[str, Union[int, datetime]] = attrs.field(validator=validators.instance_of(dict), factory=dict)
 
     @parameters.validator  # noqa
-    def check(self, attribute: attrs.Attribute, parameters: Dict[str, Any]) -> None:  # type: ignore
+    def check(self, attribute: attrs.Attribute, parameters: Dict[str, Any]) -> None:  # type: ignore  # noqa
         for parameter in parameters:
             if parameter not in ["gte", "lte", "gt", "lt"]:
                 raise ValueError(f'"{parameter}" is not a valid range')
@@ -234,19 +221,16 @@ class NotFilter:
     """
     see filter reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/filters-reference
     The Not Filter is a container which allows to negate any kind of filter.
-    The operator allows you to define the combination of queries within the NOT filter (OR and AND).
+    The operator allows you to define the combination of queries within the NOT filter ("OR" and "AND").
     The following SQL statement is executed in the background: WHERE !(stock = 1 OR availableStock = 1):
 
     :parameter:
         operator: 'or' | 'and'
         queries: List[Filter]
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test (pass operator as string)
     >>> my_filter = NotFilter('or', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
-    >>> pp(attrs.asdict(my_filter))
+    >>> pprint_attrs(my_filter)
     {'type': 'not',
      'operator': 'or',
      'queries': [{'type': 'equals', 'field': 'stock', 'value': 1},
@@ -254,7 +238,7 @@ class NotFilter:
 
     >>> # Test (pass operator from 'not_filter_operator' object)
     >>> my_filter = NotFilter(not_filter_operator.or_, [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
-    >>> pp(attrs.asdict(my_filter))
+    >>> pprint_attrs(my_filter)
     {'type': 'not',
      'operator': 'or',
      'queries': [{'type': 'equals', 'field': 'stock', 'value': 1},
@@ -264,7 +248,7 @@ class NotFilter:
     >>> my_filter = NotFilter('duck', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
     Traceback (most recent call last):
         ...
-    ValueError: 'operator' must be in ['and', 'or'] (got 'duck')
+    ValueError: ("'operator' must be in ['and', 'or'] (got 'duck')", ...)
 
     """
 
@@ -280,19 +264,16 @@ class MultiFilter:
     """
     see filter reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/filters-reference
     The Multi Filter is a container, which allows to set logical links between filters.
-    The operator allows you to define the links between the queries within the Multi filter (OR and AND).
+    The operator allows you to define the links between the queries within the Multi filter ("OR" and "AND").
     The following SQL statement is executed in the background: WHERE (stock = 1 OR availableStock = 1)
 
     :parameter:
         operator: 'or' | 'and'
         queries: List[Filter]
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test (pass operator as string)
     >>> my_filter = MultiFilter('or', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
-    >>> pp(attrs.asdict(my_filter))
+    >>> pprint_attrs(my_filter)
     {'type': 'multi',
      'operator': 'or',
      'queries': [{'type': 'equals', 'field': 'stock', 'value': 1},
@@ -300,7 +281,7 @@ class MultiFilter:
 
     >>> # Test (pass operator from 'not_filter_operator' object)
     >>> my_filter = MultiFilter(multi_filter_operator.or_, [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
-    >>> pp(attrs.asdict(my_filter))
+    >>> pprint_attrs(my_filter)
     {'type': 'multi',
      'operator': 'or',
      'queries': [{'type': 'equals', 'field': 'stock', 'value': 1},
@@ -310,7 +291,7 @@ class MultiFilter:
     >>> my_filter = MultiFilter('duck', [EqualsFilter('stock', 1), EqualsFilter('availableStock', 10)])
     Traceback (most recent call last):
         ...
-    ValueError: 'operator' must be in ['and', 'or'] (got 'duck')
+    ValueError: ("'operator' must be in ['and', 'or'] (got 'duck')", ...)
 
     """
 
@@ -333,12 +314,9 @@ class PrefixFilter:
         field: str
         value: str
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test
     >>> my_filter = PrefixFilter('name', 'Lightweight')
-    >>> pp(attrs.asdict(my_filter))
+    >>> pprint_attrs(my_filter)
     {'type': 'prefix', 'field': 'name', 'value': 'Lightweight'}
 
     """
@@ -362,12 +340,9 @@ class SuffixFilter:
         field: str
         value: str
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test
     >>> my_filter = SuffixFilter('name', 'Lightweight')
-    >>> pp(attrs.asdict(my_filter))
+    >>> pprint_attrs(my_filter)
     {'type': 'suffix', 'field': 'name', 'value': 'Lightweight'}
 
     """

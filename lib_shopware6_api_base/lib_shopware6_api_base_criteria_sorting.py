@@ -6,10 +6,10 @@ import attrs
 
 # proj
 try:
-    from lib_shopware6_api_base_helpers import get_pretty_printer
+    from lib_shopware6_api_base_helpers import pprint_attrs
 except ImportError:  # pragma: no cover
     # Imports for Doctest
-    from .lib_shopware6_api_base_helpers import get_pretty_printer
+    from .lib_shopware6_api_base_helpers import pprint_attrs
 
 
 # FieldSorting{{{
@@ -27,12 +27,9 @@ class FieldSorting:
         order : str "ASC" or "DESC"
         naturalSorting : Optional[bool]
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test
     >>> my_sorting = FieldSorting('name', 'ASC', True)
-    >>> pp(attrs.asdict(my_sorting))
+    >>> pprint_attrs(my_sorting)
     {'field': 'name', 'order': 'ASC', 'naturalSorting': True}
 
     """
@@ -57,12 +54,9 @@ class AscFieldSorting:
         field : str
         naturalSorting : Optional[bool]
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test
     >>> my_sorting = AscFieldSorting('name', True)
-    >>> pp(attrs.asdict(my_sorting))
+    >>> pprint_attrs(my_sorting)
     {'field': 'name', 'order': 'ASC', 'naturalSorting': True}
 
     """
@@ -88,12 +82,9 @@ class DescFieldSorting:
         field : str
         naturalSorting : Optional[bool]
 
-    >>> # Setup
-    >>> pp = get_pretty_printer()
-
     >>> # Test
     >>> my_sorting = DescFieldSorting('name', True)
-    >>> pp(attrs.asdict(my_sorting))
+    >>> pprint_attrs(my_sorting)
     {'field': 'name', 'order': 'DESC', 'naturalSorting': True}
 
     """

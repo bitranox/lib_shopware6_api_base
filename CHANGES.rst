@@ -5,6 +5,11 @@ Changelog
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
 
+v2.1.5
+---------
+    - get rid of special pretty printer version for python 3.7 and below
+    - correct type for filter "ContainsFilter"
+
 v2.1.4
 ---------
 2023-10-18:

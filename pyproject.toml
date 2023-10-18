@@ -31,11 +31,10 @@ dependencies = [
     "click",
     "lib_detect_testenv",
     "oauthlib",
-    "pprint3x",
     "requests",
     "requests_oauthlib",
 ]
-version = "v2.1.4"
+version = "v2.1.5"
 # seems to be not allowed anymore
 # zip-save = false
 
