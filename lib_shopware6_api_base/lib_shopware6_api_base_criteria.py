@@ -309,13 +309,13 @@ class Criteria:
 
 
     @limit.validator      # noqa
-    def check_if_ids_are_set(self, attribute: attrs.Attribute, value: int) -> None:     # type: ignore  # noqa
+    def on_set_limit_check_if_ids_are_set(self, attribute: attrs.Attribute, value: int) -> None:     # type: ignore  # noqa
         if value is not None and len(self.ids):
             raise ValueError('You can use either "limit/page" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids')
 
 
     @page.validator      # noqa
-    def check_if_ids_are_set(self, attribute: attrs.Attribute, value: int) -> None:     # type: ignore  # noqa
+    def on_set_page_check_if_ids_are_set(self, attribute: attrs.Attribute, value: int) -> None:     # type: ignore  # noqa
         if value is not None and len(self.ids):
             raise ValueError('You can use either "limit/page" or "ids", but not both, see : https://github.com/bitranox/lib_shopware6_api_base#ids')
 
