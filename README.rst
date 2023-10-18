@@ -1912,7 +1912,7 @@ v2.1.5
 ---------
 2023-10-18:
     - get rid of special pretty printer version "pprint3x" for python 3.7 and below
-    - correct type for filter "ContainsFilter"
+    - correcting type hint for filter "ContainsFilter"
 
 v2.1.4
 ---------
