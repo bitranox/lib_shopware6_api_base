@@ -7,7 +7,6 @@ coloredlogs
 coverage
 flake8
 mypy
-pprint3x
 pytest
 pytest-cov
 pytest-runner
