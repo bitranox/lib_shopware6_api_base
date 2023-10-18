@@ -1,12 +1,11 @@
 # STDLIB
 import os
-from functools import lru_cache
 import json
 
 import logging
 import sys
 import time
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Union, cast   # noqa
 
 # EXT
 import oauthlib
@@ -57,9 +56,9 @@ class Shopware6StoreFrontClientBase(object):
         the Shopware6 Storefront Base API
 
         :param config:  You can pass a configuration object here.
-                        If not given and github actions is detected, or use_docker_test_container == True:
+                        If not given and gitHub actions is detected, or use_docker_test_container == True:
                             conf_shopware6_api_docker_testcontainer.py will be loaded automatically
-                        If not given and no github actions is detected:
+                        If not given and no gitHub actions is detected:
                             conf_shopware6_api_base_rotek.py will be loaded automatically
 
         :param use_docker_test_container:   if True, and no config is given, the dockware config will be loaded
@@ -92,7 +91,7 @@ class Shopware6StoreFrontClientBase(object):
             payload : a dictionary
             update_header_fields: allows to modify or add header fields
 
-        :returns
+        returns
             response_dict: dictionary with the response as dict
 
         """
@@ -110,7 +109,7 @@ class Shopware6StoreFrontClientBase(object):
             payload : a dictionary
             update_header_fields: allows to modify or add header fields
 
-        :returns
+        returns
             response_dict: dictionary with the response as dict
 
         >>> # Setup
@@ -140,7 +139,7 @@ class Shopware6StoreFrontClientBase(object):
             payload : a dictionary
             update_header_fields: allows to modify or add header fields
 
-        :returns
+        returns
             List[response_dict]: a list of dictionaries
 
         >>> # Setup
@@ -171,7 +170,7 @@ class Shopware6StoreFrontClientBase(object):
             payload : a dictionary
             update_header_fields: allows to modify or add header fields
 
-        :returns
+        returns
             response_dict: dictionary with the response as dict
 
         """
@@ -189,7 +188,7 @@ class Shopware6StoreFrontClientBase(object):
             payload : a dictionary
             update_header_fields: allows to modify or add header fields
 
-        :returns
+        returns
             response_dict: dictionary with the response as dict
 
         >>> # Setup
@@ -223,7 +222,7 @@ class Shopware6StoreFrontClientBase(object):
             payload : a dictionary
             update_header_fields: allows to modify or add header fields
 
-        :returns
+        returns
             response_dict: dictionary with the response as dict
 
         """
@@ -285,7 +284,7 @@ class Shopware6StoreFrontClientBase(object):
             payload : a dictionary
             update_header_fields : allows to modify or add header fields
 
-        :returns
+        returns
             response_dict: dictionary with the response as dict
 
 
@@ -344,7 +343,7 @@ class Shopware6StoreFrontClientBase(object):
         parameters:
             update_header_fields : allows to modify or add header fields
 
-        :returns the default header fields
+        returns the default header fields
 
 
         >>> my_api_client = Shopware6StoreFrontClientBase()
@@ -401,9 +400,9 @@ class Shopware6AdminAPIClientBase(object):
         the Shopware6 Admin Base API
 
         :param config:  You can pass a configuration object here.
-                If not given and github actions is detected, or use_docker_test_container == True:
+                If not given and gitHub actions is detected, or use_docker_test_container == True:
                     conf_shopware6_api_docker_testcontainer.py will be loaded automatically
-                If not given and no github actions is detected:
+                If not given and no gitHub actions is detected:
                     conf_shopware6_api_base_rotek.py will be loaded automatically
 
         :param use_docker_test_container:   if True, and no config is given, the dockware config will be loaded
@@ -431,7 +430,7 @@ class Shopware6AdminAPIClientBase(object):
             payload : a dictionary
             update_header_fields: allows to modify or add header fields
 
-        :returns
+        returns
             response_dict: dictionary with the response as dict
 
         >>> # Setup
@@ -483,7 +482,7 @@ class Shopware6AdminAPIClientBase(object):
             limit : the junk size
             update_header_fields: allows to modify or add header fields
 
-        :returns
+        returns
             response_dict: dictionary with the response as dict
 
         >>> # Setup
@@ -540,7 +539,7 @@ class Shopware6AdminAPIClientBase(object):
             additional_query_params: additional query parameters for patch, post, put, delete
             update_header_fields: allows to modify or add header fields
 
-        :returns
+        returns
             response_dict: dictionary with the response as dict
 
         """
@@ -574,7 +573,7 @@ class Shopware6AdminAPIClientBase(object):
             additional_query_params: additional query parameters for patch, post, put, delete
             update_header_fields: allows to modify or add header fields
 
-        :returns
+        returns
             response_dict: dictionary with the response as dict
 
         """
@@ -606,7 +605,7 @@ class Shopware6AdminAPIClientBase(object):
             junk_size : the junk size
             update_header_fields: allows to modify or add header fields
 
-        :returns
+        returns
             response_dict: dictionary with the response as dict
 
         >>> # Setup
@@ -660,7 +659,7 @@ class Shopware6AdminAPIClientBase(object):
             additional_query_params: additional query parameters for patch, post, put, delete
             update_header_fields: allows to modify or add header fields
 
-        :returns
+        returns
             response_dict: dictionary with the response as dict
 
         """
@@ -693,7 +692,7 @@ class Shopware6AdminAPIClientBase(object):
             additional_query_params: additional query parameters for patch, post, put, delete
             update_header_fields: allows to modify or add header fields
 
-        :returns
+        returns
             response_dict: dictionary with the response as dict
 
         """
@@ -718,21 +717,15 @@ class Shopware6AdminAPIClientBase(object):
         "page" will be ignored
 
         parameters:
-            http_method:
+            http_method: 'get', 'patch', 'post', 'put', 'delete'
             request_url: API Url, without the common api prefix
             payload : a dictionary
             junk_size : the junk size
             update_header_fields: allows to modify or add header fields
 
-        :returns
+        returns
             response_dict: dictionary with the response as dict
 
-
-        :param http_method:
-        :param request_url:
-        :param payload:
-        :param junk_size:
-        :return:
         """
         response_dict: Dict[str, Any] = dict()
         response_dict["data"] = list()
@@ -799,7 +792,7 @@ class Shopware6AdminAPIClientBase(object):
             additional_query_params: additional query parameters for patch, post, put, delete
             update_header_fields: allows to modify or add header fields
 
-        :returns
+        returns
             response_dict: dictionary with the response as dict
 
 
@@ -909,7 +902,7 @@ class Shopware6AdminAPIClientBase(object):
         update_header_fields: Optional[Dict[str, str]] = None,
     ) -> requests.Response:
         """
-        makes a request, needs a self.session to be set up and authenticated
+        makes a request, needs a "self.session" to be set up and authenticated
 
         parameters:
             http_method: 'get', 'patch', 'post', 'put', 'delete'
@@ -919,7 +912,7 @@ class Shopware6AdminAPIClientBase(object):
             additional_query_params: additional query parameters for patch, post, put, delete
             update_header_fields: allows to modify or add header fields
 
-        :returns
+        returns
             response_dict: dictionary with the response as dict
 
         see : https://docs.python-requests.org/en/latest/user/quickstart/
@@ -970,11 +963,11 @@ class Shopware6AdminAPIClientBase(object):
         """
         get access token, "Client Credentials Grant Type" or "Resource Owner Password Grant Type"
 
-        :parameters
+        parameters
             conf.is_grant_type_resource_owner
 
         :return:
-            the token, also saved in self.token
+            the token, also saved in "self.token"
 
         >>> # Setup
         >>> my_api_client = Shopware6AdminAPIClientBase()
@@ -1013,16 +1006,16 @@ class Shopware6AdminAPIClientBase(object):
         setup via Web Administration Interface > settings > system > integration: "access_id" and "access_secret"
         or directly via URL : https://shop.yourdomain.com/admin#/sw/integration/index
 
-        :parameter
-            self.shopware_api_url   the api url, like : 'https://shop.yourdomain.com/api'
-            self.client_id          the client ID, setup via Web Administration Interface > settings > system > integration: "access_id"
-                                    or directly via URL : https://shop.yourdomain.com/admin#/sw/integration/index
+        parameter
+            self.config.shopware_api_url    the api url, like : 'https://shop.yourdomain.com/api'
+            self.config.client_id           the client ID, setup via Web Administration Interface > settings > system > integration: "access_id"
+                                            or directly via URL : https://shop.yourdomain.com/admin#/sw/integration/index
 
-            self.client_secret      the client secret, setup via Web Administration Interface > settings > system > integration: "access_secret"
-                                    or directly via URL : https://shop.yourdomain.com/admin#/sw/integration/index
+            self.config.client_secret       the client secret, setup via Web Administration Interface > settings > system > integration: "access_secret"
+                                            or directly via URL : https://shop.yourdomain.com/admin#/sw/integration/index
 
-        :returns
-            self.token
+        returns
+            "self.token"
 
         >>> # Setup
         >>> my_api_client = Shopware6AdminAPIClientBase()
@@ -1088,12 +1081,12 @@ class Shopware6AdminAPIClientBase(object):
         see : https://shopware.stoplight.io/docs/admin-api/ZG9jOjEwODA3NjQx-authentication-and-authorisation
         setup at admin/settings/system/user: "access_id" and "access_secret"
 
-        :parameter
-            self.shopware_api_url   the api url, like : 'https://shop.yourdomain.com/api'
-            self.username           the username, set up at setup at admin/settings/system/users
-            self.password           the password, set up at setup at admin/settings/system/users
+        parameter
+            self.config.shopware_api_url   the api url, like : 'https://shop.yourdomain.com/api'
+            self.config.username           the username, set up at setup at admin/settings/system/users
+            self.config.password           the password, set up at setup at admin/settings/system/users
 
-        :returns
+        returns and sets
             self.token
 
 
@@ -1202,10 +1195,10 @@ class Shopware6AdminAPIClientBase(object):
         saves the token - this is needed for automatically refreshing the "resource owner" access token.
         the "user_credentials" can not be refreshed
 
-        :parameter
+        parameter
             token:             the token to be saved
 
-        :returns
+        returns
             None
 
         """
@@ -1224,8 +1217,8 @@ class Shopware6AdminAPIClientBase(object):
         formatted url to make a request
 
         :parameter
-            request_url:             the request url, for instance "oauth/token"
-            self.shopware_api_url:          the api url, for instance https://your.shop-domain.com/api
+            request_url:                        the request url, for instance "oauth/token"
+            self.config.shopware_api_url:       the api url, for instance https://your.shop-domain.com/api
 
         :returns
             the formatted url, like  https://your.shop-domain.com/api/oauth/token
@@ -1378,7 +1371,7 @@ def _load_config_for_rotek_production() -> ConfShopware6ApiBase:
 
 def _is_github_actions() -> bool:
     """
-    True if run on github actions
+    True if run on gitHub actions
     >>> discard = _is_github_actions()
     """
     return os.getenv("GITHUB_ACTIONS", "false").lower() == "true"

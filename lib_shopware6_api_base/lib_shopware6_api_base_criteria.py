@@ -1,15 +1,8 @@
 # STDLIB
-from datetime import datetime
-import sys
-from typing import Any, Dict, List, Optional, Union
-
-# OWN
-import lib_detect_testenv
+from typing import Any, Dict, List, Optional, Union     # noqa
 
 # EXT
-import attrs
-from attrs import validators
-
+import attrs    # noqa
 
 # proj
 try:
@@ -38,7 +31,7 @@ class Query:
     Any filter type can be used for the query. A score has to be defined for each query.
     The sum of the matching queries then results in the total _score value.
 
-    :parameter
+    parameter
         score   int
         query   FilterType
 
@@ -115,20 +108,20 @@ class Criteria:
 
     >>> # Test Filter aggregation
     >>> my_criteria = Criteria(limit=1, includes={'product':['id', 'name']},
-    ...     aggregations=FilterAggregation(name='active-price-avg',
-    ...                                    filter=EqualsFilter(field='active', value=True),
-    ...                                    aggregation=AvgAggregation(name='avg-price',field='price')))
+    ...     aggregations=[FilterAggregation(name='active-price-avg',
+    ...                                    filter=[EqualsFilter(field='active', value=True)],
+    ...                                    aggregation=AvgAggregation(name='avg-price',field='price'))])
     >>> pprint_attrs(my_criteria)
     {'limit': 1,
      'page': None,
-     'aggregations': {'name': 'active-price-avg',
-                      'type': 'filter',
-                      'filter': {'type': 'equals',
-                                 'field': 'active',
-                                 'value': True},
-                      'aggregation': {'name': 'avg-price',
-                                      'type': 'avg',
-                                      'field': 'price'}},
+     'aggregations': [{'name': 'active-price-avg',
+                       'type': 'filter',
+                       'filter': [{'type': 'equals',
+                                   'field': 'active',
+                                   'value': True}],
+                       'aggregation': {'name': 'avg-price',
+                                       'type': 'avg',
+                                       'field': 'price'}}],
      'includes': {'product': ['id', 'name']},
      'term': None,
      'total_count_mode': None}
@@ -290,7 +283,7 @@ class Criteria:
         return result
 
 
-def _is_not_empty(attribute: Any, value: Any) -> bool:
+def _is_not_empty(attribute: Any, value: Any) -> bool:  # noqa
     """Filter out empty Lists and Dictionaries"""
     if value == dict():
         return False

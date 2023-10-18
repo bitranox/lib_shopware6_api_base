@@ -42,7 +42,7 @@ def cli_main(traceback: Optional[bool] = None) -> None:
 
 @cli_main.command("info", context_settings=CLICK_CONTEXT_SETTINGS)  # type: ignore
 def cli_info() -> None:
-    """get program informations"""
+    """get program information"""
     info()
 
 

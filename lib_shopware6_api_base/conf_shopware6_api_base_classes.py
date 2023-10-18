@@ -1,11 +1,7 @@
 # STDLIB
-from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
-
 # EXT
 # config_class{{{
 import attrs
-from attrs import validators
 
 
 @attrs.define

@@ -1,6 +1,7 @@
 # the configuration file for the dockware docker test container.
 
 
+# noinspection GrazieInspection
 """
 # config_dockware{{{
 
@@ -8,7 +9,7 @@ for testing we use the dockware docker container,
 see : `dockware <https://developer.shopware.com/docs/guides/installation/dockware>`_
 
 
-on github actions the dockware docker test container is installed as a service and is available
+on gitHub actions the dockware docker test container is installed as a service and is available
 for communication on localhost
 
 You can start the dockware container locally with the command : sudo docker run -d --rm -p 80:80 --name dockware dockware/dev:latest

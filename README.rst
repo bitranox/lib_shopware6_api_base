@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v2.1.5 as of 2023-10-18 see `Changelog`_
+Version v2.1.6 as of 2023-10-18 see `Changelog`_
 
 |build_badge| |codeql| |license| |pypi|
 |pypi-downloads| |black| |codecov| |cc_maintain| |cc_issues| |cc_coverage| |snyk|
@@ -142,7 +142,6 @@ configuration
 .. code-block:: python
 
     import attrs
-    from attrs import validators
 
 
     @attrs.define
@@ -210,7 +209,7 @@ for testing we use the dockware docker container,
 see : `dockware <https://developer.shopware.com/docs/guides/installation/dockware>`_
 
 
-on github actions the dockware docker test container is installed as a service and is available
+on gitHub actions the dockware docker test container is installed as a service and is available
 for communication on localhost
 
 You can start the dockware container locally with the command : sudo docker run -d --rm -p 80:80 --name dockware dockware/dev:latest
@@ -289,9 +288,9 @@ Store API
             the Shopware6 Storefront Base API
 
             :param config:  You can pass a configuration object here.
-                            If not given and github actions is detected, or use_docker_test_container == True:
+                            If not given and gitHub actions is detected, or use_docker_test_container == True:
                                 conf_shopware6_api_docker_testcontainer.py will be loaded automatically
-                            If not given and no github actions is detected:
+                            If not given and no gitHub actions is detected:
                                 conf_shopware6_api_base_rotek.py will be loaded automatically
 
             :param use_docker_test_container:   if True, and no config is given, the dockware config will be loaded
@@ -319,7 +318,7 @@ Store API
                 payload : a dictionary
                 update_header_fields: allows to modify or add header fields
 
-            :returns
+            returns
                 response_dict: dictionary with the response as dict
 
             >>> # Setup
@@ -349,7 +348,7 @@ Store API
                 payload : a dictionary
                 update_header_fields: allows to modify or add header fields
 
-            :returns
+            returns
                 List[response_dict]: a list of dictionaries
 
             >>> # Setup
@@ -380,7 +379,7 @@ Store API
                 payload : a dictionary
                 update_header_fields: allows to modify or add header fields
 
-            :returns
+            returns
                 response_dict: dictionary with the response as dict
 
             """
@@ -398,7 +397,7 @@ Store API
                 payload : a dictionary
                 update_header_fields: allows to modify or add header fields
 
-            :returns
+            returns
                 response_dict: dictionary with the response as dict
 
             >>> # Setup
@@ -431,7 +430,7 @@ Store API
                 payload : a dictionary
                 update_header_fields: allows to modify or add header fields
 
-            :returns
+            returns
                 response_dict: dictionary with the response as dict
 
             """
@@ -450,7 +449,7 @@ Store API
                 payload : a dictionary
                 update_header_fields: allows to modify or add header fields
 
-            :returns
+            returns
                 response_dict: dictionary with the response as dict
 
             """
@@ -466,9 +465,9 @@ Admin API
             the Shopware6 Admin Base API
 
             :param config:  You can pass a configuration object here.
-                    If not given and github actions is detected, or use_docker_test_container == True:
+                    If not given and gitHub actions is detected, or use_docker_test_container == True:
                         conf_shopware6_api_docker_testcontainer.py will be loaded automatically
-                    If not given and no github actions is detected:
+                    If not given and no gitHub actions is detected:
                         conf_shopware6_api_base_rotek.py will be loaded automatically
 
             :param use_docker_test_container:   if True, and no config is given, the dockware config will be loaded
@@ -491,7 +490,7 @@ Admin API
                 payload : a dictionary
                 update_header_fields: allows to modify or add header fields
 
-            :returns
+            returns
                 response_dict: dictionary with the response as dict
 
             >>> # Setup
@@ -543,7 +542,7 @@ Admin API
                 limit : the junk size
                 update_header_fields: allows to modify or add header fields
 
-            :returns
+            returns
                 response_dict: dictionary with the response as dict
 
             >>> # Setup
@@ -598,7 +597,7 @@ Admin API
                 additional_query_params: additional query parameters for patch, post, put, delete
                 update_header_fields: allows to modify or add header fields
 
-            :returns
+            returns
                 response_dict: dictionary with the response as dict
 
             """
@@ -625,7 +624,7 @@ Admin API
                 additional_query_params: additional query parameters for patch, post, put, delete
                 update_header_fields: allows to modify or add header fields
 
-            :returns
+            returns
                 response_dict: dictionary with the response as dict
 
             """
@@ -650,7 +649,7 @@ Admin API
                 junk_size : the junk size
                 update_header_fields: allows to modify or add header fields
 
-            :returns
+            returns
                 response_dict: dictionary with the response as dict
 
             >>> # Setup
@@ -702,7 +701,7 @@ Admin API
                 additional_query_params: additional query parameters for patch, post, put, delete
                 update_header_fields: allows to modify or add header fields
 
-            :returns
+            returns
                 response_dict: dictionary with the response as dict
 
             """
@@ -728,7 +727,7 @@ Admin API
                 additional_query_params: additional query parameters for patch, post, put, delete
                 update_header_fields: allows to modify or add header fields
 
-            :returns
+            returns
                 response_dict: dictionary with the response as dict
 
             """
@@ -790,20 +789,20 @@ a search criteria follows the following schema:
 
         >>> # Test Filter aggregation
         >>> my_criteria = Criteria(limit=1, includes={'product':['id', 'name']},
-        ...     aggregations=FilterAggregation(name='active-price-avg',
-        ...                                    filter=EqualsFilter(field='active', value=True),
-        ...                                    aggregation=AvgAggregation(name='avg-price',field='price')))
+        ...     aggregations=[FilterAggregation(name='active-price-avg',
+        ...                                    filter=[EqualsFilter(field='active', value=True)],
+        ...                                    aggregation=AvgAggregation(name='avg-price',field='price'))])
         >>> pprint_attrs(my_criteria)
         {'limit': 1,
          'page': None,
-         'aggregations': {'name': 'active-price-avg',
-                          'type': 'filter',
-                          'filter': {'type': 'equals',
-                                     'field': 'active',
-                                     'value': True},
-                          'aggregation': {'name': 'avg-price',
-                                          'type': 'avg',
-                                          'field': 'price'}},
+         'aggregations': [{'name': 'active-price-avg',
+                           'type': 'filter',
+                           'filter': [{'type': 'equals',
+                                       'field': 'active',
+                                       'value': True}],
+                           'aggregation': {'name': 'avg-price',
+                                           'type': 'avg',
+                                           'field': 'price'}}],
          'includes': {'product': ['id', 'name']},
          'term': None,
          'total_count_mode': None}
@@ -1156,21 +1155,21 @@ back to `Aggregations`_
         are only used when calculating this aggregation.
         The filters have no effect on other aggregations or on the result of the search.
 
-        :parameter:
+        parameter:
             name: str
             sort: SortType
-            filter: FilterType
+            filter: List of FilterType
             aggregation : AggregationType
 
         >>> # Test
         >>> my_aggregation = FilterAggregation(
         ...     name='active-price-avg',
-        ...     filter=EqualsFilter(field='active', value=True),
+        ...     filter=[EqualsFilter(field='active', value=True)],
         ...     aggregation=AvgAggregation(name='avg-price',field='price'))
         >>> pprint_attrs(my_aggregation)
         {'name': 'active-price-avg',
          'type': 'filter',
-         'filter': {'type': 'equals', 'field': 'active', 'value': True},
+         'filter': [{'type': 'equals', 'field': 'active', 'value': True}],
          'aggregation': {'name': 'avg-price', 'type': 'avg', 'field': 'price'}}
 
         """
@@ -1661,7 +1660,7 @@ The sum of the matching queries then results in the total _score value.
         Any filter type can be used for the query. A score has to be defined for each query.
         The sum of the matching queries then results in the total _score value.
 
-        :parameter
+        parameter
             score   int
             query   FilterType
 
@@ -1711,7 +1710,7 @@ FieldSorting
         The order parameter defines the sort direction.
         The parameter naturalSorting allows to use a Natural Sorting Algorithm
 
-        :parameter
+        parameter:
             field : str
             order : str "ASC" or "DESC"
             naturalSorting : Optional[bool]
@@ -1737,7 +1736,7 @@ AscFieldSorting
         The order parameter defines the sort direction.
         The parameter naturalSorting allows to use a Natural Sorting Algorithm
 
-        :parameter
+        parameter:
             field : str
             naturalSorting : Optional[bool]
 
@@ -1762,7 +1761,7 @@ DescFieldSorting
         The order parameter defines the sort direction.
         The parameter naturalSorting allows to use a Natural Sorting Algorithm
 
-        :parameter
+        parameter:
             field : str
             naturalSorting : Optional[bool]
 
@@ -1788,7 +1787,7 @@ Usage from Commandline
      -h, --help                    Show this message and exit.
 
    Commands:
-     info  get program informations
+     info  get program information
 
 Installation and Upgrade
 ------------------------
@@ -1907,6 +1906,11 @@ Changelog
 - new MAJOR version for incompatible API changes,
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
+
+v2.1.6
+---------
+2023-10-18:
+    - correcting "Filter Aggregation", some typos correction
 
 v2.1.5
 ---------

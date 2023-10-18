@@ -34,7 +34,7 @@ dependencies = [
     "requests",
     "requests_oauthlib",
 ]
-version = "v2.1.5"
+version = "v2.1.6"
 # seems to be not allowed anymore
 # zip-save = false
 

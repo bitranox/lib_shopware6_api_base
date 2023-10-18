@@ -22,7 +22,7 @@ class FieldSorting:
     The order parameter defines the sort direction.
     The parameter naturalSorting allows to use a Natural Sorting Algorithm
 
-    :parameter
+    parameter:
         field : str
         order : str "ASC" or "DESC"
         naturalSorting : Optional[bool]
@@ -50,7 +50,7 @@ class AscFieldSorting:
     The order parameter defines the sort direction.
     The parameter naturalSorting allows to use a Natural Sorting Algorithm
 
-    :parameter
+    parameter:
         field : str
         naturalSorting : Optional[bool]
 
@@ -78,7 +78,7 @@ class DescFieldSorting:
     The order parameter defines the sort direction.
     The parameter naturalSorting allows to use a Natural Sorting Algorithm
 
-    :parameter
+    parameter:
         field : str
         naturalSorting : Optional[bool]
 

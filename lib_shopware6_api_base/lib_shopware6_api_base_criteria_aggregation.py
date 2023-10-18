@@ -257,21 +257,21 @@ class FilterAggregation:
     are only used when calculating this aggregation.
     The filters have no effect on other aggregations or on the result of the search.
 
-    :parameter:
+    parameter:
         name: str
         sort: SortType
-        filter: FilterType
+        filter: List of FilterType
         aggregation : AggregationType
 
     >>> # Test
     >>> my_aggregation = FilterAggregation(
     ...     name='active-price-avg',
-    ...     filter=EqualsFilter(field='active', value=True),
+    ...     filter=[EqualsFilter(field='active', value=True)],
     ...     aggregation=AvgAggregation(name='avg-price',field='price'))
     >>> pprint_attrs(my_aggregation)
     {'name': 'active-price-avg',
      'type': 'filter',
-     'filter': {'type': 'equals', 'field': 'active', 'value': True},
+     'filter': [{'type': 'equals', 'field': 'active', 'value': True}],
      'aggregation': {'name': 'avg-price', 'type': 'avg', 'field': 'price'}}
 
     """
@@ -280,7 +280,7 @@ class FilterAggregation:
 
     name: str = attrs.field(validator=attrs.validators.instance_of(str))
     type: str = attrs.field(init=False, default="filter")
-    filter: FilterType
+    filter: List[FilterType]
     aggregation: "AggregationType"
 
 
