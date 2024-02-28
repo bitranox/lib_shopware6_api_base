@@ -5,4 +5,4 @@ cli_exit_tools
 lib_detect_testenv
 oauthlib
 requests
-requests_oauthlib
+requests-oauthlib

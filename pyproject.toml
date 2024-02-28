@@ -32,7 +32,7 @@ dependencies = [
     "lib_detect_testenv",
     "oauthlib",
     "requests",
-    "requests_oauthlib",
+    "requests-oauthlib",
 ]
 version = "v2.1.7"
 # seems to be not allowed anymore
