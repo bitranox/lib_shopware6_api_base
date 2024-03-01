@@ -313,20 +313,20 @@ class Shopware6StoreFrontClientBase(object):
         """
         if isinstance(payload, Criteria):
             payload = payload.get_dict()
-        formatted_request_url = self._format_storefront_api_url(request_url)
+        storefront_api_url = self._build_storefront_api_url(endpoint=request_url)
         response: requests.Response = requests.Response()
         headers = self._get_headers(update_header_fields=update_header_fields)
 
         if http_method == "get":
-            response = requests.request("GET", formatted_request_url, params=payload, headers=headers)
+            response = requests.request("GET", storefront_api_url, params=payload, headers=headers)
         elif http_method == "patch":
-            response = requests.request("PATCH", formatted_request_url, data=json.dumps(payload), headers=headers)
+            response = requests.request("PATCH", storefront_api_url, data=json.dumps(payload), headers=headers)
         elif http_method == "post":
-            response = requests.request("POST", formatted_request_url, data=json.dumps(payload), headers=headers)
+            response = requests.request("POST", storefront_api_url, data=json.dumps(payload), headers=headers)
         elif http_method == "put":
-            response = requests.request("PUT", formatted_request_url, data=json.dumps(payload), headers=headers)
+            response = requests.request("PUT", storefront_api_url, data=json.dumps(payload), headers=headers)
         elif http_method == "delete":
-            response = requests.request("DELETE", formatted_request_url, headers=headers)
+            response = requests.request("DELETE", storefront_api_url, headers=headers)
 
         try:
             response.raise_for_status()
@@ -373,24 +373,25 @@ class Shopware6StoreFrontClientBase(object):
             headers.update(update_header_fields)
         return headers
 
-    def _format_storefront_api_url(self, request_url: str) -> str:
+    def _build_storefront_api_url(self, endpoint: str) -> str:
         """
-        formatted url to make a request
+        Constructs a fully qualified URL for accessing the Storefront API.
 
-        :parameter
-            request_url:                        the request url, for instance "oauth/token"
-            self.shopware_storefront_api_url:   the api url, for instance https://your.shop-domain.com/store-api
+        Parameters:
+            endpoint: A string representing the specific API endpoint to be accessed, e.g., "oauth/token".
+            self.config.shopware_storefront_api_url: The base URL of the Storefront API, e.g., https://your.shop-domain.com/store-api.
 
-        :returns
-            the formatted url, like  https://your.shop-domain.com/store-api/product
+        Returns:
+            A string containing the fully qualified URL to the specified API endpoint, formatted as https://your.shop-domain.com/store-api/endpoint.
 
+        Example:
         >>> my_api_client = Shopware6StoreFrontClientBase()
-        >>> my_api_client._format_storefront_api_url('test')
+        >>> my_api_client._build_storefront_api_url('test')
         'http.../store-api/test'
 
         """
-        request_url = request_url.lstrip("/")
-        return f"{self.config.shopware_storefront_api_url}/{request_url}"
+        endpoint = endpoint.lstrip("/")
+        return f"{self.config.shopware_storefront_api_url}/{endpoint}"
 
 
 # admin_api{{{
