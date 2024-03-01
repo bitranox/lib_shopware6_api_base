@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v2.1.7 as of 2023-10-18 see `Changelog`_
+Version v2.1.7 as of 2024-03-01 see `Changelog`_
 
 |build_badge| |codeql| |license| |pypi|
 |pypi-downloads| |black| |codecov| |cc_maintain| |cc_issues| |cc_coverage| |snyk|
@@ -70,7 +70,7 @@ automated tests, Github Actions, Documentation, Badges, etc. are managed with `P
 
 Python version required: 3.8.0 or newer
 
-tested on recent linux with python 3.8, 3.9, 3.10, 3.11, 3.12-dev, pypy-3.9, pypy-3.10 - architectures: amd64
+tested on recent linux with python 3.8, 3.9, 3.10, 3.11, 3.12, pypy-3.9, pypy-3.10 - architectures: amd64
 
 `100% code coverage <https://codeclimate.com/github/bitranox/lib_shopware6_api_base/test_coverage>`_, flake8 style checking ,mypy static type checking ,tested under `Linux <https://github.com/bitranox/lib_shopware6_api_base/actions/workflows/python-package.yml>`_, automatic daily builds and monitoring
 
@@ -871,8 +871,8 @@ a search criteria follows the following schema:
         >>> my_criteria = Criteria()
         >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
         >>> pprint_attrs(my_criteria)
-        {'limit': 3,
-         'page': 1,
+        {'limit': None,
+         'page': None,
          'ids': ['012cd563cf8e4f0384eed93b5201cc98',
                  '075fb241b769444bb72431f797fd5776',
                  '090fcc2099794771935acf814e3fdb24'],
@@ -1603,8 +1603,8 @@ Please note that as soon as You use ids, limit and page does not apply anymore !
         >>> my_criteria = Criteria()
         >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
         >>> pprint_attrs(my_criteria)
-        {'limit': 3,
-         'page': 1,
+        {'limit': None,
+         'page': None,
          'ids': ['012cd563cf8e4f0384eed93b5201cc98',
                  '075fb241b769444bb72431f797fd5776',
                  '090fcc2099794771935acf814e3fdb24'],
@@ -1832,13 +1832,12 @@ Usage from Commandline
 Installation and Upgrade
 ------------------------
 
-- Before You start, its highly recommended to update pip and setup tools:
+- Before You start, its highly recommended to update pip:
 
 
 .. code-block::
 
     python -m pip --upgrade pip
-    python -m pip --upgrade setuptools
 
 - to install the latest release from PyPi via pip (recommended):
 
@@ -1920,7 +1919,7 @@ following modules will be automatically installed :
     lib_detect_testenv
     oauthlib
     requests
-    requests_oauthlib
+    requests-oauthlib
 
 Acknowledgements
 ----------------

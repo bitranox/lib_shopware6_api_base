@@ -50,7 +50,7 @@ jobs:
 
         # MYPY tests
         MYPY_DO_TESTS: "True"
-        MYPY_OPTIONS: "--follow-imports=normal --ignore-missing-imports --implicit-reexport --install-types --no-warn-unused-ignores --non-interactive --strict"
+        MYPY_OPTIONS: "--follow-imports=normal --ignore-missing-imports --install-types --no-warn-unused-ignores --non-interactive --strict"
         MYPYPATH: "./.3rd_party_stubs"
 
         # coverage
@@ -70,7 +70,7 @@ jobs:
         CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         # make PyPi API token available in Environment
         PYPI_UPLOAD_API_TOKEN: ${{ secrets.PYPI_UPLOAD_API_TOKEN }}
-
+        # additional Environment Variables:
 
     strategy:
       matrix:
@@ -124,7 +124,7 @@ jobs:
               DO_CLI_TEST: "True"
 
           - os: ubuntu-latest
-            python-version: "3.12-dev"
+            python-version: "3.12"
             env:
               BUILD_DOCS: "True"
               BUILD: "True"  
@@ -161,11 +161,11 @@ jobs:
 
     steps:
     # see : https://github.com/actions/checkout
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setting up Python ${{ matrix.python-version }}
       # see: https://github.com/actions/setup-python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
 
