@@ -5,6 +5,11 @@ Changelog
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
 
+v2.1.8
+---------
+2024-09-29:
+    - add example for /search/order via post request
+
 v2.1.7
 ---------
 2023-10-18:

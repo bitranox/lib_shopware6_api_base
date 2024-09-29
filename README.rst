@@ -2,7 +2,7 @@ lib_shopware6_api_base
 ======================
 
 
-Version v2.1.7 as of 2024-03-01 see `Changelog`_
+Version v2.1.8 as of 2024-09-29 see `Changelog`_
 
 |build_badge| |codeql| |license| |pypi|
 |pypi-downloads| |black| |codecov| |cc_maintain| |cc_issues| |cc_coverage| |snyk|
@@ -571,8 +571,6 @@ Admin API
             >>> my_payload=Criteria()
             >>> my_response_dict = my_api_client.request_get_paginated(request_url='product', payload=my_payload, junk_size=10)
             >>> assert 5 < len(my_response_dict['data'])
-
-
             """
 
 - Admin API PATCH
@@ -676,6 +674,36 @@ Admin API
             >>> my_response_dict = my_api_client.request_post_paginated(request_url=my_url, payload=my_payload, junk_size=3)
             >>> assert 4 == len(my_response_dict['data'])
 
+            >>> # search for orders
+            >>> # test https://github.com/bitranox/lib_shopware6_api_base/issues/11
+            >>> import pprint
+            >>> date_from = '2024-09-29T00:00:00.000Z'
+            >>> date_to = '2024-09-29T23:59:59.999Z'
+            >>> my_criteria = Criteria()
+            >>> my_criteria.filter.append(RangeFilter(field="orderDate", parameters = {'gte': date_from, 'lte': date_to}))
+            >>> my_criteria.filter.append(MultiFilter('or', [
+            ...     EqualsFilter(field='documents.documentType.technicalName', value='invoice'),
+            ...     EqualsFilter(field='documents.documentType.technicalName', value='storno')]))
+            >>> pprint_attrs(my_criteria)
+            {'limit': None,
+             'page': None,
+             'filter': [{'type': 'range',
+                         'field': 'orderDate',
+                         'parameters': {'gte': '2024-09-29T00:00:00.000Z',
+                                        'lte': '2024-09-29T23:59:59.999Z'}},
+                        {'type': 'multi',
+                         'operator': 'or',
+                         'queries': [{'type': 'equals',
+                                      'field': 'documents.documentType.technicalName',
+                                      'value': 'invoice'},
+                                     {'type': 'equals',
+                                      'field': 'documents.documentType.technicalName',
+                                      'value': 'storno'}]}],
+             'term': None,
+             'total_count_mode': None}
+            >>> my_response_dict = my_api_client.request_post_paginated(request_url='search/order', payload=my_criteria)
+            >>> pprint.pprint(my_response_dict)
+            {'data': []}
             """
 
 - Admin API PUT
@@ -1945,6 +1973,11 @@ Changelog
 - new MAJOR version for incompatible API changes,
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
+
+v2.1.8
+---------
+2024-09-29:
+    - add example for /search/order via post request
 
 v2.1.7
 ---------
