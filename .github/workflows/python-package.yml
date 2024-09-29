@@ -68,6 +68,8 @@ jobs:
         RST_INCLUDE_TARGET: "./README.rst"
         # make Code Coverage Secret available in Environment
         CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        CODECOV_TOKEN: ${{ secrets.CC_TEST_REPORTER_ID }}
+
         # make PyPi API token available in Environment
         PYPI_UPLOAD_API_TOKEN: ${{ secrets.PYPI_UPLOAD_API_TOKEN }}
         # additional Environment Variables:
