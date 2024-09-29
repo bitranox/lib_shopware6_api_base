@@ -157,7 +157,7 @@ jobs:
               DO_CLI_TEST: "True"
 
           - os: ubuntu-latest
-            python-version: "graalpy"
+            python-version: "graalpy-24.1"
             env:
               BUILD_DOCS: "False"
               BUILD: "True"
