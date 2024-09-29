@@ -5,6 +5,11 @@ Changelog
 - new MINOR version for added functionality in a backwards compatible manner
 - new PATCH version for backwards compatible bug fixes
 
+v2.1.9
+---------
+2024-09-29:
+    - add graalpy tests
+
 v2.1.8
 ---------
 2024-09-29:
