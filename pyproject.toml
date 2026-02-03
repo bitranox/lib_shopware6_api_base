@@ -62,8 +62,8 @@ dev = [
 ]
 
 [project.scripts]
-lib_shopware6_api_base = "lib_shopware6_api_base.lib_shopware6_api_base_cli:cli_main"
-lib-shopware6-api-base = "lib_shopware6_api_base.lib_shopware6_api_base_cli:cli_main"
+lib_shopware6_api_base = "lib_shopware6_api_base.lib_shopware6_api_base_cli:main"
+lib-shopware6-api-base = "lib_shopware6_api_base.lib_shopware6_api_base_cli:main"
 
 [build-system]
 requires = ["hatchling>=1.28.0"]
@@ -124,6 +124,8 @@ convention = "google"
 "scripts/*.py" = ["T20", "S101", "S603", "S607", "ERA001", "FBT001", "FBT002", "FBT003", "PERF203", "PLR0912", "PLR0913", "PLR0915", "PLR2004", "RUF012"]
 # Tests: assert is standard, test fixtures have passwords, magic values are clearer inline, temp paths are fine
 "tests/*.py" = ["T20", "S101", "S105", "S106", "S108", "FBT001", "FBT003", "PLR0913", "PLR2004"]
+# CLI module: boolean flags from click decorators, exception mapper with multiple return statements
+"src/lib_shopware6_api_base/lib_shopware6_api_base_cli.py" = ["FBT001", "PLR0911"]
 
 [tool.pyright]
 typeCheckingMode = "strict"

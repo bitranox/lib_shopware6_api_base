@@ -7,6 +7,7 @@ from .conf_shopware6_api_base_classes import (
     load_config_from_env,
     require_config_from_env,
 )
+from .exit_codes import ExitCode
 from .lib_shopware6_api_base import *
 from .lib_shopware6_api_base_criteria import *
 
