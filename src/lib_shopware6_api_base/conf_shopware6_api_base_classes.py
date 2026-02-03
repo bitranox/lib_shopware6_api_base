@@ -128,6 +128,16 @@ class ConfShopware6ApiBase(BaseSettings):
     # WARNING: Only set to "1" for local development/testing!
     insecure_transport: str = "0"
 
+    # HTTP redirect behavior
+    # Set to True to follow redirects automatically (may expose auth tokens to redirect targets)
+    # Default is False for security - redirects are not followed
+    follow_redirects: bool = False
+
+    # HTTP request/response logging
+    # Set to True to enable debug logging of all HTTP requests and responses
+    # Useful for debugging API issues, but may expose sensitive data in logs
+    enable_request_logging: bool = False
+
     @field_validator("grant_type", mode="before")
     @classmethod
     def parse_grant_type(cls, v: str | GrantType) -> GrantType:

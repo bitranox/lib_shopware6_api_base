@@ -1,0 +1,16 @@
+{
+  "python.defaultInterpreterPath": "/usr/local/bin/python",
+  "python.analysis.typeCheckingMode": "strict",
+  "python.analysis.extraPaths": ["./src"],
+  "jupyter.alwaysTrustNotebooks": true,
+  "jupyter.kernelPickerType": "OnlyRecommended",
+  "jupyter.askForKernelRestart": false,
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    }
+  }
+}

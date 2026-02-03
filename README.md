@@ -4,7 +4,7 @@
 [![CI](https://github.com/bitranox/lib_shopware6_api_base/actions/workflows/cicd_docker.yml/badge.svg)](https://github.com/bitranox/lib_shopware6_api_base/actions/workflows/cicd_docker.yml)
 [![CodeQL](https://github.com/bitranox/lib_shopware6_api_base/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/bitranox/lib_shopware6_api_base/actions/workflows/codeql-analysis.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Open in Codespaces](https://img.shields.io/badge/Codespaces-Open-blue?logo=github&logoColor=white&style=flat-square)](https://codespaces.new/bitranox/bmk?quickstart=1)
+[![Open in Codespaces](https://img.shields.io/badge/Codespaces-Open-blue?logo=github&logoColor=white&style=flat-square)](https://codespaces.new/bitranox/lib_shopware6_api_base?quickstart=1)
 [![PyPI](https://img.shields.io/pypi/v/lib_shopware6_api_base.svg)](https://pypi.org/project/lib_shopware6_api_base/)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/lib_shopware6_api_base.svg)](https://pypi.org/project/lib_shopware6_api_base/)
 [![Code Style: Ruff](https://img.shields.io/badge/Code%20Style-Ruff-46A3FF?logo=ruff&labelColor=000)](https://docs.astral.sh/ruff/)
@@ -31,7 +31,7 @@ This is the base abstraction layer. For higher-level functions, see [lib_shopwar
 - Migrated OAuth2 from `oauthlib` to `authlib` (OAuth 2.1 compliant)
 - Minimum Python version raised to 3.10+
 - Filter/Criteria classes now require keyword arguments: `EqualsFilter(field="x", value=1)` instead of `EqualsFilter("x", 1)`
-- **Environment variables now use `SHOPWARE_` prefix** to avoid collision with system variables (e.g., Windows `USERNAME`). Update your `.env` files: `USERNAME` → `SHOPWARE_USERNAME`, `PASSWORD` → `SHOPWARE_PASSWORD`, etc.
+- **Environment variables use `SHOPWARE_` prefix** to avoid collision with system variables (e.g., Windows `USERNAME`).
 
 **New Features:**
 - `load_config_from_env()` and `require_config_from_env()` for .env file loading
@@ -354,6 +354,43 @@ criteria = Criteria()
 criteria.associations["manufacturer"] = Criteria()
 criteria.associations["categories"] = Criteria(limit=5)
 ```
+
+---
+
+## Error Handling
+
+The library provides specific exception classes for different error scenarios:
+
+```python
+from lib_shopware6_api_base import (
+    ShopwareAPIError,
+    ConfigurationError,
+    Shopware6AdminAPIClientBase,
+    load_config_from_env,
+)
+
+# Handle configuration errors
+try:
+    config = load_config_from_env("/path/to/missing.env")
+except ConfigurationError as e:
+    print(f"Configuration error: {e}")
+    # Handle missing or invalid configuration
+
+# Handle API errors
+try:
+    client = Shopware6AdminAPIClientBase(config=config)
+    response = client.request_get("product/invalid-id")
+except ShopwareAPIError as e:
+    print(f"API error: {e}")
+    # Handle API errors (404, 401, 500, etc.)
+```
+
+### Exception Types
+
+| Exception | When Raised |
+|-----------|-------------|
+| `ConfigurationError` | Missing .env file, invalid configuration values |
+| `ShopwareAPIError` | HTTP errors from the API (4xx, 5xx responses) |
 
 ---
 

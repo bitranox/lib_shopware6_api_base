@@ -13,6 +13,26 @@ from .conf_shopware6_api_base_classes import (
 )
 from .exit_codes import ExitCode as ExitCode
 from .lib_shopware6_api_base import (
+    CONTENT_TYPE_JSON as CONTENT_TYPE_JSON,
+)
+
+# New module constants and logging hooks
+from .lib_shopware6_api_base import (
+    DEFAULT_REQUEST_TIMEOUT as DEFAULT_REQUEST_TIMEOUT,
+)
+from .lib_shopware6_api_base import (
+    HEADER_SINGLE_OPERATION as HEADER_SINGLE_OPERATION,
+)
+from .lib_shopware6_api_base import (
+    HEADER_SW_ACCESS_KEY as HEADER_SW_ACCESS_KEY,
+)
+from .lib_shopware6_api_base import (
+    MAX_RETRY_ATTEMPTS as MAX_RETRY_ATTEMPTS,
+)
+from .lib_shopware6_api_base import (
+    REQUEST_TIMEOUT as REQUEST_TIMEOUT,
+)
+from .lib_shopware6_api_base import (
     AggregationType as AggregationType,
 )
 from .lib_shopware6_api_base import (
@@ -149,6 +169,12 @@ from .lib_shopware6_api_base import (
 )
 from .lib_shopware6_api_base import (
     equal_filter_type as equal_filter_type,
+)
+from .lib_shopware6_api_base import (
+    log_request as log_request,
+)
+from .lib_shopware6_api_base import (
+    log_response as log_response,
 )
 from .lib_shopware6_api_base import (
     multi_filter_operator as multi_filter_operator,

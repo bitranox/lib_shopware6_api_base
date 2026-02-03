@@ -77,7 +77,7 @@ include = [
 [tool.ruff]
 line-length = 130
 target-version = "py310"
-exclude = ["lib_shopware6_api_base.ipynb"]
+exclude = ["notebooks/Quickstart.ipynb"]
 
 [tool.ruff.lint]
 select = [
@@ -130,6 +130,9 @@ convention = "google"
 "src/lib_shopware6_api_base/lib_shopware6_api_base_cli.py" = ["FBT001", "PLR0911"]
 # Main API module: internal methods need many params, doctest examples have long lines
 "src/lib_shopware6_api_base/lib_shopware6_api_base.py" = ["PLR0913", "E501"]
+# Split client modules: same exemptions as main module
+"src/lib_shopware6_api_base/lib_shopware6_admin_client.py" = ["PLR0913", "E501"]
+"src/lib_shopware6_api_base/lib_shopware6_storefront_client.py" = ["PLR0913", "E501"]
 # Criteria modules: doctest examples with long product IDs
 "src/lib_shopware6_api_base/lib_shopware6_api_base_criteria*.py" = ["E501"]
 
@@ -238,15 +241,23 @@ root_package = "lib_shopware6_api_base"
 exclude_type_checking_imports = true
 
 [[tool.importlinter.contracts]]
-name = "Domain is pure (no adapter dependencies)"
+name = "Configuration layer is independent"
 type = "forbidden"
-source_modules = []
-forbidden_modules = []
+source_modules = ["lib_shopware6_api_base.conf_shopware6_api_base_classes"]
+forbidden_modules = [
+    "lib_shopware6_api_base.lib_shopware6_api_base",
+    "lib_shopware6_api_base.lib_shopware6_storefront_client",
+    "lib_shopware6_api_base.lib_shopware6_admin_client",
+]
 
 [[tool.importlinter.contracts]]
 name = "Clean Architecture layers"
 type = "layers"
-layers = []
+layers = [
+    "lib_shopware6_api_base.lib_shopware6_api_base",
+    "lib_shopware6_api_base.lib_shopware6_api_base_criteria",
+    "lib_shopware6_api_base.conf_shopware6_api_base_classes",
+]
 
 [tool.pip-audit]
 # Known vulnerabilities to ignore (environment-level packages, not project dependencies)
