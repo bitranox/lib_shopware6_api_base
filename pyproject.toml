@@ -1,103 +1,200 @@
-[build-system]
-requires = ['setuptools', 'setuptools-scm']
-build-backend = "setuptools.build_meta"
-
 [project]
-# see: https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
 name = "lib_shopware6_api_base"
-authors = [
-    {name = "Robert Nowotny", email = "bitranox@gmail.com"},
-]
+version = "3.0.0"
 description = "python3 base API client for shopware6"
-readme = "README.rst"
-requires-python = ">=3.8.0"
-keywords = [
-]
-license = {text = "MIT"}
-classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Natural Language :: English",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-]
-# dependencies - former setup.cfg "install_requires"
-# see: https://setuptools.pypa.io/en/latest/userguide/dependency_management.html
+readme = "README.md"
+requires-python = ">=3.10"
 dependencies = [
-    "attrs>=21.3.0",
-    "cli_exit_tools",
-    "click",
-    "lib_detect_testenv",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "lib_cli_exit_tools>=2.2.4",
+    "rich-click",
+    "orjson",
     "oauthlib",
     "requests",
     "requests-oauthlib",
 ]
-version = "v2.1.9"
-# seems to be not allowed anymore
-# zip-save = false
-
+license = {text = "MIT"}
+authors = [{ name = "bitranox", email = "bitranox@gmail.com" }]
+keywords = ["shopware", "api"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "License :: OSI Approved :: MIT License",
+  "Environment :: Console",
+  "Operating System :: OS Independent",
+  "Typing :: Typed",
+]
 [project.urls]
 Homepage = "https://github.com/bitranox/lib_shopware6_api_base"
-Documentation = "https://github.com/bitranox/lib_shopware6_api_base/blob/master/README.rst"
+Documentation = "https://github.com/bitranox/lib_shopware6_api_base/blob/master/README.md"
 Repository = "https://github.com/bitranox/lib_shopware6_api_base.git"
-Changelog = "https://github.com/bitranox/lib_shopware6_api_base/blob/master/CHANGES.rst"
+Changelog = "https://github.com/bitranox/lib_shopware6_api_base/blob/master/CHANGELOG.md"
 
 [project.optional-dependencies]
-test = [
-    "black",
-    "codecov",
-    "coloredlogs",
-    "coverage",
-    "flake8",
-    "mypy",
-    "pytest",
-    "pytest-cov",
-    "pytest-runner",
-    "readme_renderer",
+dev = [
+  "pytest>=9.0.2",
+  "pytest-cov>=7.0.0",
+  "hypothesis>=6.151.4",
+"ruff>=0.14.14",
+  "pyright[nodejs]>=1.1.408",
+  "bandit>=1.9.3",
+  "build>=1.4.0",
+  "twine>=6.2.0",
+  "codecov-cli>=11.2.6",
+  "pip-audit>=2.10.0",
+  "textual>=7.5.0",
+  "import-linter>=2.9",
+  "rtoml>=0.13.0",
+  "httpx>=0.28.1",
+  # Transitive CVE pins
+  "jaraco-context>=6.1.0",       # CVE-2025-23949
+  "python-multipart>=0.0.22",    # CVE-2025-24486
+  "wheel>=0.46.3",               # CVE-2025-24049
+  "pynacl>=1.6.2",               # CVE-2025-69277
+  "urllib3>=2.6.3",              # CVE-2025-66471, CVE-2025-66418
+  "virtualenv>=20.36.1",         # CVE-2025-22702
 ]
 
 [project.scripts]
-    lib_shopware6_api_base = "lib_shopware6_api_base.lib_shopware6_api_base_cli:cli_main"
+lib_shopware6_api_base = "lib_shopware6_api_base.lib_shopware6_api_base_cli:cli_main"
+lib-shopware6-api-base = "lib_shopware6_api_base.lib_shopware6_api_base_cli:cli_main"
 
-[tool.setuptools.package-data]
-lib_shopware6_api_base = [
-    "*.pyi",
-    "__init__.pyi",
-    "py.typed",
+[build-system]
+requires = ["hatchling>=1.28.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lib_shopware6_api_base"]
+include = [
+    "src/lib_shopware6_api_base/py.typed",
 ]
 
-[tool.black]
-line-length = 160
-#You should include all Python versions that you want your code to run under
-target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
-# Note that you have to use single-quoted strings in TOML for regular expressions
-include = '\.pyi?$'
-exclude = '/(\.eggs|\.git|\.hg|\.mypy_cache|\.nox|\.tox|\.venv|_build|buck-out|build|dist)/'
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+exclude = ["lib_shopware6_api_base.ipynb"]
 
-[tool.mypy]
-verbosity=0
-warn_unused_configs = true
-ignore_missing_imports = true
-no_implicit_optional = true
-no_strict_optional = true
-show_error_context = true
+[tool.ruff.lint]
+select = [
+  "E", "W",     # pycodestyle
+  "F",           # pyflakes
+  "I",           # isort
+  "N",           # pep8-naming
+  "UP",          # pyupgrade
+  "B",           # bugbear
+  "A",           # builtins shadowing
+  "C4",          # comprehension simplification
+  "SIM",         # simplification
+  "TCH",         # type-checking imports
+  "RUF",         # ruff-specific
+  "G",           # logging format (catches f-string in logger)
+  "T20",         # print statements
+  "PTH",         # pathlib preference
+  "PLC", "PLE",  # pylint conventions/errors
+  "S",           # flake8-bandit security checks
+  "PERF",        # performance anti-patterns
+  "ERA",         # eradicate dead/commented-out code
+  "FBT",         # boolean trap (boolean positional args)
+  "PLR",         # pylint refactor
+  "PLW",         # pylint warnings
+]
+ignore = [
+  "RUF002",    # ambiguous unicode characters in docstrings (en-dash) - typography choice
+  "RUF022",    # unsorted __all__ - kept in logical grouping order
+  "PLC0415",   # deferred imports inside functions - circular import prevention
+  "TC001",     # stdlib imports at runtime - needed, not just for type hints
+  "TC002",     # third-party imports at runtime - needed, not just for type hints
+  "TC003",     # stdlib imports - same as TC001
+  "TC006",     # cast() type expressions - existing code uses unquoted
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+# Notebooks: unused imports are often intentional for side effects
+"notebooks/*.ipynb" = ["F401"]
+# Scripts: tooling code with print(), subprocess, boolean params, large orchestrators
+"scripts/*.py" = ["T20", "S101", "S603", "S607", "ERA001", "FBT001", "FBT002", "FBT003", "PERF203", "PLR0912", "PLR0913", "PLR0915", "PLR2004", "RUF012"]
+# Tests: assert is standard, test fixtures have passwords, magic values are clearer inline, temp paths are fine
+"tests/*.py" = ["T20", "S101", "S105", "S106", "S108", "FBT001", "FBT003", "PLR0913", "PLR2004"]
+
+[tool.pyright]
+typeCheckingMode = "strict"
+extraPaths = [
+  "src",
+]
+# Suppress errors for third-party libs without complete stubs and attrs patterns
+reportUnknownMemberType = "warning"
+reportUnknownVariableType = "warning"
+reportUnknownArgumentType = "warning"
+reportPrivateUsage = "warning"
+reportUntypedFunctionDecorator = "none"
+reportMissingImports = "warning"
+reportAttributeAccessIssue = "warning"  # oauthlib.oauth2 and attrs validators
+reportOptionalMemberAccess = "warning"  # attrs validators
+reportInvalidTypeForm = "warning"  # forward reference type aliases
+reportUnnecessaryComparison = "warning"  # attrs validator checks
+reportUnusedImport = "warning"  # used in doctests
+reportUnusedFunction = "warning"  # used in doctests
 
 [tool.pytest.ini_options]
-addopts = "-vvl --doctest-modules"
-doctest_optionflags =  "NORMALIZE_WHITESPACE ELLIPSIS ALLOW_UNICODE ALLOW_BYTES IGNORE_EXCEPTION_DETAIL"
-log_cli = true
-log_cli_level = "CRITICAL"
+addopts = ["--doctest-modules"]
+doctest_optionflags = ["ELLIPSIS", "NORMALIZE_WHITESPACE"]
+pythonpath = ["src"]
+markers = [
+  "os_agnostic: test runs on every supported operating system",
+  "os_windows: test exercises Windows-only behavior",
+  "os_macos: test exercises macOS-only behavior",
+  "os_posix: test exercises behavior requiring POSIX semantics",
+  "os_linux: test exercises Linux-only behavior",
+  "local_only: tests that require the local dev environment (external resources, script composition); skipped in CI",
+  "integration: tests requiring external resources (SMTP, databases, APIs); run via 'bmk ti' or 'mktesti.sh'",
+]
 
-[tool.pip-audit]
-# Known vulnerabilities to ignore (unfixable or accepted risk)
-# GHSA-4xh5-x5gv-qwph: py library ReDoS (no fix available, low risk)
-# PYSEC-2022-42969: same as above (alias)
-ignore-vulns = ["GHSA-4xh5-x5gv-qwph", "PYSEC-2022-42969"]
+[tool.coverage.run]
+branch = true
+parallel = false
+# Use a temp directory for the coverage database to avoid SQLite locking
+# issues on network-mounted filesystems. The {envtmpdir} placeholder is
+# not supported by coverage.py, so we use an environment variable with
+# fallback to a cross-platform temp location via the pytest_configure
+# hook in tests/conftest.py. CI also sets COVERAGE_FILE via workflow env.
+#
+# For local development, the pytest hook automatically redirects to
+# tempfile.gettempdir() before pytest-cov creates its Coverage() object.
+# This static fallback catches edge cases where coverage is run directly.
+data_file = "/tmp/.coverage.lib_shopware6_api_base"
+source = ["src/lib_shopware6_api_base"]
+
+
+[tool.coverage.report]
+omit = [
+  "tests/*",
+]
+exclude_lines = [
+  "pragma: no cover",
+  "if TYPE_CHECKING:",
+  "if __name__ == .__main__.:",
+  "@abstractmethod",
+]
+fail_under = 80
+show_missing = true
+
+[tool.coverage.json]
+output = "coverage.json"
+pretty_print = true
+
 [tool.clean]
 # Patterns to remove when running `make clean` or `python -m scripts clean`
 patterns = [
+  "**/__pycache__",
   ".hypothesis",
   ".import_linter_cache",
   ".pytest_cache",
@@ -127,3 +224,29 @@ default-remote = "origin"
 pytest-verbosity = "-vv"
 coverage-report-file = "coverage.xml"
 src-path = "src"
+[tool.importlinter]
+root_package = "lib_shopware6_api_base"
+exclude_type_checking_imports = true
+
+[[tool.importlinter.contracts]]
+name = "Domain is pure (no adapter dependencies)"
+type = "forbidden"
+source_modules = []
+forbidden_modules = []
+
+[[tool.importlinter.contracts]]
+name = "Clean Architecture layers"
+type = "layers"
+layers = []
+
+[tool.pip-audit]
+# Known vulnerabilities to ignore (environment-level packages, not project dependencies)
+# PYSEC-2022-42969: py library ReDoS — py 1.11.0 is installed in the development
+#   environment but is not a dependency of this project; no fix available.
+ignore-vulns = [
+  "PYSEC-2022-42969",
+  "PYSEC-2022-43012",  # setuptools 65.5.0 — env-only, not a project dependency
+  "PYSEC-2025-49",     # setuptools 65.5.0 — env-only, not a project dependency
+  "CVE-2024-6345",     # setuptools 65.5.0 — env-only, not a project dependency
+  "CVE-2026-1703",
+]

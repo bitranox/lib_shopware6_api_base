@@ -7,7 +7,7 @@ import pathlib
 import click
 
 # CONSTANTS
-CLICK_CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+CLICK_CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 logger = logging.getLogger()
 logger.level = logging.INFO
 
@@ -36,13 +36,13 @@ def append_subdirs_to_mypy_paths(root_directory: str) -> str:
     path_root_directory = pathlib.Path(root_directory).resolve()
     if not path_root_directory.is_dir():
         logger.warning(f'add mypy paths : the given root directory "{path_root_directory}" does not exist')
-        return ''
+        return ""
     l_subdirs = [str(path_root_directory / _dir) for _dir in next(os.walk(path_root_directory))[1]]
-    str_current_mypy_paths = get_env_data(env_variable='MYPYPATH')
+    str_current_mypy_paths = get_env_data(env_variable="MYPYPATH")
     if str_current_mypy_paths:
         l_subdirs.insert(0, str_current_mypy_paths)
-    str_new_mypy_paths = ':'.join(l_subdirs)
-    set_env_data(env_variable='MYPYPATH', env_str=str_new_mypy_paths)
+    str_new_mypy_paths = ":".join(l_subdirs)
+    set_env_data(env_variable="MYPYPATH", env_str=str_new_mypy_paths)
     return str_new_mypy_paths
 
 
@@ -69,13 +69,13 @@ def append_directory_to_env_path_variable(env_variable: str, directory: str) -> 
     """
     path_directory = pathlib.Path(directory).resolve()
     if not path_directory.is_dir():
-        logger.warning('can not add to env "{}" : the given directory "{}" does not exist'.format(env_variable, directory))
-        return ''
+        logger.warning(f'can not add to env "{env_variable}" : the given directory "{directory}" does not exist')
+        return ""
     l_subdirs = [str(path_directory)]
     str_current_paths = get_env_data(env_variable=env_variable)
     if str_current_paths:
         l_subdirs.insert(0, str_current_paths)
-    str_new_mypy_paths = ':'.join(l_subdirs)
+    str_new_mypy_paths = ":".join(l_subdirs)
     set_env_data(env_variable=env_variable, env_str=str_new_mypy_paths)
     return str_new_mypy_paths
 
@@ -96,7 +96,7 @@ def get_env_data(env_variable: str) -> str:
     if env_variable in os.environ:
         env_data = os.environ[env_variable]
     else:
-        env_data = ''
+        env_data = ""
     return env_data
 
 
@@ -105,35 +105,35 @@ def set_env_data(env_variable: str, env_str: str) -> None:
 
 
 @click.group(context_settings=CLICK_CONTEXT_SETTINGS)
-def cli_main() -> None:                     # pragma: no cover
-    """ testing tools """
-    pass                                    # pragma: no cover
+def cli_main() -> None:  # pragma: no cover
+    """testing tools"""
+    pass  # pragma: no cover
 
 
-@cli_main.command('append_immediate_subdirs_to_mypy_path', context_settings=CLICK_CONTEXT_SETTINGS)
-@click.argument('root_directory', type=click.Path(exists=False, file_okay=False, dir_okay=True))
-def cli_append_immediate_subdirs_to_mypy_path(root_directory: str) -> None:                        # pragma: no cover
-    """ adds all immediate subdirs to MYPYPATH, and returns the result as string """
-    response = append_subdirs_to_mypy_paths(root_directory)                                        # pragma: no cover
+@cli_main.command("append_immediate_subdirs_to_mypy_path", context_settings=CLICK_CONTEXT_SETTINGS)
+@click.argument("root_directory", type=click.Path(exists=False, file_okay=False, dir_okay=True))
+def cli_append_immediate_subdirs_to_mypy_path(root_directory: str) -> None:  # pragma: no cover
+    """adds all immediate subdirs to MYPYPATH, and returns the result as string"""
+    response = append_subdirs_to_mypy_paths(root_directory)  # pragma: no cover
     print(response)
 
 
-@cli_main.command('append_directory_to_mypy_path', context_settings=CLICK_CONTEXT_SETTINGS)
-@click.argument('directory', type=click.Path(exists=False, file_okay=False, dir_okay=True))
-def cli_append_directory_to_mypy_path(directory: str) -> None:                                      # pragma: no cover
-    """ adds directory to MYPYPATH, and returns the result as string """
-    response = append_directory_to_env_path_variable(env_variable='MYPYPATH', directory=directory)  # pragma: no cover
+@cli_main.command("append_directory_to_mypy_path", context_settings=CLICK_CONTEXT_SETTINGS)
+@click.argument("directory", type=click.Path(exists=False, file_okay=False, dir_okay=True))
+def cli_append_directory_to_mypy_path(directory: str) -> None:  # pragma: no cover
+    """adds directory to MYPYPATH, and returns the result as string"""
+    response = append_directory_to_env_path_variable(env_variable="MYPYPATH", directory=directory)  # pragma: no cover
     print(response)
 
 
-@cli_main.command('append_directory_to_python_path', context_settings=CLICK_CONTEXT_SETTINGS)
-@click.argument('directory', type=click.Path(exists=False, file_okay=False, dir_okay=True))
-def cli_append_directory_to_python_path(directory: str) -> None:                                     # pragma: no cover
-    """ adds directory to PYTHONPATH, and returns the result as string """
-    response = append_directory_to_env_path_variable(env_variable='PYTHONPATH', directory=directory)         # pragma: no cover
+@cli_main.command("append_directory_to_python_path", context_settings=CLICK_CONTEXT_SETTINGS)
+@click.argument("directory", type=click.Path(exists=False, file_okay=False, dir_okay=True))
+def cli_append_directory_to_python_path(directory: str) -> None:  # pragma: no cover
+    """adds directory to PYTHONPATH, and returns the result as string"""
+    response = append_directory_to_env_path_variable(env_variable="PYTHONPATH", directory=directory)  # pragma: no cover
     print(response)
 
 
 # entry point if main
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()

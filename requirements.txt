@@ -1,8 +1,0 @@
-## Project Requirements
-attrs>=21.3.0
-click
-cli_exit_tools
-lib_detect_testenv
-oauthlib
-requests
-requests-oauthlib
