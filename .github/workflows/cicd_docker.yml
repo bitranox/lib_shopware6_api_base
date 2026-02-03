@@ -357,7 +357,16 @@ jobs:
           python -m pytest -m "integration"
           --cov=${{ env.SRC_PATH }}/${{ env.PACKAGE_MODULE }}
           --cov-report=term-missing
+          --cov-report=xml:coverage-integration.xml
           ${{ env.PYTEST_VERBOSITY }}
+
+      - name: Upload integration coverage to Codecov
+        if: always()
+        uses: codecov/codecov-action@v5
+        with:
+          files: coverage-integration.xml
+          flags: integration
+          fail_ci_if_error: false
 
       - name: Stop dockware container
         if: always()

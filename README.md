@@ -59,7 +59,7 @@ This is the base abstraction layer. For higher-level functions, see [lib_shopwar
 - [CLI Usage](#cli-usage)
 - [Installation](#installation)
 - [Requirements](#requirements)
-- [Changelog](#changelog)
+- [Changelog](CHANGELOG.md)
 - [License](#license)
 
 ---
