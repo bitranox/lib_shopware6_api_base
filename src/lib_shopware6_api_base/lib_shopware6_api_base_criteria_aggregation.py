@@ -1,10 +1,10 @@
 # STDLIB
-from enum import StrEnum
 from typing import Literal
 
 # EXT
 from pydantic import BaseModel, Field, computed_field
 
+from ._compat import StrEnum
 from .lib_shopware6_api_base_criteria_filter import FilterType
 from .lib_shopware6_api_base_criteria_sorting import SortType
 

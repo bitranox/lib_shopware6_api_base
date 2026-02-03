@@ -4,9 +4,14 @@
 [![CI](https://github.com/bitranox/lib_shopware6_api_base/actions/workflows/cicd_docker.yml/badge.svg)](https://github.com/bitranox/lib_shopware6_api_base/actions/workflows/cicd_docker.yml)
 [![CodeQL](https://github.com/bitranox/lib_shopware6_api_base/actions/workflows/codeql.yml/badge.svg)](https://github.com/bitranox/lib_shopware6_api_base/actions/workflows/codeql.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/lib_shopware6_api_base.svg)](https://pypi.org/project/lib_shopware6_api_base/)
+[![Open in Codespaces](https://img.shields.io/badge/Codespaces-Open-blue?logo=github&logoColor=white&style=flat-square)](https://codespaces.new/bitranox/bmk?quickstart=1)
+[![PyPI](https://img.shields.io/pypi/v/bmk.svg)](https://pypi.org/project/lib_shopware6_api_base/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/bmk.svg)](https://pypi.org/project/lib_shopware6_api_base/)
 [![Code Style: Ruff](https://img.shields.io/badge/Code%20Style-Ruff-46A3FF?logo=ruff&labelColor=000)](https://docs.astral.sh/ruff/)
-[![codecov](https://codecov.io/gh/bitranox/lib_shopware6_api_base/graph/badge.svg)](https://codecov.io/gh/bitranox/lib_shopware6_api_base)
+[![codecov](https://codecov.io/gh/bitranox/lib_shopware6_api_base/graph/badge.svg?token=UFBaUDIgRk)](https://codecov.io/gh/bitranox/bmk)
+[![Maintainability](https://qlty.sh/badges/041ba2c1-37d6-40bb-85a0-ec5a8a0aca0c/maintainability.svg)](https://qlty.sh/gh/bitranox/projects/bmk)
+[![Known Vulnerabilities](https://snyk.io/test/github/bitranox/lib_shopware6_api_base/badge.svg)](https://snyk.io/test/github/bitranox/bmk)
+[![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
 
 A Python base API client for Shopware 6, supporting Windows, Linux, and macOS.
 Supports all OAuth2 authentication methods for both Admin API and Storefront API.
@@ -15,6 +20,24 @@ Paginated requests are fully supported.
 This is the base abstraction layer. For higher-level functions, see [lib_shopware6_api](https://github.com/bitranox/lib_shopware6_api).
 
 **Python 3.10+** required.
+
+---
+
+### v3.0.0 (2026-02-03) - complete overhaul
+
+**Breaking Changes:**
+- Migrated from `attrs` to `Pydantic` for all data models (Criteria, Filters, Aggregations, Sorting)
+- Migrated HTTP client from `requests`/`requests-oauthlib` to `httpx`/`authlib`
+- Migrated OAuth2 from `oauthlib` to `authlib` (OAuth 2.1 compliant)
+- Minimum Python version raised to 3.10+
+- Filter/Criteria classes now require keyword arguments: `EqualsFilter(field="x", value=1)` instead of `EqualsFilter("x", 1)`
+
+**New Features:**
+- `load_config_from_env()` and `require_config_from_env()` for .env file loading
+- `ConfigurationError` exception for configuration issues
+- `ExitCode` enum for CLI exit codes
+- HTTP/2 support via httpx
+- ~20-30% performance improvement from httpx
 
 ---
 
@@ -383,51 +406,6 @@ Automatically installed dependencies:
 - `rich-click` - CLI formatting
 - `orjson` - Fast JSON serialization
 - `lib_cli_exit_tools>=2.2.4` - CLI utilities
-
----
-
-## Changelog
-
-### v3.0.0 (2026-02-03)
-
-**Breaking Changes:**
-- Migrated from `attrs` to `Pydantic` for all data models (Criteria, Filters, Aggregations, Sorting)
-- Migrated HTTP client from `requests`/`requests-oauthlib` to `httpx`/`authlib`
-- Migrated OAuth2 from `oauthlib` to `authlib` (OAuth 2.1 compliant)
-- Minimum Python version raised to 3.10+
-- Filter/Criteria classes now require keyword arguments: `EqualsFilter(field="x", value=1)` instead of `EqualsFilter("x", 1)`
-
-**New Features:**
-- `load_config_from_env()` and `require_config_from_env()` for .env file loading
-- `ConfigurationError` exception for configuration issues
-- `ExitCode` enum for CLI exit codes
-- HTTP/2 support via httpx
-- ~20-30% performance improvement from httpx
-
-**Improvements:**
-- Full type hints with strict pyright checking
-- 90%+ test coverage
-- Docker integration tests auto-start container
-
-### v2.1.9 (2024-09-29)
-- Add graalpy tests
-
-### v2.1.8 (2024-09-29)
-- Add `/search/order` POST example
-
-### v2.1.7 (2023-10-18)
-- Validator for `Criteria.ids` and `Criteria.limit` mutual exclusion
-
-### v2.1.0 - v2.1.6
-- Additional header fields for bulk operations
-- Various bug fixes and type improvements
-
-### v2.0.0 (2022-01-04)
-- Allow None values in filters
-- Paginated requests respect limits
-
-### v1.0.0 (2021-12-26)
-- Initial release
 
 ---
 

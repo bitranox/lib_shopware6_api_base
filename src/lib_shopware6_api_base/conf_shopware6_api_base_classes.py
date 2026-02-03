@@ -2,11 +2,13 @@
 import os
 from enum import Enum
 from pathlib import Path
-from typing import Any, Self
+from typing import Any
 
 # EXT
 from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from ._compat import Self
 
 __all__ = [
     "GrantType",

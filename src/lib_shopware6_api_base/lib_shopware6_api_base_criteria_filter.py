@@ -1,10 +1,11 @@
 # STDLIB
 from datetime import datetime
-from enum import StrEnum
 from typing import Any, Literal
 
 # EXT
 from pydantic import BaseModel, Field, computed_field, field_validator
+
+from ._compat import StrEnum
 
 __all__ = [
     # Enums
