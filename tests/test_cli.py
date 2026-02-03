@@ -22,7 +22,7 @@ _env["PYTHONPATH"] = str(_src_path) + os.pathsep + _env.get("PYTHONPATH", "")
 
 def call_cli_command(commandline_args: str = "") -> bool:
     """Helper function to call CLI commands via subprocess."""
-    args = [sys.executable, "-m", "lib_shopware6_api_base"] + commandline_args.split()
+    args = [sys.executable, "-m", "lib_shopware6_api_base", *commandline_args.split()]
     try:
         subprocess.run(args, check=True, env=_env, capture_output=True)
     except subprocess.CalledProcessError:
@@ -32,7 +32,7 @@ def call_cli_command(commandline_args: str = "") -> bool:
 
 def get_cli_output(commandline_args: str = "") -> str:
     """Helper function to get CLI output as string."""
-    args = [sys.executable, "-m", "lib_shopware6_api_base"] + commandline_args.split()
+    args = [sys.executable, "-m", "lib_shopware6_api_base", *commandline_args.split()]
     result = subprocess.run(args, env=_env, capture_output=True, text=True)
     return result.stdout + result.stderr
 
@@ -164,6 +164,85 @@ class TestInfoFunction:
 
         # Should not raise any exception
         info()
+
+
+# =============================================================================
+# TestExitCodeMapping - Tests for _get_exit_code function
+# =============================================================================
+
+
+class TestExitCodeMapping:
+    """Tests for _get_exit_code exception mapping function."""
+
+    @pytest.mark.os_agnostic
+    def test_configuration_error_returns_configuration_exit_code(self) -> None:
+        """Test ConfigurationError maps to CONFIGURATION_ERROR exit code."""
+        from lib_shopware6_api_base.conf_shopware6_api_base_classes import ConfigurationError
+        from lib_shopware6_api_base.exit_codes import ExitCode
+        from lib_shopware6_api_base.lib_shopware6_api_base_cli import _get_exit_code
+
+        exc = ConfigurationError("test config error")
+        assert _get_exit_code(exc) == ExitCode.CONFIGURATION_ERROR
+
+    @pytest.mark.os_agnostic
+    def test_shopware_api_error_returns_api_exit_code(self) -> None:
+        """Test ShopwareAPIError maps to API_ERROR exit code."""
+        from lib_shopware6_api_base.conf_shopware6_api_base_classes import ShopwareAPIError
+        from lib_shopware6_api_base.exit_codes import ExitCode
+        from lib_shopware6_api_base.lib_shopware6_api_base_cli import _get_exit_code
+
+        exc = ShopwareAPIError("test API error")
+        assert _get_exit_code(exc) == ExitCode.API_ERROR
+
+    @pytest.mark.os_agnostic
+    def test_value_error_returns_invalid_argument_exit_code(self) -> None:
+        """Test ValueError maps to INVALID_ARGUMENT exit code."""
+        from lib_shopware6_api_base.exit_codes import ExitCode
+        from lib_shopware6_api_base.lib_shopware6_api_base_cli import _get_exit_code
+
+        exc = ValueError("invalid value")
+        assert _get_exit_code(exc) == ExitCode.INVALID_ARGUMENT
+
+    @pytest.mark.os_agnostic
+    def test_broken_pipe_error_returns_sigpipe_exit_code(self) -> None:
+        """Test BrokenPipeError maps to SIGPIPE exit code."""
+        from lib_shopware6_api_base.exit_codes import ExitCode
+        from lib_shopware6_api_base.lib_shopware6_api_base_cli import _get_exit_code
+
+        exc = BrokenPipeError("pipe broken")
+        assert _get_exit_code(exc) == ExitCode.SIGPIPE
+
+    @pytest.mark.os_agnostic
+    def test_sigint_interrupt_returns_sigint_exit_code(self) -> None:
+        """Test SigIntInterrupt maps to SIGINT exit code."""
+        import lib_cli_exit_tools
+
+        from lib_shopware6_api_base.exit_codes import ExitCode
+        from lib_shopware6_api_base.lib_shopware6_api_base_cli import _get_exit_code
+
+        exc = lib_cli_exit_tools.SigIntInterrupt()
+        assert _get_exit_code(exc) == ExitCode.SIGINT
+
+    @pytest.mark.os_agnostic
+    def test_sigterm_interrupt_returns_sigterm_exit_code(self) -> None:
+        """Test SigTermInterrupt maps to SIGTERM exit code."""
+        import lib_cli_exit_tools
+
+        from lib_shopware6_api_base.exit_codes import ExitCode
+        from lib_shopware6_api_base.lib_shopware6_api_base_cli import _get_exit_code
+
+        exc = lib_cli_exit_tools.SigTermInterrupt()
+        assert _get_exit_code(exc) == ExitCode.SIGTERM
+
+    @pytest.mark.os_agnostic
+    def test_generic_exception_delegates_to_lib_cli_exit_tools(self) -> None:
+        """Test generic exceptions are delegated to lib_cli_exit_tools."""
+        from lib_shopware6_api_base.lib_shopware6_api_base_cli import _get_exit_code
+
+        exc = RuntimeError("generic error")
+        exit_code = _get_exit_code(exc)
+        # lib_cli_exit_tools returns 1 for generic exceptions
+        assert exit_code == 1
 
 
 # Keep the original test for backward compatibility

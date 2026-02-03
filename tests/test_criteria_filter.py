@@ -23,7 +23,6 @@ from lib_shopware6_api_base.lib_shopware6_api_base_criteria_filter import (
     RangeParam,
 )
 
-
 # =============================================================================
 # TestEqualsFilter - 6 tests
 # =============================================================================
@@ -230,7 +229,7 @@ class TestNotFilter:
     def test_not_filter_with_enum_operator(self) -> None:
         """Test NotFilter using FilterOperator enum."""
         my_filter = NotFilter(
-            operator=FilterOperator.OR,
+            operator=FilterOperator.OR,  # type: ignore[arg-type]  # pydantic coerces enum to string
             queries=[EqualsFilter(field="stock", value=0)],
         )
         assert my_filter.operator == "or"
@@ -297,7 +296,7 @@ class TestMultiFilter:
     def test_multi_filter_with_enum_operator(self) -> None:
         """Test MultiFilter using FilterOperator enum."""
         my_filter = MultiFilter(
-            operator=FilterOperator.AND,
+            operator=FilterOperator.AND,  # type: ignore[arg-type]  # pydantic coerces enum to string
             queries=[EqualsFilter(field="active", value=True)],
         )
         assert my_filter.operator == "and"

@@ -14,7 +14,6 @@ from lib_shopware6_api_base.lib_shopware6_api_base_helpers import (
     pprint_attrs,
 )
 
-
 # =============================================================================
 # TestPprintAttrs - 5 tests
 # =============================================================================

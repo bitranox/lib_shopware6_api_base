@@ -22,9 +22,9 @@ from __future__ import annotations
 import sys
 
 #: Distribution name declared in ``pyproject.toml``.
-name = "pyproject"
+name = "lib_shopware6_api_base"
 #: Human-readable summary shown in CLI help output.
-title = "pyproject"
+title = "python3 base API client for shopware6"
 #: Current release version pulled from ``pyproject.toml`` by automation.
 version = "3.0.0"
 #: Repository homepage presented to users.
@@ -32,14 +32,14 @@ homepage = "https://github.com/bitranox/lib_shopware6_api_base"
 #: Author attribution surfaced in CLI output.
 author = "bitranox"
 #: Contact email surfaced in CLI output.
-author_email = ""
+author_email = "bitranox@gmail.com"
 #: Console-script name published by the package.
 shell_command = "lib-shopware6-api-base"
 
 #: Vendor identifier for lib_layered_config paths (macOS/Windows)
 LAYEREDCONF_VENDOR: str = "bitranox"
 #: Application display name for lib_layered_config paths (macOS/Windows)
-LAYEREDCONF_APP: str = "Pyproject"
+LAYEREDCONF_APP: str = "Lib Shopware6 Api Base"
 #: Configuration slug for lib_layered_config Linux paths and environment variables
 LAYEREDCONF_SLUG: str = "lib-shopware6-api-base"
 
@@ -57,7 +57,7 @@ def print_info() -> None:
     Examples
     --------
     >>> print_info()  # doctest: +ELLIPSIS
-    Info for pyproject:
+    Info for lib_shopware6_api_base:
     ...
     """
 

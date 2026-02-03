@@ -4,8 +4,12 @@ from typing import Literal
 # EXT
 from pydantic import BaseModel, computed_field
 
-# proj
-from .lib_shopware6_api_base_helpers import pprint_attrs
+__all__ = [
+    "FieldSorting",
+    "AscFieldSorting",
+    "DescFieldSorting",
+    "SortType",
+]
 
 
 class FieldSorting(BaseModel):

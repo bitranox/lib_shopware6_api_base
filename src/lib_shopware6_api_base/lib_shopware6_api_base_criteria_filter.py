@@ -6,8 +6,28 @@ from typing import Any, Literal
 # EXT
 from pydantic import BaseModel, Field, computed_field, field_validator
 
-# proj
-from .lib_shopware6_api_base_helpers import pprint_attrs
+__all__ = [
+    # Enums
+    "FilterTypeName",
+    "RangeParam",
+    "FilterOperator",
+    # Backward compatibility aliases
+    "equal_filter_type",
+    "range_filter",
+    "not_filter_operator",
+    "multi_filter_operator",
+    # Filter classes
+    "EqualsFilter",
+    "EqualsAnyFilter",
+    "ContainsFilter",
+    "RangeFilter",
+    "NotFilter",
+    "MultiFilter",
+    "PrefixFilter",
+    "SuffixFilter",
+    # Type alias
+    "FilterType",
+]
 
 
 class FilterTypeName(StrEnum):
@@ -339,16 +359,7 @@ class SuffixFilter(BaseModel):
         return "suffix"
 
 
-FilterType = (
-    EqualsFilter
-    | EqualsAnyFilter
-    | ContainsFilter
-    | RangeFilter
-    | NotFilter
-    | MultiFilter
-    | PrefixFilter
-    | SuffixFilter
-)
+FilterType = EqualsFilter | EqualsAnyFilter | ContainsFilter | RangeFilter | NotFilter | MultiFilter | PrefixFilter | SuffixFilter
 
 # Rebuild models with forward references
 NotFilter.model_rebuild()

@@ -5,21 +5,201 @@ import time
 from typing import Any
 
 # EXT
-import oauthlib
+import httpx
 import orjson
-import requests
-import requests_oauthlib
-from oauthlib.oauth2 import TokenExpiredError
+from authlib.integrations.base_client import TokenExpiredError
+from authlib.integrations.httpx_client import OAuth2Client
+
+from .conf_shopware6_api_base_classes import (
+    ConfigurationError as ConfigurationError,
+)
 
 # conf
-from .conf_shopware6_api_base_classes import *
-from .conf_shopware6_api_base_classes import GrantType, HttpMethod
-from .lib_shopware6_api_base_criteria import *
+from .conf_shopware6_api_base_classes import (
+    ConfShopware6ApiBase as ConfShopware6ApiBase,
+)
+from .conf_shopware6_api_base_classes import (
+    GrantType,
+    HttpMethod,
+)
+from .conf_shopware6_api_base_classes import (
+    ShopwareAPIError as ShopwareAPIError,
+)
+from .conf_shopware6_api_base_classes import (
+    load_config_from_env as load_config_from_env,
+)
+from .conf_shopware6_api_base_classes import (
+    require_config_from_env as require_config_from_env,
+)
+from .lib_shopware6_api_base_criteria import (
+    AggregationType as AggregationType,
+)
+from .lib_shopware6_api_base_criteria import (
+    AggregationTypeName as AggregationTypeName,
+)
+from .lib_shopware6_api_base_criteria import (
+    AscFieldSorting as AscFieldSorting,
+)
+from .lib_shopware6_api_base_criteria import (
+    AvgAggregation as AvgAggregation,
+)
+from .lib_shopware6_api_base_criteria import (
+    ContainsFilter as ContainsFilter,
+)
+from .lib_shopware6_api_base_criteria import (
+    CountAggregation as CountAggregation,
+)
+from .lib_shopware6_api_base_criteria import (
+    Criteria,
+)
+from .lib_shopware6_api_base_criteria import (
+    DateHistogramAggregation as DateHistogramAggregation,
+)
+from .lib_shopware6_api_base_criteria import (
+    DescFieldSorting as DescFieldSorting,
+)
+from .lib_shopware6_api_base_criteria import (
+    EntityAggregation as EntityAggregation,
+)
+from .lib_shopware6_api_base_criteria import (
+    EqualsAnyFilter as EqualsAnyFilter,
+)
+from .lib_shopware6_api_base_criteria import (
+    EqualsFilter as EqualsFilter,
+)
+from .lib_shopware6_api_base_criteria import (
+    FieldSorting as FieldSorting,
+)
+from .lib_shopware6_api_base_criteria import (
+    FilterAggregation as FilterAggregation,
+)
+from .lib_shopware6_api_base_criteria import (
+    FilterOperator as FilterOperator,
+)
+from .lib_shopware6_api_base_criteria import (
+    FilterType as FilterType,
+)
+from .lib_shopware6_api_base_criteria import (
+    FilterTypeName as FilterTypeName,
+)
+from .lib_shopware6_api_base_criteria import (
+    MaxAggregation as MaxAggregation,
+)
+from .lib_shopware6_api_base_criteria import (
+    MinAggregation as MinAggregation,
+)
+from .lib_shopware6_api_base_criteria import (
+    MultiFilter as MultiFilter,
+)
+from .lib_shopware6_api_base_criteria import (
+    NotFilter as NotFilter,
+)
+from .lib_shopware6_api_base_criteria import (
+    PrefixFilter as PrefixFilter,
+)
+from .lib_shopware6_api_base_criteria import (
+    Query as Query,
+)
+from .lib_shopware6_api_base_criteria import (
+    RangeFilter as RangeFilter,
+)
+from .lib_shopware6_api_base_criteria import (
+    RangeParam as RangeParam,
+)
+from .lib_shopware6_api_base_criteria import (
+    SortType as SortType,
+)
+from .lib_shopware6_api_base_criteria import (
+    StatsAggregation as StatsAggregation,
+)
+from .lib_shopware6_api_base_criteria import (
+    SuffixFilter as SuffixFilter,
+)
+from .lib_shopware6_api_base_criteria import (
+    SumAggregation as SumAggregation,
+)
+from .lib_shopware6_api_base_criteria import (
+    TermsAggregation as TermsAggregation,
+)
+from .lib_shopware6_api_base_criteria import (
+    aggregation_names as aggregation_names,
+)
+from .lib_shopware6_api_base_criteria import (
+    equal_filter_type as equal_filter_type,
+)
+from .lib_shopware6_api_base_criteria import (
+    multi_filter_operator as multi_filter_operator,
+)
+from .lib_shopware6_api_base_criteria import (
+    not_filter_operator as not_filter_operator,
+)
+from .lib_shopware6_api_base_criteria import (
+    range_filter as range_filter,
+)
 
 logger = logging.getLogger(__name__)
 
-# Default timeout for HTTP requests in seconds (connect timeout, read timeout)
-REQUEST_TIMEOUT = (10, 30)
+__all__ = [
+    # Re-exports from conf
+    "ConfShopware6ApiBase",
+    "ConfigurationError",
+    "GrantType",
+    "HttpMethod",
+    "ShopwareAPIError",
+    "load_config_from_env",
+    "require_config_from_env",
+    # Re-exports from criteria
+    "AggregationType",
+    "AggregationTypeName",
+    "AscFieldSorting",
+    "AvgAggregation",
+    "ContainsFilter",
+    "CountAggregation",
+    "Criteria",
+    "DateHistogramAggregation",
+    "DescFieldSorting",
+    "EntityAggregation",
+    "EqualsAnyFilter",
+    "EqualsFilter",
+    "FieldSorting",
+    "FilterAggregation",
+    "FilterOperator",
+    "FilterType",
+    "FilterTypeName",
+    "MaxAggregation",
+    "MinAggregation",
+    "MultiFilter",
+    "NotFilter",
+    "PrefixFilter",
+    "Query",
+    "RangeFilter",
+    "RangeParam",
+    "SortType",
+    "StatsAggregation",
+    "SuffixFilter",
+    "SumAggregation",
+    "TermsAggregation",
+    "aggregation_names",
+    "equal_filter_type",
+    "multi_filter_operator",
+    "not_filter_operator",
+    "range_filter",
+    # Local exports
+    "PayLoad",
+    "HEADER_write_in_separate_transactions",
+    "HEADER_write_in_single_transactions",
+    "HEADER_index_synchronously",
+    "HEADER_index_asynchronously",
+    "HEADER_index_disabled",
+    "HEADER_fail_on_error",
+    "HEADER_do_not_fail_on_error",
+    "Shopware6StoreFrontClientBase",
+    "Shopware6AdminAPIClientBase",
+]
+
+# Default timeout for HTTP requests in seconds
+# httpx.Timeout requires either a default or all four parameters (connect, read, write, pool)
+REQUEST_TIMEOUT = httpx.Timeout(30.0, connect=10.0)
 
 PayLoad = dict[str, Any] | Criteria | None
 
@@ -303,7 +483,7 @@ class Shopware6StoreFrontClientBase:
         request_url: str,
         payload: PayLoad = None,
         update_header_fields: dict[str, str] | None = None,
-    ) -> requests.Response | None:
+    ) -> httpx.Response | None:
         """
         makes a request, using the conf.store_api_sw_access_key for authentication
 
@@ -322,61 +502,75 @@ class Shopware6StoreFrontClientBase:
 
         >>> # test GET (a new cart)
         >>> my_api_client._request(http_method=HttpMethod.GET, request_url='checkout/cart', payload={'name': 'rn_doctest'})
-        <Response [200]>
+        <Response [200 OK]>
 
         >>> # test DELETE (a new cart)
         >>> my_api_client._request(http_method=HttpMethod.DELETE, request_url='checkout/cart')
-        <Response [204]>
+        <Response [204 No Content]>
 
         >>> # test POST (a single product)
         >>> my_payload=Criteria(filter=[EqualsFilter(field='active', value='true')])
         >>> my_api_client._request(http_method=HttpMethod.POST, request_url='product', payload=my_payload)
-        <Response [200]>
+        <Response [200 OK]>
 
         >>> # test Link does not exist (a single product)
         >>> my_api_client._request(http_method=HttpMethod.POST, request_url='product/000')
         Traceback (most recent call last):
             ...
-        conf_shopware6_api_base_classes.ShopwareAPIError: 400 Client Error: Bad Request for url: ...
+        conf_shopware6_api_base_classes.ShopwareAPIError: Client error '400 Bad Request' for url ...
 
         """
         if isinstance(payload, Criteria):
             payload = payload.get_dict()
         storefront_api_url = self._build_storefront_api_url(endpoint=request_url)
-        response: requests.Response = requests.Response()
+        response: httpx.Response
         headers = self._get_headers(update_header_fields=update_header_fields)
 
         if http_method == HttpMethod.GET:
-            response = requests.request(
-                "GET", storefront_api_url, params=payload, headers=headers, timeout=REQUEST_TIMEOUT
+            response = httpx.request(
+                "GET",
+                storefront_api_url,
+                params=payload,
+                headers=headers,
+                timeout=REQUEST_TIMEOUT,
+                follow_redirects=True,
             )
         elif http_method == HttpMethod.PATCH:
-            response = requests.request(
+            response = httpx.request(
                 "PATCH",
                 storefront_api_url,
-                data=orjson.dumps(payload).decode(),
+                content=orjson.dumps(payload).decode(),
                 headers=headers,
                 timeout=REQUEST_TIMEOUT,
+                follow_redirects=True,
             )
         elif http_method == HttpMethod.POST:
-            response = requests.request(
+            response = httpx.request(
                 "POST",
                 storefront_api_url,
-                data=orjson.dumps(payload).decode(),
+                content=orjson.dumps(payload).decode(),
                 headers=headers,
                 timeout=REQUEST_TIMEOUT,
+                follow_redirects=True,
             )
         elif http_method == HttpMethod.PUT:
-            response = requests.request(
-                "PUT", storefront_api_url, data=orjson.dumps(payload).decode(), headers=headers, timeout=REQUEST_TIMEOUT
+            response = httpx.request(
+                "PUT",
+                storefront_api_url,
+                content=orjson.dumps(payload).decode(),
+                headers=headers,
+                timeout=REQUEST_TIMEOUT,
+                follow_redirects=True,
             )
         elif http_method == HttpMethod.DELETE:
-            response = requests.request("DELETE", storefront_api_url, headers=headers, timeout=REQUEST_TIMEOUT)
+            response = httpx.request(
+                "DELETE", storefront_api_url, headers=headers, timeout=REQUEST_TIMEOUT, follow_redirects=True
+            )
 
         try:
-            response.raise_for_status()
-        except Exception as exc:
-            detailed_error = f" : {exc.response.text}" if hasattr(exc, "response") else ""  # type: ignore  # pragma: no cover
+            response.raise_for_status()  # type: ignore[possibly-undefined]
+        except httpx.HTTPStatusError as exc:
+            detailed_error = f" : {exc.response.text}"
             raise ShopwareAPIError(f"{exc}{detailed_error}") from exc
         return response
 
@@ -458,7 +652,7 @@ class Shopware6AdminAPIClientBase:
         """
         self.config = config
         self.token: dict[str, Any] = {}
-        self.session: requests_oauthlib.OAuth2Session = requests_oauthlib.OAuth2Session()
+        self.session: OAuth2Client | httpx.Client = httpx.Client()
 
     def request_get(
         self, request_url: str, payload: PayLoad = None, update_header_fields: dict[str, str] | None = None
@@ -927,20 +1121,10 @@ class Shopware6AdminAPIClientBase:
                     update_header_fields=update_header_fields,
                 )
                 retry = 0
-            except requests_oauthlib.TokenUpdated as exc:
-                self._token_saver(token=exc.token)
-                response = self._request(
-                    http_method=http_method,
-                    request_url=request_url,
-                    payload=payload,
-                    content_type=content_type,
-                    additional_query_params=additional_query_params,
-                    update_header_fields=update_header_fields,
-                )
-                retry = 0
             except TokenExpiredError:
                 if self._is_refreshable_token():  # pragma: no cover
                     # this actually should never happen - just in case.
+                    # Authlib handles token refresh via callback automatically
                     logger.warning(
                         "something went wrong - the token should have been automatically refreshed. getting a new token"
                     )  # pragma: no cover
@@ -958,11 +1142,10 @@ class Shopware6AdminAPIClientBase:
                 )
                 retry = 0
             except ShopwareAPIError as exc:
-                """
-                retry   : how often to retry - sometimes we get error code:9, status:401, The resource owner or authorization server denied the request,
-                detail: Access token could not be verified.
-                But it works if You try again, it seems to be an error in shopware API or race condition
-                """
+                # retry: how often to retry - sometimes we get error code:9, status:401,
+                # The resource owner or authorization server denied the request,
+                # detail: Access token could not be verified.
+                # But it works if You try again, it seems to be an error in shopware API or race condition
                 retry = retry - 1
                 if not retry:
                     raise exc
@@ -985,7 +1168,7 @@ class Shopware6AdminAPIClientBase:
         content_type: str = "json",
         additional_query_params: dict[str, Any] | None = None,
         update_header_fields: dict[str, str] | None = None,
-    ) -> requests.Response:
+    ) -> httpx.Response:
         """
         makes a request, needs a "self.session" to be set up and authenticated
 
@@ -1000,7 +1183,7 @@ class Shopware6AdminAPIClientBase:
         returns
             response_dict: dictionary with the response as dict
 
-        see : https://docs.python-requests.org/en/latest/user/quickstart/
+        see : https://www.python-httpx.org/quickstart/
 
         """
         request_data: str
@@ -1017,41 +1200,48 @@ class Shopware6AdminAPIClientBase:
         if not additional_query_params:
             additional_query_params = {}
 
-        response: requests.Response = requests.Response()
+        response: httpx.Response
         headers = self._get_headers(content_type=content_type, update_header_fields=update_header_fields)
 
         if http_method == HttpMethod.GET:
             if additional_query_params:
                 raise ShopwareAPIError("query parameters for GET requests need to be provided as payload")
-            response = self.session.get(self._format_admin_api_url(request_url), params=payload_dict, headers=headers)
+            response = self.session.get(
+                self._format_admin_api_url(request_url), params=payload_dict, headers=headers, follow_redirects=True
+            )
         elif http_method == HttpMethod.PATCH:
             response = self.session.patch(
                 self._format_admin_api_url(request_url),
-                data=request_data,
+                content=request_data,
                 headers=headers,
                 params=additional_query_params,
+                follow_redirects=True,
             )
         elif http_method == HttpMethod.POST:
             response = self.session.post(
                 self._format_admin_api_url(request_url),
-                data=request_data,
+                content=request_data,
                 headers=headers,
                 params=additional_query_params,
+                follow_redirects=True,
             )
         elif http_method == HttpMethod.PUT:
             response = self.session.put(
                 self._format_admin_api_url(request_url),
-                data=request_data,
+                content=request_data,
                 headers=headers,
                 params=additional_query_params,
+                follow_redirects=True,
             )
         elif http_method == HttpMethod.DELETE:
-            response = self.session.delete(self._format_admin_api_url(request_url), params=additional_query_params)
+            response = self.session.delete(
+                self._format_admin_api_url(request_url), params=additional_query_params, follow_redirects=True
+            )
 
         try:
-            response.raise_for_status()
-        except Exception as exc:
-            detailed_error = f" : {exc.response.text}" if hasattr(exc, "response") else ""  # type: ignore
+            response.raise_for_status()  # type: ignore[possibly-undefined]
+        except httpx.HTTPStatusError as exc:
+            detailed_error = f" : {exc.response.text}"
             raise ShopwareAPIError(f"{exc}{detailed_error}") from exc
 
         return response
@@ -1165,14 +1355,13 @@ class Shopware6AdminAPIClientBase:
         if not self.config.client_secret:
             raise ShopwareAPIError("client_secret needed")
 
-        additional_parameters = {"grant_type": "user_credentials"}
-        client = oauthlib.oauth2.BackendApplicationClient(client_id=self.config.client_id)
-        oauth = requests_oauthlib.OAuth2Session(client=client)
-        self.token = oauth.fetch_token(
-            token_url=self._format_admin_api_url("oauth/token"),
+        client = OAuth2Client(
             client_id=self.config.client_id,
             client_secret=self.config.client_secret,
-            kwargs=additional_parameters,
+        )
+        self.token = client.fetch_token(
+            url=self._format_admin_api_url("oauth/token"),
+            grant_type="client_credentials",
         )
         return self.token
 
@@ -1239,22 +1428,18 @@ class Shopware6AdminAPIClientBase:
         if not self.config.password:
             raise ShopwareAPIError("password needed")
 
-        client_id = "administration"
-        additional_parameters = {"grant_type": "password", "scopes": "write"}
-        client = oauthlib.oauth2.LegacyApplicationClient(client_id=client_id)
-        session_oauth = requests_oauthlib.OAuth2Session(client=client)
-        self.token = session_oauth.fetch_token(
-            token_url=self._format_admin_api_url("oauth/token"),
-            client_id=client_id,
+        client = OAuth2Client(client_id="administration")
+        self.token = client.fetch_token(
+            url=self._format_admin_api_url("oauth/token"),
+            grant_type="password",
             username=self.config.username,
             password=self.config.password,
-            kwargs=additional_parameters,
         )
         return self.token
 
     def _get_session(self) -> None:
         """
-        see : https://requests-oauthlib.readthedocs.io/en/latest/oauth2_workflow.html#legacy-application-flow
+        see : https://docs.authlib.org/en/latest/client/httpx.html
         see : https://shopware.stoplight.io/docs/admin-api/ZG9jOjEwODA3NjQx-authentication-and-authorisation
 
 
@@ -1280,37 +1465,43 @@ class Shopware6AdminAPIClientBase:
         >>> assert my_api_client.token['access_token'] != my_access_token
 
         """
-        try:
-            if not self.token:
-                self._get_token()
-            if self._is_refreshable_token():
-                self.token["expires_in"] = int(self.token["expires_at"] - time.time())
-                client_id = "administration"
-                extra = {"client_id": client_id}
-                self.session = requests_oauthlib.OAuth2Session(
-                    client_id,
-                    token=self.token,
-                    auto_refresh_kwargs=extra,
-                    auto_refresh_url=self._format_admin_api_url("oauth/token"),
-                )
-            else:
-                client_id = self.config.client_id
-                self.session = requests_oauthlib.OAuth2Session(client_id, token=self.token)
-        except requests_oauthlib.TokenUpdated as exc:  # pragma: no cover
-            self._token_saver(token=exc.token)  # pragma: no cover
+        if not self.token:
+            self._get_token()
+        if self._is_refreshable_token():
+            self.token["expires_in"] = int(self.token["expires_at"] - time.time())
+            client_id = "administration"
+            self.session = OAuth2Client(
+                client_id=client_id,
+                token=self.token,
+                token_endpoint=self._format_admin_api_url("oauth/token"),
+                update_token=self._token_saver,
+            )
+        else:
+            client_id = self.config.client_id
+            self.session = OAuth2Client(client_id=client_id, token=self.token)
 
-    def _token_saver(self, token: dict[str, str]) -> None:
+    def _token_saver(
+        self,
+        token: dict[str, Any],
+        refresh_token: str | None = None,
+        access_token: str | None = None,
+    ) -> None:
         """
         saves the token - this is needed for automatically refreshing the "resource owner" access token.
         the "user_credentials" can not be refreshed
 
+        This is the callback for Authlib's OAuth2Client update_token parameter.
+
         parameter
             token:             the token to be saved
+            refresh_token:     optional refresh token (Authlib callback parameter)
+            access_token:      optional access token (Authlib callback parameter)
 
         returns
             None
 
         """
+        _ = refresh_token, access_token  # unused, but required by Authlib callback signature
         self.token = token
 
     def _is_refreshable_token(self) -> bool:
@@ -1376,12 +1567,12 @@ class Shopware6AdminAPIClientBase:
         return headers
 
 
-def _is_type_bytes(payload: PayLoad) -> bool:
+def _is_type_bytes(payload: Any) -> bool:
     """True if the passed type is bytes"""
     return isinstance(payload, bytes)
 
 
-def _is_type_criteria(payload: PayLoad) -> bool:
+def _is_type_criteria(payload: Any) -> bool:
     """True if the passed type is Criteria"""
     return isinstance(payload, Criteria)
 

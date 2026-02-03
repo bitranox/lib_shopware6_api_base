@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from typing import Any
-from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -11,8 +10,6 @@ from lib_shopware6_api_base import Criteria, EqualsFilter
 from lib_shopware6_api_base.conf_shopware6_api_base_classes import (
     ConfShopware6ApiBase,
     GrantType,
-    HttpMethod,
-    ShopwareAPIError,
 )
 from lib_shopware6_api_base.lib_shopware6_api_base import (
     HEADER_do_not_fail_on_error,
@@ -28,7 +25,6 @@ from lib_shopware6_api_base.lib_shopware6_api_base import (
     _is_type_bytes,
     _is_type_criteria,
 )
-
 
 # =============================================================================
 # TestShopware6AdminAPIClientBase - 5 tests
@@ -322,6 +318,115 @@ class TestShopware6AdminAPIClientBaseIntegration:
         client = Shopware6AdminAPIClientBase(config=docker_test_config)
         criteria = Criteria(limit=5)
         response = client.request_post("search/currency", payload=criteria)
+        assert "data" in response
+        assert isinstance(response["data"], list)
+
+
+@pytest.mark.integration
+class TestShopware6AdminAPIClientBaseIntegrationAdvanced:
+    """Advanced integration tests for Admin API covering PATCH, PUT, DELETE.
+
+    These tests use the docker_test_config fixture which automatically
+    ensures the dockware container is running.
+    """
+
+    def test_admin_client_crud_operations(self, docker_test_config: ConfShopware6ApiBase) -> None:
+        """Test full CRUD cycle: Create, Read, Update (PATCH), Delete a tag."""
+        import uuid
+
+        client = Shopware6AdminAPIClientBase(config=docker_test_config)
+
+        # Generate unique test data
+        tag_id = uuid.uuid4().hex
+        tag_name = f"test-tag-{tag_id[:8]}"
+
+        # CREATE - POST a new tag
+        create_payload = {"id": tag_id, "name": tag_name}
+        client.request_post("tag", payload=create_payload)
+
+        # READ - GET the created tag (Shopware returns flat structure, not JSON:API)
+        response = client.request_get(f"tag/{tag_id}")
+        assert response["data"]["id"] == tag_id
+        assert response["data"]["name"] == tag_name
+
+        # UPDATE - PATCH the tag
+        updated_name = f"updated-{tag_name}"
+        patch_payload = {"name": updated_name}
+        client.request_patch(f"tag/{tag_id}", payload=patch_payload)
+
+        # Verify update
+        response = client.request_get(f"tag/{tag_id}")
+        assert response["data"]["name"] == updated_name
+
+        # DELETE - Remove the tag
+        client.request_delete(f"tag/{tag_id}")
+
+        # Verify deletion - request should raise an error for non-existent resource
+        from lib_shopware6_api_base.conf_shopware6_api_base_classes import ShopwareAPIError
+
+        with pytest.raises(ShopwareAPIError):
+            client.request_get(f"tag/{tag_id}")
+
+    def test_admin_client_request_patch(self, docker_test_config: ConfShopware6ApiBase) -> None:
+        """Test PATCH request to admin API."""
+        import uuid
+
+        client = Shopware6AdminAPIClientBase(config=docker_test_config)
+
+        # Create a tag to patch
+        tag_id = uuid.uuid4().hex
+        tag_name = f"patch-test-{tag_id[:8]}"
+        client.request_post("tag", payload={"id": tag_id, "name": tag_name})
+
+        # PATCH the tag
+        new_name = f"patched-{tag_name}"
+        patch_response = client.request_patch(f"tag/{tag_id}", payload={"name": new_name})
+        # PATCH returns empty dict on success (204 No Content)
+        assert isinstance(patch_response, dict)
+
+        # Verify patch worked
+        response = client.request_get(f"tag/{tag_id}")
+        assert response["data"]["name"] == new_name
+
+        # Clean up
+        client.request_delete(f"tag/{tag_id}")
+
+    def test_admin_client_request_delete(self, docker_test_config: ConfShopware6ApiBase) -> None:
+        """Test DELETE request to admin API."""
+        import uuid
+
+        client = Shopware6AdminAPIClientBase(config=docker_test_config)
+
+        # Create a tag to delete
+        tag_id = uuid.uuid4().hex
+        tag_name = f"delete-test-{tag_id[:8]}"
+
+        create_payload = {"id": tag_id, "name": tag_name}
+        client.request_post("tag", payload=create_payload)
+
+        # DELETE the tag
+        delete_response = client.request_delete(f"tag/{tag_id}")
+        # DELETE returns empty dict on success (204 No Content)
+        assert isinstance(delete_response, dict)
+
+    def test_admin_client_with_custom_headers(self, docker_test_config: ConfShopware6ApiBase) -> None:
+        """Test request with custom header fields."""
+        client = Shopware6AdminAPIClientBase(config=docker_test_config)
+
+        # Test with indexing behavior header
+        custom_headers = {"indexing-behavior": "use-queue-indexing"}
+        response = client.request_get("currency", update_header_fields=custom_headers)
+        assert "data" in response
+
+    def test_admin_client_search_with_criteria(self, docker_test_config: ConfShopware6ApiBase) -> None:
+        """Test search with complex Criteria object."""
+        client = Shopware6AdminAPIClientBase(config=docker_test_config)
+
+        # Create criteria with filter, limit, and sorting
+        criteria = Criteria(limit=5, page=1)
+        criteria.filter.append(EqualsFilter(field="active", value=True))
+
+        response = client.request_post("search/product", payload=criteria)
         assert "data" in response
         assert isinstance(response["data"], list)
 

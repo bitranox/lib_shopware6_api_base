@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         # Test against all supported Python versions (3.10+)
         python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
     env:
@@ -288,17 +288,13 @@ jobs:
           PY
 
   integration:
-    name: Integration tests (Python ${{ matrix.python }}, dockware)
-    runs-on: ubuntu-latest
+    name: Integration tests (Python ${{ matrix.python }}, ${{ matrix.os }}, dockware)
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
         python: ["3.13"]
-    services:
-      dockware:
-        image: dockware/dev:latest
-        ports:
-          - 80:80
     env:
       PYO3_USE_ABI3_FORWARD_COMPATIBILITY: "1"
       PYTHONIOENCODING: "utf-8"
@@ -314,6 +310,31 @@ jobs:
         with:
           enable-cache: true
           prune-cache: false
+
+      # macOS: Install Docker using colima (lightweight Docker runtime)
+      - name: Install Docker (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install docker colima
+          colima start --cpu 2 --memory 4 --disk 20
+          # Wait for Docker daemon to be ready
+          for i in {1..30}; do
+            if docker info >/dev/null 2>&1; then
+              echo "Docker is ready!"
+              break
+            fi
+            echo "Waiting for Docker daemon... ($i/30)"
+            sleep 2
+          done
+
+      # Start dockware container (manual start works on all platforms)
+      - name: Start dockware container
+        shell: bash
+        run: |
+          echo "Starting dockware container..."
+          docker pull dockware/dev:latest
+          docker run -d --name dockware -p 80:80 dockware/dev:latest
+          echo "Container started, waiting for initialization..."
 
       - name: Install tomli (Python < 3.11)
         shell: bash
@@ -353,6 +374,17 @@ jobs:
           --cov=${{ env.SRC_PATH }}/${{ env.PACKAGE_MODULE }}
           --cov-report=term-missing
           ${{ env.PYTEST_VERBOSITY }}
+
+      - name: Stop dockware container
+        if: always()
+        shell: bash
+        run: |
+          docker stop dockware || true
+          docker rm dockware || true
+
+      - name: Stop colima (macOS)
+        if: always() && runner.os == 'macOS'
+        run: colima stop || true
 
       - name: Prune uv cache
         continue-on-error: true

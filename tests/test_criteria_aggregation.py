@@ -23,7 +23,6 @@ from lib_shopware6_api_base.lib_shopware6_api_base_criteria_aggregation import (
     AggregationTypeName,
 )
 
-
 # =============================================================================
 # TestAvgAggregation - 3 tests
 # =============================================================================

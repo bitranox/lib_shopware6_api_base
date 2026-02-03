@@ -55,9 +55,7 @@ def info() -> None:
     prog_name=__init__conf__.shell_command,
     message=f"{__init__conf__.shell_command} version {__init__conf__.version}",
 )
-@click.option(
-    "--traceback/--no-traceback", is_flag=True, type=bool, default=None, help="return traceback information on cli"
-)
+@click.option("--traceback/--no-traceback", is_flag=True, type=bool, default=None, help="return traceback information on cli")
 def cli_main(traceback: bool | None = None) -> None:
     """Main CLI entry point."""
     if traceback is not None:

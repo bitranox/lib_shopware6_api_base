@@ -5,14 +5,13 @@ description = "python3 base API client for shopware6"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "pydantic>=2.0.0",
-    "pydantic-settings>=2.0.0",
+    "pydantic>=2.12.5",
+    "pydantic-settings>=2.12.0",
     "lib_cli_exit_tools>=2.2.4",
     "rich-click",
     "orjson",
-    "oauthlib",
-    "requests",
-    "requests-oauthlib",
+    "httpx>=0.28.1",
+    "authlib>=1.6.6",
 ]
 license = {text = "MIT"}
 authors = [{ name = "bitranox", email = "bitranox@gmail.com" }]
@@ -76,7 +75,7 @@ include = [
 ]
 
 [tool.ruff]
-line-length = 120
+line-length = 130
 target-version = "py310"
 exclude = ["lib_shopware6_api_base.ipynb"]
 
@@ -108,10 +107,12 @@ ignore = [
   "RUF002",    # ambiguous unicode characters in docstrings (en-dash) - typography choice
   "RUF022",    # unsorted __all__ - kept in logical grouping order
   "PLC0415",   # deferred imports inside functions - circular import prevention
+  "PLC0414",   # import alias does not rename - intentional for explicit re-exports (X as X)
   "TC001",     # stdlib imports at runtime - needed, not just for type hints
   "TC002",     # third-party imports at runtime - needed, not just for type hints
   "TC003",     # stdlib imports - same as TC001
-  "TC006",     # cast() type expressions - existing code uses unquoted
+  "TC006",     # cast() type expressions - scripts use unquoted
+  "N815",      # mixedCase variable names - required by Shopware API (naturalSorting field)
 ]
 
 [tool.ruff.lint.pydocstyle]
@@ -123,9 +124,14 @@ convention = "google"
 # Scripts: tooling code with print(), subprocess, boolean params, large orchestrators
 "scripts/*.py" = ["T20", "S101", "S603", "S607", "ERA001", "FBT001", "FBT002", "FBT003", "PERF203", "PLR0912", "PLR0913", "PLR0915", "PLR2004", "RUF012"]
 # Tests: assert is standard, test fixtures have passwords, magic values are clearer inline, temp paths are fine
-"tests/*.py" = ["T20", "S101", "S105", "S106", "S108", "FBT001", "FBT003", "PLR0913", "PLR2004"]
-# CLI module: boolean flags from click decorators, exception mapper with multiple return statements
+# S603/S607: subprocess security - test code only, PLW1510: explicit check arg, G004: f-string logging, E501: local_testscripts
+"tests/**/*.py" = ["T20", "S101", "S105", "S106", "S108", "S603", "S607", "FBT001", "FBT003", "PLR0913", "PLR2004", "PLW1510", "G004", "E501"]
+# CLI module: boolean flags from click decorators, exception mapper with multiple returns
 "src/lib_shopware6_api_base/lib_shopware6_api_base_cli.py" = ["FBT001", "PLR0911"]
+# Main API module: internal methods need many params, doctest examples have long lines
+"src/lib_shopware6_api_base/lib_shopware6_api_base.py" = ["PLR0913", "E501"]
+# Criteria modules: doctest examples with long product IDs
+"src/lib_shopware6_api_base/lib_shopware6_api_base_criteria*.py" = ["E501"]
 
 [tool.pyright]
 typeCheckingMode = "strict"
@@ -147,7 +153,8 @@ reportUnusedImport = "warning"  # used in doctests
 reportUnusedFunction = "warning"  # used in doctests
 
 [tool.pytest.ini_options]
-addopts = ["--doctest-modules"]
+# Note: --doctest-modules removed from defaults - doctests require integration test setup
+# Run doctests explicitly: pytest --doctest-modules src/ -m integration
 doctest_optionflags = ["ELLIPSIS", "NORMALIZE_WHITESPACE"]
 pythonpath = ["src"]
 markers = [

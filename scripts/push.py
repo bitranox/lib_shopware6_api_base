@@ -216,9 +216,7 @@ def _display_dependency_issues(
         name_width = max(len(name) for name, _, _, _ in outdated_installed)
         installed_width = max(len(installed) for _, installed, _, _ in outdated_installed)
         for name, installed, required, latest in sorted(outdated_installed):
-            click.echo(
-                f"  [!] {name:<{name_width}}  {installed:<{installed_width}}  (requires >={required}, latest: {latest})"
-            )
+            click.echo(f"  [!] {name:<{name_width}}  {installed:<{installed_width}}  (requires >={required}, latest: {latest})")
 
 
 def _prompt_and_install_dependencies(total_issues: int) -> None:

@@ -5,11 +5,28 @@ from typing import Literal
 # EXT
 from pydantic import BaseModel, Field, computed_field
 
-from .lib_shopware6_api_base_criteria_filter import EqualsFilter, FilterType
-from .lib_shopware6_api_base_criteria_sorting import DescFieldSorting, SortType
+from .lib_shopware6_api_base_criteria_filter import FilterType
+from .lib_shopware6_api_base_criteria_sorting import SortType
 
-# proj
-from .lib_shopware6_api_base_helpers import pprint_attrs
+__all__ = [
+    # Enums
+    "AggregationTypeName",
+    # Backward compatibility alias
+    "aggregation_names",
+    # Aggregation classes
+    "AvgAggregation",
+    "CountAggregation",
+    "MaxAggregation",
+    "MinAggregation",
+    "SumAggregation",
+    "StatsAggregation",
+    "TermsAggregation",
+    "FilterAggregation",
+    "EntityAggregation",
+    "DateHistogramAggregation",
+    # Type alias
+    "AggregationType",
+]
 
 
 class AggregationTypeName(StrEnum):

@@ -7,8 +7,8 @@ import sys
 import time
 from typing import TYPE_CHECKING
 
+import httpx
 import pytest
-import requests
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -412,9 +412,10 @@ REQUEST_TIMEOUT = 10  # seconds for HTTP requests
 def _is_docker_container_active() -> bool:
     """Check if the local docker container is running and responding."""
     try:
-        requests.get("http://localhost/admin", timeout=REQUEST_TIMEOUT)
-        return True
-    except requests.exceptions.ConnectionError:
+        response = httpx.get("http://localhost/admin", timeout=REQUEST_TIMEOUT, follow_redirects=True)
+        # Container is ready if we get a successful response or a redirect to login
+        return response.status_code in (200, 302, 403)
+    except (httpx.ConnectError, httpx.ReadError, httpx.TimeoutException):
         return False
 
 

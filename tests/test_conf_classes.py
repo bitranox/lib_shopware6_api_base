@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-from pydantic import ValidationError
 
 from lib_shopware6_api_base.conf_shopware6_api_base_classes import (
     ConfShopware6ApiBase,
@@ -11,7 +10,6 @@ from lib_shopware6_api_base.conf_shopware6_api_base_classes import (
     HttpMethod,
     ShopwareAPIError,
 )
-
 
 # =============================================================================
 # TestConfShopware6ApiBase - 12 tests

@@ -169,9 +169,7 @@ def _run_pytest_step(
 
     run_command_fn = make_run_command(test_env.default_env)
     run_fn = make_run_fn(run_command_fn, verbose)
-    enable_coverage = coverage_mode == "on" or (
-        coverage_mode == "auto" and (os.getenv("CI") or os.getenv("CODECOV_TOKEN"))
-    )
+    enable_coverage = coverage_mode == "on" or (coverage_mode == "auto" and (os.getenv("CI") or os.getenv("CODECOV_TOKEN")))
 
     if enable_coverage:
         click.echo("[coverage] enabled")

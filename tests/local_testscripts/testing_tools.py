@@ -7,7 +7,7 @@ import pathlib
 import click
 
 # CONSTANTS
-CLICK_CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
+CLICK_CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 logger = logging.getLogger()
 logger.level = logging.INFO
 
@@ -93,10 +93,7 @@ def get_env_data(env_variable: str) -> str:
     >>> set_env_data('MYPYPATH', save_mypy_path)
 
     """
-    if env_variable in os.environ:
-        env_data = os.environ[env_variable]
-    else:
-        env_data = ""
+    env_data = os.environ.get(env_variable, "")
     return env_data
 
 

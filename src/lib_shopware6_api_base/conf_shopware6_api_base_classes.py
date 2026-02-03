@@ -8,6 +8,16 @@ from typing import Any, Self
 from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+__all__ = [
+    "GrantType",
+    "HttpMethod",
+    "ShopwareAPIError",
+    "ConfigurationError",
+    "ConfShopware6ApiBase",
+    "load_config_from_env",
+    "require_config_from_env",
+]
+
 
 class GrantType(str, Enum):
     """OAuth2 grant type for Shopware6 API authentication."""
@@ -104,16 +114,16 @@ class ConfShopware6ApiBase(BaseSettings):
         """Parse grant_type from string or GrantType enum."""
         if isinstance(v, GrantType):
             return v
-        if isinstance(v, str):
-            # Handle both "USER_CREDENTIALS" and "user_credentials" formats
-            v_upper = v.upper()
-            if v_upper in ("USER_CREDENTIALS", "RESOURCE_OWNER"):
-                return GrantType(v.lower())
-            # Try direct enum value
-            try:
-                return GrantType(v.lower())
-            except ValueError:
-                pass
+        # At this point v is guaranteed to be str
+        # Handle both "USER_CREDENTIALS" and "user_credentials" formats
+        v_upper = v.upper()
+        if v_upper in ("USER_CREDENTIALS", "RESOURCE_OWNER"):
+            return GrantType(v.lower())
+        # Try direct enum value
+        try:
+            return GrantType(v.lower())
+        except ValueError:
+            pass
         raise ValueError(f"Invalid grant_type: {v!r}. Must be 'USER_CREDENTIALS' or 'RESOURCE_OWNER'")
 
     @model_validator(mode="after")
@@ -171,20 +181,18 @@ def _parse_env_file(env_path: Path) -> dict[str, Any]:
     """Parse a .env file and return a dictionary of values."""
     env_values: dict[str, Any] = {}
     with env_path.open(encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
+        for raw_line in f:
+            stripped_line = raw_line.strip()
             # Skip empty lines and comments
-            if not line or line.startswith("#"):
+            if not stripped_line or stripped_line.startswith("#"):
                 continue
             # Parse KEY=value or KEY="value"
-            if "=" in line:
-                key, _, value = line.partition("=")
+            if "=" in stripped_line:
+                key, _, value = stripped_line.partition("=")
                 key = key.strip().lower()  # Convert to lowercase for Pydantic field names
                 value = value.strip()
                 # Remove surrounding quotes
-                if (value.startswith('"') and value.endswith('"')) or (
-                    value.startswith("'") and value.endswith("'")
-                ):
+                if (value.startswith('"') and value.endswith('"')) or (value.startswith("'") and value.endswith("'")):
                     value = value[1:-1]
                 env_values[key] = value
     return env_values
@@ -192,13 +200,14 @@ def _parse_env_file(env_path: Path) -> dict[str, Any]:
 
 def _get_env_values() -> dict[str, Any]:
     """Get configuration values from environment variables."""
+    # Mapping of environment variable names to pydantic field names (not actual credentials)
     env_mapping = {
         "SHOPWARE_ADMIN_API_URL": "shopware_admin_api_url",
         "SHOPWARE_STOREFRONT_API_URL": "shopware_storefront_api_url",
         "USERNAME": "username",
-        "PASSWORD": "password",
+        "PASSWORD": "password",  # nosec B105 - field name mapping, not actual password
         "CLIENT_ID": "client_id",
-        "CLIENT_SECRET": "client_secret",
+        "CLIENT_SECRET": "client_secret",  # nosec B105 - field name mapping, not actual secret
         "GRANT_TYPE": "grant_type",
         "STORE_API_SW_ACCESS_KEY": "store_api_sw_access_key",
         "INSECURE_TRANSPORT": "insecure_transport",
@@ -308,14 +317,14 @@ def require_config_from_env(env_file: str | Path | None = None) -> ConfShopware6
     found_env = _find_env_file()
     if found_env is None:
         raise ConfigurationError(
-            f"Configuration file not found: .env\n\n"
-            f"Searched in current directory and all parent directories.\n"
-            f"This application requires a .env file with Shopware 6 API credentials.\n"
-            f"See 'example.env' in the project root for a documented template:\n"
-            f"  https://github.com/bitranox/lib_shopware6_api_base/blob/master/example.env\n\n"
-            f"Quick start:\n"
-            f"  1. Copy example.env to .env in your project root\n"
-            f"  2. Edit .env with your shop's credentials\n"
+            "Configuration file not found: .env\n\n"
+            "Searched in current directory and all parent directories.\n"
+            "This application requires a .env file with Shopware 6 API credentials.\n"
+            "See 'example.env' in the project root for a documented template:\n"
+            "  https://github.com/bitranox/lib_shopware6_api_base/blob/master/example.env\n\n"
+            "Quick start:\n"
+            "  1. Copy example.env to .env in your project root\n"
+            "  2. Edit .env with your shop's credentials\n"
         )
 
     return ConfShopware6ApiBase.from_env_file(found_env)

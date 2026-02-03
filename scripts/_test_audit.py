@@ -111,9 +111,7 @@ class AuditDependency:
         if isinstance(raw_vulns, list):
             typed_vulns = cast(list[object], raw_vulns)
             vulns = tuple(
-                AuditVulnerability.from_dict(cast(dict[str, object], entry))
-                for entry in typed_vulns
-                if isinstance(entry, dict)
+                AuditVulnerability.from_dict(cast(dict[str, object], entry)) for entry in typed_vulns if isinstance(entry, dict)
             )
 
         return cls(name=name, version=version, vulns=vulns)
@@ -148,20 +146,13 @@ class AuditResult:
         typed_deps = cast(list[object], raw_deps)
         return cls(
             dependencies=tuple(
-                AuditDependency.from_dict(cast(dict[str, object], entry))
-                for entry in typed_deps
-                if isinstance(entry, dict)
+                AuditDependency.from_dict(cast(dict[str, object], entry)) for entry in typed_deps if isinstance(entry, dict)
             )
         )
 
     def find_unexpected_vulns(self, ignore_ids: set[str]) -> list[str]:
         """Find vulnerabilities not in the ignore set."""
-        return [
-            f"{dep.name}: {vuln_id}"
-            for dep in self.dependencies
-            for vuln_id in dep.vuln_ids()
-            if vuln_id not in ignore_ids
-        ]
+        return [f"{dep.name}: {vuln_id}" for dep in self.dependencies for vuln_id in dep.vuln_ids() if vuln_id not in ignore_ids]
 
 
 # ---------------------------------------------------------------------------
