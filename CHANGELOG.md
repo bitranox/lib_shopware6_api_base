@@ -18,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   # Old (v2.x): EqualsFilter("stock", 10)
   # New (v3.0): EqualsFilter(field="stock", value=10)
   ```
+- **Environment Variables**: All env vars now use `SHOPWARE_` prefix to avoid collision with system variables (e.g., Windows `USERNAME`):
+  ```bash
+  # Old: USERNAME, PASSWORD, CLIENT_ID, CLIENT_SECRET, GRANT_TYPE, INSECURE_TRANSPORT, STORE_API_SW_ACCESS_KEY
+  # New: SHOPWARE_USERNAME, SHOPWARE_PASSWORD, SHOPWARE_CLIENT_ID, SHOPWARE_CLIENT_SECRET, SHOPWARE_GRANT_TYPE, SHOPWARE_INSECURE_TRANSPORT, SHOPWARE_STORE_API_SW_ACCESS_KEY
+  ```
 
 ### Added
 

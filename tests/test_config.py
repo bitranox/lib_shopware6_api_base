@@ -39,13 +39,13 @@ def temp_env_file() -> Generator[Path, None, None]:
     with tempfile.NamedTemporaryFile(mode="w", suffix=".env", delete=False) as f:
         f.write('SHOPWARE_ADMIN_API_URL="http://localhost/api"\n')
         f.write('SHOPWARE_STOREFRONT_API_URL="http://localhost/store-api"\n')
-        f.write("USERNAME=testuser\n")
-        f.write("PASSWORD=testpass\n")
-        f.write("CLIENT_ID=test_client\n")
-        f.write("CLIENT_SECRET=test_secret\n")
-        f.write("GRANT_TYPE=user_credentials\n")
-        f.write('STORE_API_SW_ACCESS_KEY="SWTEST123"\n')
-        f.write('INSECURE_TRANSPORT="1"\n')
+        f.write("SHOPWARE_USERNAME=testuser\n")
+        f.write("SHOPWARE_PASSWORD=testpass\n")
+        f.write("SHOPWARE_CLIENT_ID=test_client\n")
+        f.write("SHOPWARE_CLIENT_SECRET=test_secret\n")
+        f.write("SHOPWARE_GRANT_TYPE=user_credentials\n")
+        f.write('SHOPWARE_STORE_API_SW_ACCESS_KEY="SWTEST123"\n')
+        f.write('SHOPWARE_INSECURE_TRANSPORT="1"\n')
         temp_path = Path(f.name)
     yield temp_path
     temp_path.unlink(missing_ok=True)
@@ -56,7 +56,7 @@ def temp_env_file_single_quotes() -> Generator[Path, None, None]:
     """Create a temp .env file with single-quoted values."""
     with tempfile.NamedTemporaryFile(mode="w", suffix=".env", delete=False) as f:
         f.write("SHOPWARE_ADMIN_API_URL='http://localhost/api'\n")
-        f.write("USERNAME='admin'\n")
+        f.write("SHOPWARE_USERNAME='admin'\n")
         temp_path = Path(f.name)
     yield temp_path
     temp_path.unlink(missing_ok=True)
@@ -70,7 +70,7 @@ def temp_env_file_with_comments() -> Generator[Path, None, None]:
         f.write("\n")
         f.write("SHOPWARE_ADMIN_API_URL=http://localhost/api\n")
         f.write("# Another comment\n")
-        f.write("USERNAME=admin\n")
+        f.write("SHOPWARE_USERNAME=admin\n")
         f.write("\n")
         temp_path = Path(f.name)
     yield temp_path
@@ -82,10 +82,10 @@ def temp_env_file_resource_owner() -> Generator[Path, None, None]:
     """Create a temp .env file configured for resource owner grant."""
     with tempfile.NamedTemporaryFile(mode="w", suffix=".env", delete=False) as f:
         f.write("SHOPWARE_ADMIN_API_URL=http://localhost/api\n")
-        f.write("CLIENT_ID=integration_id\n")
-        f.write("CLIENT_SECRET=integration_secret\n")
-        f.write("GRANT_TYPE=RESOURCE_OWNER\n")
-        f.write("INSECURE_TRANSPORT=1\n")
+        f.write("SHOPWARE_CLIENT_ID=integration_id\n")
+        f.write("SHOPWARE_CLIENT_SECRET=integration_secret\n")
+        f.write("SHOPWARE_GRANT_TYPE=RESOURCE_OWNER\n")
+        f.write("SHOPWARE_INSECURE_TRANSPORT=1\n")
         temp_path = Path(f.name)
     yield temp_path
     temp_path.unlink(missing_ok=True)
@@ -215,9 +215,9 @@ class TestFromEnvVars:
     def test_from_env_vars_loads_environment(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test from_env_vars loads values from environment variables."""
         monkeypatch.setenv("SHOPWARE_ADMIN_API_URL", "http://env-test/api")
-        monkeypatch.setenv("USERNAME", "env_user")
-        monkeypatch.setenv("PASSWORD", "env_pass")
-        monkeypatch.setenv("GRANT_TYPE", "resource_owner")
+        monkeypatch.setenv("SHOPWARE_USERNAME", "env_user")
+        monkeypatch.setenv("SHOPWARE_PASSWORD", "env_pass")
+        monkeypatch.setenv("SHOPWARE_GRANT_TYPE", "resource_owner")
 
         config = ConfShopware6ApiBase.from_env_vars()
 
@@ -229,17 +229,17 @@ class TestFromEnvVars:
     @pytest.mark.os_agnostic
     def test_from_env_vars_uses_defaults_when_not_set(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test from_env_vars uses defaults for unset variables."""
-        # Clear all relevant env vars
+        # Clear all relevant env vars (all use SHOPWARE_ prefix)
         for var in [
             "SHOPWARE_ADMIN_API_URL",
             "SHOPWARE_STOREFRONT_API_URL",
-            "USERNAME",
-            "PASSWORD",
-            "CLIENT_ID",
-            "CLIENT_SECRET",
-            "GRANT_TYPE",
-            "STORE_API_SW_ACCESS_KEY",
-            "INSECURE_TRANSPORT",
+            "SHOPWARE_USERNAME",
+            "SHOPWARE_PASSWORD",
+            "SHOPWARE_CLIENT_ID",
+            "SHOPWARE_CLIENT_SECRET",
+            "SHOPWARE_GRANT_TYPE",
+            "SHOPWARE_STORE_API_SW_ACCESS_KEY",
+            "SHOPWARE_INSECURE_TRANSPORT",
         ]:
             monkeypatch.delenv(var, raising=False)
 

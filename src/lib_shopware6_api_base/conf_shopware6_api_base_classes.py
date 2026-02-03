@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 # EXT
-from pydantic import field_validator, model_validator
+from pydantic import AliasChoices, Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from ._compat import Self
@@ -55,11 +55,25 @@ class ConfShopware6ApiBase(BaseSettings):
     Configuration for Shopware6 API connection.
 
     This configuration can be loaded from:
-    1. Environment variables (UPPERCASE names, e.g., SHOPWARE_ADMIN_API_URL)
+    1. Environment variables (with SHOPWARE_ prefix, e.g., SHOPWARE_USERNAME)
     2. A .env file in the current working directory
     3. A custom .env file path via load_config_from_env()
 
     See example.env for a documented template of all configuration options.
+
+    Environment Variables:
+        All environment variables use the SHOPWARE_ prefix to avoid collision
+        with system environment variables (e.g., Windows USERNAME):
+
+        - SHOPWARE_ADMIN_API_URL
+        - SHOPWARE_STOREFRONT_API_URL
+        - SHOPWARE_USERNAME
+        - SHOPWARE_PASSWORD
+        - SHOPWARE_CLIENT_ID
+        - SHOPWARE_CLIENT_SECRET
+        - SHOPWARE_GRANT_TYPE
+        - SHOPWARE_STORE_API_SW_ACCESS_KEY
+        - SHOPWARE_INSECURE_TRANSPORT
 
     Attributes:
         shopware_admin_api_url: Admin API URL (e.g., 'https://shop.example.com/api')
@@ -75,6 +89,7 @@ class ConfShopware6ApiBase(BaseSettings):
     """
 
     model_config = SettingsConfigDict(
+        env_prefix="SHOPWARE_",
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
@@ -83,8 +98,11 @@ class ConfShopware6ApiBase(BaseSettings):
     )
 
     # API Endpoints
-    shopware_admin_api_url: str = ""
-    shopware_storefront_api_url: str = ""
+    # Use validation_alias to avoid double prefix: SHOPWARE_SHOPWARE_ADMIN_API_URL
+    shopware_admin_api_url: str = Field(default="", validation_alias=AliasChoices("ADMIN_API_URL", "shopware_admin_api_url"))
+    shopware_storefront_api_url: str = Field(
+        default="", validation_alias=AliasChoices("STOREFRONT_API_URL", "shopware_storefront_api_url")
+    )
 
     # User Credentials Grant Type (with refresh token)
     # Use for: client applications performing administrative actions
@@ -180,7 +198,23 @@ class ConfShopware6ApiBase(BaseSettings):
 
 
 def _parse_env_file(env_path: Path) -> dict[str, Any]:
-    """Parse a .env file and return a dictionary of values."""
+    """Parse a .env file and return a dictionary of values.
+
+    Environment variable names are mapped to Pydantic field names using
+    explicit mapping. All env vars use the SHOPWARE_ prefix.
+    """
+    # Mapping of env var names (uppercase) to pydantic field names (not actual credentials)
+    env_to_field = {
+        "SHOPWARE_ADMIN_API_URL": "shopware_admin_api_url",
+        "SHOPWARE_STOREFRONT_API_URL": "shopware_storefront_api_url",
+        "SHOPWARE_USERNAME": "username",
+        "SHOPWARE_PASSWORD": "password",  # nosec B105 - field name mapping, not actual password
+        "SHOPWARE_CLIENT_ID": "client_id",
+        "SHOPWARE_CLIENT_SECRET": "client_secret",  # nosec B105 - field name mapping, not actual secret
+        "SHOPWARE_GRANT_TYPE": "grant_type",
+        "SHOPWARE_STORE_API_SW_ACCESS_KEY": "store_api_sw_access_key",
+        "SHOPWARE_INSECURE_TRANSPORT": "insecure_transport",
+    }
     env_values: dict[str, Any] = {}
     with env_path.open(encoding="utf-8") as f:
         for raw_line in f:
@@ -191,28 +225,34 @@ def _parse_env_file(env_path: Path) -> dict[str, Any]:
             # Parse KEY=value or KEY="value"
             if "=" in stripped_line:
                 key, _, value = stripped_line.partition("=")
-                key = key.strip().lower()  # Convert to lowercase for Pydantic field names
+                key = key.strip().upper()  # Normalize to uppercase for lookup
                 value = value.strip()
                 # Remove surrounding quotes
                 if (value.startswith('"') and value.endswith('"')) or (value.startswith("'") and value.endswith("'")):
                     value = value[1:-1]
-                env_values[key] = value
+                # Map to field name if known, otherwise skip
+                if key in env_to_field:
+                    env_values[env_to_field[key]] = value
     return env_values
 
 
 def _get_env_values() -> dict[str, Any]:
-    """Get configuration values from environment variables."""
+    """Get configuration values from environment variables.
+
+    All environment variables use the SHOPWARE_ prefix to avoid collision
+    with system environment variables (e.g., Windows USERNAME).
+    """
     # Mapping of environment variable names to pydantic field names (not actual credentials)
     env_mapping = {
         "SHOPWARE_ADMIN_API_URL": "shopware_admin_api_url",
         "SHOPWARE_STOREFRONT_API_URL": "shopware_storefront_api_url",
-        "USERNAME": "username",
-        "PASSWORD": "password",  # nosec B105 - field name mapping, not actual password
-        "CLIENT_ID": "client_id",
-        "CLIENT_SECRET": "client_secret",  # nosec B105 - field name mapping, not actual secret
-        "GRANT_TYPE": "grant_type",
-        "STORE_API_SW_ACCESS_KEY": "store_api_sw_access_key",
-        "INSECURE_TRANSPORT": "insecure_transport",
+        "SHOPWARE_USERNAME": "username",
+        "SHOPWARE_PASSWORD": "password",  # nosec B105 - field name mapping, not actual password
+        "SHOPWARE_CLIENT_ID": "client_id",
+        "SHOPWARE_CLIENT_SECRET": "client_secret",  # nosec B105 - field name mapping, not actual secret
+        "SHOPWARE_GRANT_TYPE": "grant_type",
+        "SHOPWARE_STORE_API_SW_ACCESS_KEY": "store_api_sw_access_key",
+        "SHOPWARE_INSECURE_TRANSPORT": "insecure_transport",
     }
     env_values: dict[str, Any] = {}
     for env_key, field_name in env_mapping.items():

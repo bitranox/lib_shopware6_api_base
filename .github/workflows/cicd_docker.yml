@@ -257,6 +257,10 @@ jobs:
         run: |
           uv pip install --system nbclient nbformat ipykernel jupyter_client
           python -m ipykernel install --user --name python3 --display-name "Python 3"
+
+      - name: Install package
+        run: uv pip install -e . --system
+
       - name: Execute notebook
         env:
           PIP_DISABLE_PIP_VERSION_CHECK: "1"

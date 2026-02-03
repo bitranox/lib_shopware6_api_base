@@ -364,8 +364,17 @@ def query_with_equals_filter(equals_filter: EqualsFilter) -> Query:
 
 @pytest.fixture
 def empty_config() -> ConfShopware6ApiBase:
-    """Return an empty ConfShopware6ApiBase configuration."""
-    return ConfShopware6ApiBase()
+    """Return an empty ConfShopware6ApiBase configuration.
+
+    Note: Explicitly set credential fields to empty strings to override
+    any environment variables (e.g., Windows USERNAME system variable).
+    """
+    return ConfShopware6ApiBase(
+        username="",
+        password="",
+        client_id="",
+        client_secret="",
+    )
 
 
 @pytest.fixture

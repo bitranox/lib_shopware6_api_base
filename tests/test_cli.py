@@ -33,8 +33,8 @@ def call_cli_command(commandline_args: str = "") -> bool:
 def get_cli_output(commandline_args: str = "") -> str:
     """Helper function to get CLI output as string."""
     args = [sys.executable, "-m", "lib_shopware6_api_base", *commandline_args.split()]
-    result = subprocess.run(args, env=_env, capture_output=True, text=True)
-    return result.stdout + result.stderr
+    result = subprocess.run(args, env=_env, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    return (result.stdout or "") + (result.stderr or "")
 
 
 # =============================================================================

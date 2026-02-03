@@ -21,8 +21,18 @@ class TestConfShopware6ApiBase:
 
     @pytest.mark.os_agnostic
     def test_conf_empty_initialization(self) -> None:
-        """Test ConfShopware6ApiBase with default empty values."""
-        config = ConfShopware6ApiBase()
+        """Test ConfShopware6ApiBase with explicit empty values.
+
+        Note: BaseSettings reads from environment variables by default.
+        On Windows, USERNAME is a system env var (e.g., 'runneradmin').
+        We test explicit initialization to verify field defaults work correctly.
+        """
+        config = ConfShopware6ApiBase(
+            username="",
+            password="",
+            client_id="",
+            client_secret="",
+        )
         assert config.shopware_admin_api_url == ""
         assert config.shopware_storefront_api_url == ""
         assert config.username == ""

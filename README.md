@@ -31,6 +31,7 @@ This is the base abstraction layer. For higher-level functions, see [lib_shopwar
 - Migrated OAuth2 from `oauthlib` to `authlib` (OAuth 2.1 compliant)
 - Minimum Python version raised to 3.10+
 - Filter/Criteria classes now require keyword arguments: `EqualsFilter(field="x", value=1)` instead of `EqualsFilter("x", 1)`
+- **Environment variables now use `SHOPWARE_` prefix** to avoid collision with system variables (e.g., Windows `USERNAME`). Update your `.env` files: `USERNAME` → `SHOPWARE_USERNAME`, `PASSWORD` → `SHOPWARE_PASSWORD`, etc.
 
 **New Features:**
 - `load_config_from_env()` and `require_config_from_env()` for .env file loading
@@ -81,36 +82,38 @@ SHOPWARE_ADMIN_API_URL="https://shop.example.com/api"
 SHOPWARE_STOREFRONT_API_URL="https://shop.example.com/store-api"
 
 # OAuth2 Security (set to "1" only for local HTTP development)
-INSECURE_TRANSPORT="0"
+SHOPWARE_INSECURE_TRANSPORT="0"
 
 # User Credentials Grant (for interactive apps with refresh tokens)
-USERNAME="admin@example.com"
-PASSWORD="your-password"
+SHOPWARE_USERNAME="admin@example.com"
+SHOPWARE_PASSWORD="your-password"
 
 # Resource Owner Grant (for automation/CLI - no refresh tokens)
-CLIENT_ID="SWIAXXXXXXXXXXXXXXXXXXXX"
-CLIENT_SECRET="your-integration-secret"
+SHOPWARE_CLIENT_ID="SWIAXXXXXXXXXXXXXXXXXXXX"
+SHOPWARE_CLIENT_SECRET="your-integration-secret"
 
 # Grant type: USER_CREDENTIALS or RESOURCE_OWNER
-GRANT_TYPE="RESOURCE_OWNER"
+SHOPWARE_GRANT_TYPE="RESOURCE_OWNER"
 
 # Storefront API access key (from Sales Channel settings)
-STORE_API_SW_ACCESS_KEY="SWSCXXXXXXXXXXXXXXXXXX"
+SHOPWARE_STORE_API_SW_ACCESS_KEY="SWSCXXXXXXXXXXXXXXXXXX"
 ```
 
 #### .env Settings Reference
+
+All environment variables use the `SHOPWARE_` prefix to avoid collision with system variables.
 
 | Variable | Description | Example |
 |----------|-------------|---------|
 | `SHOPWARE_ADMIN_API_URL` | Admin API endpoint | `https://shop.example.com/api` |
 | `SHOPWARE_STOREFRONT_API_URL` | Storefront API endpoint | `https://shop.example.com/store-api` |
-| `INSECURE_TRANSPORT` | Allow HTTP (dev only) | `0` (production) or `1` (dev) |
-| `USERNAME` | Admin user email | `admin@example.com` |
-| `PASSWORD` | Admin user password | `secret` |
-| `CLIENT_ID` | Integration Access ID | `SWIA...` |
-| `CLIENT_SECRET` | Integration Secret | `...` |
-| `GRANT_TYPE` | Auth method | `USER_CREDENTIALS` or `RESOURCE_OWNER` |
-| `STORE_API_SW_ACCESS_KEY` | Storefront access key | `SWSC...` |
+| `SHOPWARE_INSECURE_TRANSPORT` | Allow HTTP (dev only) | `0` (production) or `1` (dev) |
+| `SHOPWARE_USERNAME` | Admin user email | `admin@example.com` |
+| `SHOPWARE_PASSWORD` | Admin user password | `secret` |
+| `SHOPWARE_CLIENT_ID` | Integration Access ID | `SWIA...` |
+| `SHOPWARE_CLIENT_SECRET` | Integration Secret | `...` |
+| `SHOPWARE_GRANT_TYPE` | Auth method | `USER_CREDENTIALS` or `RESOURCE_OWNER` |
+| `SHOPWARE_STORE_API_SW_ACCESS_KEY` | Storefront access key | `SWSC...` |
 
 ### Loading Configuration
 
