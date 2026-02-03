@@ -2,15 +2,15 @@
 
 <!-- Badges -->
 [![CI](https://github.com/bitranox/lib_shopware6_api_base/actions/workflows/cicd_docker.yml/badge.svg)](https://github.com/bitranox/lib_shopware6_api_base/actions/workflows/cicd_docker.yml)
-[![CodeQL](https://github.com/bitranox/lib_shopware6_api_base/actions/workflows/codeql.yml/badge.svg)](https://github.com/bitranox/lib_shopware6_api_base/actions/workflows/codeql.yml)
+[![CodeQL](https://github.com/bitranox/lib_shopware6_api_base/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/bitranox/lib_shopware6_api_base/actions/workflows/codeql-analysis.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Open in Codespaces](https://img.shields.io/badge/Codespaces-Open-blue?logo=github&logoColor=white&style=flat-square)](https://codespaces.new/bitranox/bmk?quickstart=1)
-[![PyPI](https://img.shields.io/pypi/v/bmk.svg)](https://pypi.org/project/lib_shopware6_api_base/)
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/bmk.svg)](https://pypi.org/project/lib_shopware6_api_base/)
+[![PyPI](https://img.shields.io/pypi/v/lib_shopware6_api_base.svg)](https://pypi.org/project/lib_shopware6_api_base/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/lib_shopware6_api_base.svg)](https://pypi.org/project/lib_shopware6_api_base/)
 [![Code Style: Ruff](https://img.shields.io/badge/Code%20Style-Ruff-46A3FF?logo=ruff&labelColor=000)](https://docs.astral.sh/ruff/)
-[![codecov](https://codecov.io/gh/bitranox/lib_shopware6_api_base/graph/badge.svg?token=UFBaUDIgRk)](https://codecov.io/gh/bitranox/bmk)
-[![Maintainability](https://qlty.sh/badges/041ba2c1-37d6-40bb-85a0-ec5a8a0aca0c/maintainability.svg)](https://qlty.sh/gh/bitranox/projects/bmk)
-[![Known Vulnerabilities](https://snyk.io/test/github/bitranox/lib_shopware6_api_base/badge.svg)](https://snyk.io/test/github/bitranox/bmk)
+[![codecov](https://codecov.io/gh/bitranox/lib_shopware6_api_base/graph/badge.svg?token=UFBaUDIgRk)](https://codecov.io/gh/bitranox/lib_shopware6_api_base)
+[![Maintainability](https://qlty.sh/badges/041ba2c1-37d6-40bb-85a0-ec5a8a0aca0c/maintainability.svg)](https://qlty.sh/gh/bitranox/projects/lib_shopware6_api_base)
+[![Known Vulnerabilities](https://snyk.io/test/github/bitranox/lib_shopware6_api_base/badge.svg)](https://snyk.io/test/github/bitranox/lib_shopware6_api_base)
 [![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
 
 A Python base API client for Shopware 6, supporting Windows, Linux, and macOS.
