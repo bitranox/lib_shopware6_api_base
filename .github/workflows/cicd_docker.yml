@@ -94,7 +94,7 @@ jobs:
           # and stale journal files cause "database is locked" errors.
           COVERAGE_FILE: "${{ runner.temp }}/.coverage"
         run: >-
-          python -m pytest -m "not local_only"
+          python -m pytest -m "not local_only and not integration"
           --cov=${{ env.SRC_PATH }}/${{ env.PACKAGE_MODULE }}
           --cov-report=term-missing
           --cov-report=xml:${{ env.COV_REPORT_FILE }}
@@ -293,7 +293,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest]
         python: ["3.13"]
     env:
       PYO3_USE_ABI3_FORWARD_COMPATIBILITY: "1"
@@ -310,22 +310,6 @@ jobs:
         with:
           enable-cache: true
           prune-cache: false
-
-      # macOS: Install Docker using colima (lightweight Docker runtime)
-      - name: Install Docker (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          brew install docker colima
-          colima start --cpu 2 --memory 4 --disk 20
-          # Wait for Docker daemon to be ready
-          for i in {1..30}; do
-            if docker info >/dev/null 2>&1; then
-              echo "Docker is ready!"
-              break
-            fi
-            echo "Waiting for Docker daemon... ($i/30)"
-            sleep 2
-          done
 
       # Start dockware container (manual start works on all platforms)
       - name: Start dockware container
@@ -381,10 +365,6 @@ jobs:
         run: |
           docker stop dockware || true
           docker rm dockware || true
-
-      - name: Stop colima (macOS)
-        if: always() && runner.os == 'macOS'
-        run: colima stop || true
 
       - name: Prune uv cache
         continue-on-error: true

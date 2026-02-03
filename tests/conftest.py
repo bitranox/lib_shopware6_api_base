@@ -409,6 +409,20 @@ DOCKER_CHECK_INTERVAL = 5  # seconds between readiness checks
 REQUEST_TIMEOUT = 10  # seconds for HTTP requests
 
 
+def _docker_engine_is_linux() -> bool:
+    """Return True if a Linux Docker engine is available (required for dockware/dev)."""
+    try:
+        result = subprocess.run(
+            ["docker", "info", "--format", "{{.OSType}}"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return False
+    return result.stdout.strip().lower() == "linux"
+
+
 def _is_docker_container_active() -> bool:
     """Check if the local docker container is running and responding."""
     try:
@@ -421,30 +435,43 @@ def _is_docker_container_active() -> bool:
 
 def _is_docker_container_running() -> bool:
     """Check if the docker container process is running (even if not yet ready)."""
-    result = subprocess.run(
-        ["docker", "ps", "-q", "-f", f"name={DOCKER_CONTAINER_NAME}"],
-        capture_output=True,
-        text=True,
-    )
+    try:
+        result = subprocess.run(
+            ["docker", "ps", "-q", "-f", f"name={DOCKER_CONTAINER_NAME}"],
+            capture_output=True,
+            text=True,
+        )
+    except FileNotFoundError:
+        return False
     return bool(result.stdout.strip())
 
 
 def _start_docker_container() -> None:
     """Start the dockware docker container."""
-    subprocess.run(
-        [
-            "docker",
-            "run",
-            "-d",
-            "--rm",
-            "-p",
-            "80:80",
-            "--name",
-            DOCKER_CONTAINER_NAME,
-            DOCKER_IMAGE,
-        ],
-        check=True,
-    )
+    try:
+        subprocess.run(
+            [
+                "docker",
+                "run",
+                "-d",
+                "--rm",
+                "-p",
+                "80:80",
+                "--name",
+                DOCKER_CONTAINER_NAME,
+                DOCKER_IMAGE,
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except FileNotFoundError:
+        pytest.skip("Docker not available for integration tests")
+    except subprocess.CalledProcessError as exc:
+        stderr = (exc.stderr or "").strip()
+        stdout = (exc.stdout or "").strip()
+        msg = stderr or stdout or f"docker run failed with exit code {exc.returncode}"
+        pytest.skip(f"Docker container failed to start: {msg}")
 
 
 def _stop_docker_container() -> None:
@@ -477,6 +504,9 @@ def docker_container() -> Generator[None, None, None]:
     4. After all tests complete, stops the container
     """
     container_was_started_by_fixture = False
+
+    if not _docker_engine_is_linux():
+        pytest.skip("Docker engine is unavailable or not Linux; dockware/dev requires Linux containers")
 
     if not _is_docker_container_active():
         if _is_docker_container_running():
