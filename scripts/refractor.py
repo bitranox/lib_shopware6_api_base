@@ -15,7 +15,7 @@ Phase 1 - Iterative Roast Loop (max 10 iterations per pass):
 
 Phase 2 - Project-Wide Steps:
     1. Data Architecture Enforcement
-    2. Architecture Review (per python_clean_architecture.md)
+    2. Architecture Review (using skill `python_clean_architecture`)
     3. LRU Cache Opportunities
     4. Proper Usage of Libraries
     5. Edge Cases, Race Conditions & Security
@@ -656,7 +656,7 @@ Continue numbering for all issues found. Each issue MUST have a specific, action
     ),
     (
         "Architecture Review",
-        "review architecture like described in python_clean_architecture.md. "
+        "review architecture using skill `python_clean_architecture`"
         "do not create compatibility shims, we dont care for backward compatibility. "
         "write tests for any new code you create - aim for good test coverage. "
         "dont ask back - decide yourself given all the systemprompts in claude.md. "
