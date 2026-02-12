@@ -46,7 +46,7 @@ After the roast loop completes (only MINOR issues remain), the pipeline runs the
 | Step | Name | Description                                      |
 |------|------|--------------------------------------------------|
 | 1 | Data Architecture Enforcement | Run `/bx_data_architecture_enforcement`          |
-| 2 | Architecture Review | Review using skill `python_clean_architecture`   |
+| 2 | Architecture Review | Review using skill `bx-python-clean-architecture`   |
 | 3 | LRU Cache Opportunities | Find caching opportunities, precompile regex     |
 | 4 | Proper Usage of Libraries | Ensure orjson, rtoml, httpx usage                |
 | 5 | Edge Cases & Security | Review for edge cases, race conditions, security |
