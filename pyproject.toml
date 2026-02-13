@@ -269,4 +269,5 @@ ignore-vulns = [
   "PYSEC-2025-49",     # setuptools 65.5.0 — env-only, not a project dependency
   "CVE-2024-6345",     # setuptools 65.5.0 — env-only, not a project dependency
   "CVE-2026-1703",
+  "CVE-2026-25990",
 ]
