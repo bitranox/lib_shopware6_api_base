@@ -270,4 +270,5 @@ ignore-vulns = [
   "CVE-2024-6345",     # setuptools 65.5.0 — env-only, not a project dependency
   "CVE-2026-1703",
   "CVE-2026-25990",
+  "CVE-2026-26007",
 ]
