@@ -204,7 +204,7 @@ output = "coverage.json"
 pretty_print = true
 
 [tool.clean]
-# Patterns to remove when running `make clean` or `python -m scripts clean`
+# Patterns to remove when running `make clean`
 patterns = [
   "**/__pycache__",
   ".hypothesis",
