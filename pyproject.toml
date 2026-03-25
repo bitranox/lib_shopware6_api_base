@@ -271,4 +271,5 @@ ignore-vulns = [
   "CVE-2026-1703",
   "CVE-2026-25990",
   "CVE-2026-26007",
+  "CVE-2026-4539",    # pygments 2.19.2 — ReDoS in AdlLexer, env-only, no fix available
 ]
