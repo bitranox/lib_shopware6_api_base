@@ -107,7 +107,7 @@ jobs:
           && steps.pytest.outcome == 'success'
           && matrix.os == 'ubuntu-latest'
           && matrix.python == '3.13'
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           files: ${{ env.COV_REPORT_FILE }}
           fail_ci_if_error: false
@@ -366,7 +366,7 @@ jobs:
 
       - name: Upload integration coverage to Codecov
         if: always()
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           files: coverage-integration.xml
           flags: integration
