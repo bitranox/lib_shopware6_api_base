@@ -10,7 +10,6 @@
 [![Code Style: Ruff](https://img.shields.io/badge/Code%20Style-Ruff-46A3FF?logo=ruff&labelColor=000)](https://docs.astral.sh/ruff/)
 [![codecov](https://codecov.io/gh/bitranox/lib_shopware6_api_base/graph/badge.svg?token=UFBaUDIgRk)](https://codecov.io/gh/bitranox/lib_shopware6_api_base)
 [![Maintainability](https://qlty.sh/badges/041ba2c1-37d6-40bb-85a0-ec5a8a0aca0c/maintainability.svg)](https://qlty.sh/gh/bitranox/projects/lib_shopware6_api_base)
-[![Known Vulnerabilities](https://snyk.io/test/github/bitranox/lib_shopware6_api_base/badge.svg)](https://snyk.io/test/github/bitranox/lib_shopware6_api_base)
 [![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
 
 A Python base API client for Shopware 6, supporting Windows, Linux, and macOS.
