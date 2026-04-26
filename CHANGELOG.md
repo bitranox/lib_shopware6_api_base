@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - Snyk badge from README
-- Stale CVE entries from `tool.pip-audit.ignore-vulns` no longer flagged
+- Stale CVE entries from `tool.pip-audit.ignore-vulns` no longer flagged (kept setuptools CVEs needed by macOS Py 3.10/3.11 runners)
 
 ## [3.0.0] - 2026-02-03
 

@@ -263,5 +263,8 @@ layers = [
 # Known vulnerabilities to ignore (environment-level packages, not project dependencies)
 ignore-vulns = [
   "PYSEC-2022-42969",  # py 1.11.0 — ReDoS, env-only (pytest legacy), no fix available
+  "PYSEC-2022-43012",  # setuptools 65.5.0 — bundled with macOS Py 3.10/3.11 runners
+  "PYSEC-2025-49",     # setuptools 65.5.0 — bundled with macOS Py 3.10/3.11 runners
+  "CVE-2024-6345",     # setuptools 65.5.0 — bundled with macOS Py 3.10/3.11 runners
   "CVE-2026-3219",     # pip 26.0.1 — env-only, not a project dependency, no fix available
 ]
