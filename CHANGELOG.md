@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.1] - 2026-04-26
+
+### Changed
+
+- Bumped `authlib` minimum to `>=1.6.11` (GHSA-jj8c-mmj3-mmgv)
+- Bumped dev pin `python-multipart` to `>=0.0.26` (CVE-2026-40347)
+- Updated CI actions: `codecov-action@v6`, refreshed upload/download-artifact actions
+
+### Fixed
+
+- pip-audit: ignore `CVE-2026-3219` (pip 26.0.1, env-only, no upstream fix)
+
+### Removed
+
+- Snyk badge from README
+- Stale CVE entries from `tool.pip-audit.ignore-vulns` no longer flagged
+
 ## [3.0.0] - 2026-02-03
 
 ### Breaking Changes

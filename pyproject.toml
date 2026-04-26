@@ -1,6 +1,6 @@
 [project]
 name = "lib_shopware6_api_base"
-version = "3.0.0"
+version = "3.0.1"
 description = "python3 base API client for shopware6"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -11,7 +11,7 @@ dependencies = [
     "rich-click",
     "orjson",
     "httpx>=0.28.1",
-    "authlib>=1.6.6",
+    "authlib>=1.6.11",
 ]
 license = {text = "MIT"}
 authors = [{ name = "bitranox", email = "bitranox@gmail.com" }]
@@ -53,7 +53,7 @@ dev = [
   "httpx>=0.28.1",
   # Transitive CVE pins
   "jaraco-context>=6.1.0",       # CVE-2025-23949
-  "python-multipart>=0.0.22",    # CVE-2025-24486
+  "python-multipart>=0.0.26",    # CVE-2025-24486, CVE-2026-40347
   "wheel>=0.46.3",               # CVE-2025-24049
   "pynacl>=1.6.2",               # CVE-2025-69277
   "urllib3>=2.6.3",              # CVE-2025-66471, CVE-2025-66418
@@ -261,16 +261,7 @@ layers = [
 
 [tool.pip-audit]
 # Known vulnerabilities to ignore (environment-level packages, not project dependencies)
-# PYSEC-2022-42969: py library ReDoS — py 1.11.0 is installed in the development
-#   environment but is not a dependency of this project; no fix available.
 ignore-vulns = [
-  "PYSEC-2022-42969",
-  "PYSEC-2022-43012",  # setuptools 65.5.0 — env-only, not a project dependency
-  "PYSEC-2025-49",     # setuptools 65.5.0 — env-only, not a project dependency
-  "CVE-2024-6345",     # setuptools 65.5.0 — env-only, not a project dependency
-  "CVE-2026-1703",
-  "CVE-2026-25990",
-  "CVE-2026-26007",
-  "CVE-2026-4539",    # pygments 2.19.2 — ReDoS in AdlLexer, env-only, no fix available
-  "CVE-2026-25645",
+  "PYSEC-2022-42969",  # py 1.11.0 — ReDoS, env-only (pytest legacy), no fix available
+  "CVE-2026-3219",     # pip 26.0.1 — env-only, not a project dependency, no fix available
 ]

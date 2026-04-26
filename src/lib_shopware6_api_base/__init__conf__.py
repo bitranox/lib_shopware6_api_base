@@ -26,7 +26,7 @@ name = "lib_shopware6_api_base"
 #: Human-readable summary shown in CLI help output.
 title = "python3 base API client for shopware6"
 #: Current release version pulled from ``pyproject.toml`` by automation.
-version = "3.0.0"
+version = "3.0.1"
 #: Repository homepage presented to users.
 homepage = "https://github.com/bitranox/lib_shopware6_api_base"
 #: Author attribution surfaced in CLI output.
