@@ -1,6 +1,6 @@
 [project]
 name = "lib_shopware6_api_base"
-version = "3.0.1"
+version = "3.0.2"
 description = "python3 base API client for shopware6"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -53,7 +53,7 @@ dev = [
   "httpx>=0.28.1",
   # Transitive CVE pins
   "jaraco-context>=6.1.0",       # CVE-2025-23949
-  "python-multipart>=0.0.26",    # CVE-2025-24486, CVE-2026-40347
+  "python-multipart>=0.0.27",    # CVE-2025-24486, CVE-2026-40347, CVE-2026-42561
   "wheel>=0.46.3",               # CVE-2025-24049
   "pynacl>=1.6.2",               # CVE-2025-69277
   "urllib3>=2.6.3",              # CVE-2025-66471, CVE-2025-66418
@@ -267,4 +267,5 @@ ignore-vulns = [
   "PYSEC-2025-49",     # setuptools 65.5.0 — bundled with macOS Py 3.10/3.11 runners
   "CVE-2024-6345",     # setuptools 65.5.0 — bundled with macOS Py 3.10/3.11 runners
   "CVE-2026-3219",     # pip 26.0.1 — env-only, not a project dependency, no fix available
+  "CVE-2026-6357",     # pip 26.0.1 — env-only (GHA runner image), fix in pip 26.1, awaiting runner bump
 ]
