@@ -6,7 +6,7 @@ from typing import Any
 from urllib.parse import urljoin
 
 # EXT
-import httpx
+import httpx2
 
 from .conf_shopware6_api_base_classes import ShopwareAPIError
 from .lib_shopware6_api_base_criteria import Criteria
@@ -46,7 +46,7 @@ __all__ = [
 ]
 
 # Module-level constants for HTTP settings
-DEFAULT_REQUEST_TIMEOUT = httpx.Timeout(30.0, connect=10.0)
+DEFAULT_REQUEST_TIMEOUT = httpx2.Timeout(30.0, connect=10.0)
 MAX_RETRY_ATTEMPTS = 2
 CONTENT_TYPE_JSON = "json"
 HEADER_SW_ACCESS_KEY = "sw-access-key"
@@ -94,7 +94,7 @@ def get_payload_dict(payload: PayLoad) -> dict[str, Any]:
     return payload  # type: ignore
 
 
-def handle_json_decode_error(response: httpx.Response) -> dict[str, Any]:
+def handle_json_decode_error(response: httpx2.Response) -> dict[str, Any]:
     """Safely decode JSON response, returning empty dict on failure."""
     try:
         return dict(response.json())
@@ -103,18 +103,18 @@ def handle_json_decode_error(response: httpx.Response) -> dict[str, Any]:
         return {}
 
 
-def handle_http_error(exc: httpx.HTTPStatusError) -> None:
+def handle_http_error(exc: httpx2.HTTPStatusError) -> None:
     """Convert HTTP status errors to ShopwareAPIError with detailed message."""
     detailed_error = f" : {exc.response.text}"
     raise ShopwareAPIError(f"{exc}{detailed_error}") from exc
 
 
-def log_request(request: httpx.Request) -> None:
+def log_request(request: httpx2.Request) -> None:
     """Log outgoing HTTP request for debugging."""
     logger.debug("Request: %s %s", request.method, request.url)
 
 
-def log_response(response: httpx.Response) -> None:
+def log_response(response: httpx2.Response) -> None:
     """Log incoming HTTP response for debugging."""
     logger.debug("Response: %s %s", response.status_code, response.url)
 

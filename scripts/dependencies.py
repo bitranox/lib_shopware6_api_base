@@ -28,7 +28,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
 
-import httpx
+import httpx2
 import orjson
 
 from .toml_config import PyprojectConfig, load_pyproject_config
@@ -131,14 +131,14 @@ def _fetch_pypi_data(package_name: str) -> dict[str, Any] | None:
     url = f"https://pypi.org/pypi/{normalized}/json"
 
     try:
-        response = httpx.get(url, timeout=10.0)
+        response = httpx2.get(url, timeout=10.0)
         response.raise_for_status()
         return orjson.loads(response.content)  # type: ignore[no-any-return]
-    except httpx.HTTPStatusError as exc:
+    except httpx2.HTTPStatusError as exc:
         if exc.response.status_code == 404:
             return None
         return None
-    except (httpx.ConnectError, httpx.TimeoutException, orjson.JSONDecodeError):
+    except (httpx2.ConnectError, httpx2.TimeoutException, orjson.JSONDecodeError):
         return None
 
 

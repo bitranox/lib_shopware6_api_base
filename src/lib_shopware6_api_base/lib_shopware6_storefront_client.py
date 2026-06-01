@@ -3,7 +3,7 @@ import logging
 from typing import Any
 
 # EXT
-import httpx
+import httpx2
 import orjson
 
 from ._http_common import (
@@ -290,7 +290,7 @@ class Shopware6StoreFrontClientBase:
         request_url: str,
         payload: PayLoad = None,
         update_header_fields: dict[str, str] | None = None,
-    ) -> httpx.Response | None:
+    ) -> httpx2.Response | None:
         """
         makes a request, using the conf.store_api_sw_access_key for authentication
 
@@ -330,11 +330,11 @@ class Shopware6StoreFrontClientBase:
         if isinstance(payload, Criteria):
             payload = payload.get_dict()
         storefront_api_url = self._build_storefront_api_url(endpoint=request_url)
-        response: httpx.Response
+        response: httpx2.Response
         headers = self._get_headers(update_header_fields=update_header_fields)
 
         if http_method == HttpMethod.GET:
-            response = httpx.request(
+            response = httpx2.request(
                 "GET",
                 storefront_api_url,
                 params=payload,
@@ -343,7 +343,7 @@ class Shopware6StoreFrontClientBase:
                 follow_redirects=self.config.follow_redirects,
             )
         elif http_method == HttpMethod.PATCH:
-            response = httpx.request(
+            response = httpx2.request(
                 "PATCH",
                 storefront_api_url,
                 content=orjson.dumps(payload).decode(),
@@ -352,7 +352,7 @@ class Shopware6StoreFrontClientBase:
                 follow_redirects=self.config.follow_redirects,
             )
         elif http_method == HttpMethod.POST:
-            response = httpx.request(
+            response = httpx2.request(
                 "POST",
                 storefront_api_url,
                 content=orjson.dumps(payload).decode(),
@@ -361,7 +361,7 @@ class Shopware6StoreFrontClientBase:
                 follow_redirects=self.config.follow_redirects,
             )
         elif http_method == HttpMethod.PUT:
-            response = httpx.request(
+            response = httpx2.request(
                 "PUT",
                 storefront_api_url,
                 content=orjson.dumps(payload).decode(),
@@ -370,7 +370,7 @@ class Shopware6StoreFrontClientBase:
                 follow_redirects=self.config.follow_redirects,
             )
         elif http_method == HttpMethod.DELETE:
-            response = httpx.request(
+            response = httpx2.request(
                 "DELETE",
                 storefront_api_url,
                 headers=headers,
@@ -385,7 +385,7 @@ class Shopware6StoreFrontClientBase:
 
         try:
             response.raise_for_status()  # type: ignore[possibly-undefined]
-        except httpx.HTTPStatusError as exc:
+        except httpx2.HTTPStatusError as exc:
             detailed_error = f" : {exc.response.text}"
             raise ShopwareAPIError(f"{exc}{detailed_error}") from exc
         return response

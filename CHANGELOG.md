@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-06-01
+
+### Changed
+
+- **HTTP client migrated from `httpx` to `httpx2`** (the Pydantic-stewarded successor); minimum `httpx2>=2.2.0`. Storefront client and shared HTTP helpers swapped over directly (API-compatible surface). Dev tooling (`scripts/dependencies.py`) migrated too.
+- Admin API OAuth2 (token fetch, refresh-token flow, Bearer auth, expiry handling) reimplemented directly on `httpx2`, replacing Authlib's `OAuth2Client`. The `self.token` shape is unchanged (`access_token`, `expires_in`, `expires_at`, and `refresh_token` for the password grant); public client APIs are unchanged.
+
+### Removed
+
+- Dropped the `authlib` dependency — OAuth2 token handling is now performed in-library. As a side effect, `insecure_transport` is no longer required to talk to plain-HTTP endpoints (the previous `OAUTHLIB_INSECURE_TRANSPORT` guard is gone); the config field is retained for backward compatibility but is now a no-op.
+
 ## [3.0.2] - 2026-05-08
 
 ### Changed

@@ -440,8 +440,7 @@ Automatically installed dependencies:
 
 - `pydantic>=2.0.0` - Data validation
 - `pydantic-settings>=2.0.0` - Settings management
-- `httpx>=0.28` - HTTP client
-- `authlib>=1.6` - OAuth2 authentication
+- `httpx2>=2.2.0` - HTTP client
 - `rich-click` - CLI formatting
 - `orjson` - Fast JSON serialization
 - `lib_cli_exit_tools>=2.2.4` - CLI utilities

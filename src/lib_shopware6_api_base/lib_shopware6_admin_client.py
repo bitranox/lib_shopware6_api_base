@@ -5,13 +5,12 @@ import time
 from typing import Any
 
 # EXT
-import httpx
+import httpx2
 import orjson
-from authlib.integrations.base_client import TokenExpiredError
-from authlib.integrations.httpx_client import OAuth2Client
 
 from ._http_common import (
     CONTENT_TYPE_JSON,
+    DEFAULT_REQUEST_TIMEOUT,
     MAX_RETRY_ATTEMPTS,
     PayLoad,
     build_api_url,
@@ -53,7 +52,7 @@ class Shopware6AdminAPIClientBase:
         """
         self.config = config
         self.token: dict[str, Any] = {}
-        self.session: OAuth2Client | httpx.Client = httpx.Client()
+        self.session: httpx2.Client = httpx2.Client()
 
     def request_get(
         self, request_url: str, payload: PayLoad = None, update_header_fields: dict[str, str] | None = None
@@ -522,34 +521,16 @@ class Shopware6AdminAPIClientBase:
                     update_header_fields=update_header_fields,
                 )
                 retry = 0
-            except TokenExpiredError:
-                if self._is_refreshable_token():  # pragma: no cover
-                    # this actually should never happen - just in case.
-                    # Authlib handles token refresh via callback automatically
-                    logger.warning(
-                        "something went wrong - the token should have been automatically refreshed. getting a new token"
-                    )  # pragma: no cover
-                    self._get_access_token_by_user_credentials()  # pragma: no cover
-                else:
-                    self._get_access_token_by_resource_owner()
-                self._get_session()
-                response = self._request(
-                    http_method=http_method,
-                    request_url=request_url,
-                    payload=payload,
-                    content_type=content_type,
-                    additional_query_params=additional_query_params,
-                    update_header_fields=update_header_fields,
-                )
-                retry = 0
             except ShopwareAPIError as exc:
                 # retry: how often to retry - sometimes we get error code:9, status:401,
                 # The resource owner or authorization server denied the request,
                 # detail: Access token could not be verified.
-                # But it works if You try again, it seems to be an error in shopware API or race condition
+                # But it works if You try again, it seems to be an error in shopware API or race condition.
+                # Drop the token so the next iteration re-authenticates from scratch.
                 retry = retry - 1
                 if not retry:
                     raise exc
+                self.token = {}
 
             if not retry:
                 break
@@ -570,7 +551,7 @@ class Shopware6AdminAPIClientBase:
         content_type: str = CONTENT_TYPE_JSON,
         additional_query_params: dict[str, Any] | None = None,
         update_header_fields: dict[str, str] | None = None,
-    ) -> httpx.Response:
+    ) -> httpx2.Response:
         """
         makes a request, needs a "self.session" to be set up and authenticated
 
@@ -585,7 +566,7 @@ class Shopware6AdminAPIClientBase:
         returns
             response_dict: dictionary with the response as dict
 
-        see : https://www.python-httpx.org/quickstart/
+        see : https://www.encode.io/httpx2/
 
         """
         request_data: str
@@ -602,8 +583,9 @@ class Shopware6AdminAPIClientBase:
         if not additional_query_params:
             additional_query_params = {}
 
-        response: httpx.Response
+        response: httpx2.Response
         headers = self._get_headers(content_type=content_type, update_header_fields=update_header_fields)
+        headers["Authorization"] = f"Bearer {self.token['access_token']}"
 
         if http_method == HttpMethod.GET:
             if additional_query_params:
@@ -641,6 +623,7 @@ class Shopware6AdminAPIClientBase:
         elif http_method == HttpMethod.DELETE:
             response = self.session.delete(
                 self._format_admin_api_url(request_url),
+                headers=headers,
                 params=additional_query_params,
                 follow_redirects=self.config.follow_redirects,
             )
@@ -652,7 +635,7 @@ class Shopware6AdminAPIClientBase:
 
         try:
             response.raise_for_status()  # type: ignore[possibly-undefined]
-        except httpx.HTTPStatusError as exc:
+        except httpx2.HTTPStatusError as exc:
             detailed_error = f" : {exc.response.text}"
             raise ShopwareAPIError(f"{exc}{detailed_error}") from exc
 
@@ -767,13 +750,11 @@ class Shopware6AdminAPIClientBase:
         if not self.config.client_secret:
             raise ShopwareAPIError("client_secret needed")
 
-        client = OAuth2Client(
-            client_id=self.config.client_id,
-            client_secret=self.config.client_secret,
-        )
-        self.token = client.fetch_token(
-            url=self._format_admin_api_url("oauth/token"),
-            grant_type="client_credentials",
+        # Shopware authenticates the confidential client via HTTP Basic auth
+        # (OAuth2 "client_secret_basic"); the body carries only the grant_type.
+        self.token = self._fetch_token(
+            {"grant_type": "client_credentials"},
+            auth=httpx2.BasicAuth(self.config.client_id, self.config.client_secret),
         )
         return self.token
 
@@ -784,7 +765,6 @@ class Shopware6AdminAPIClientBase:
         - we recommend to only use this grant flow for client applications that should
           perform administrative actions and require a user-based authentication
 
-        see : https://requests-oauthlib.readthedocs.io/en/latest/oauth2_workflow.html#legacy-application-flow
         see : https://shopware.stoplight.io/docs/admin-api/ZG9jOjEwODA3NjQx-authentication-and-authorisation
         setup at admin/settings/system/user: "access_id" and "access_secret"
 
@@ -840,18 +820,25 @@ class Shopware6AdminAPIClientBase:
         if not self.config.password:
             raise ShopwareAPIError("password needed")
 
-        client = OAuth2Client(client_id="administration")
-        self.token = client.fetch_token(
-            url=self._format_admin_api_url("oauth/token"),
-            grant_type="password",
-            username=self.config.username,
-            password=self.config.password,
+        # "administration" is Shopware's built-in public client for the password
+        # grant; it issues a refresh_token, so this flow is auto-refreshable.
+        self.token = self._fetch_token(
+            {
+                "grant_type": "password",
+                "client_id": "administration",
+                "username": self.config.username,
+                "password": self.config.password,
+            }
         )
         return self.token
 
     def _get_session(self) -> None:
         """
-        see : https://docs.authlib.org/en/latest/client/httpx.html
+        ensure a valid (non-expired) access token is available before a request.
+
+        an expired token is refreshed via its refresh_token when available
+        (password grant), otherwise a fresh token is fetched (client credentials).
+
         see : https://shopware.stoplight.io/docs/admin-api/ZG9jOjEwODA3NjQx-authentication-and-authorisation
 
 
@@ -879,42 +866,70 @@ class Shopware6AdminAPIClientBase:
         """
         if not self.token:
             self._get_token()
-        if self._is_refreshable_token():
-            self.token["expires_in"] = int(self.token["expires_at"] - time.time())
-            client_id = "administration"
-            self.session = OAuth2Client(
-                client_id=client_id,
-                token=self.token,
-                token_endpoint=self._format_admin_api_url("oauth/token"),
-                update_token=self._token_saver,
-            )
-        else:
-            client_id = self.config.client_id
-            self.session = OAuth2Client(client_id=client_id, token=self.token)
+        elif self._token_is_expired():
+            if self._is_refreshable_token():
+                self._refresh_token()
+            else:
+                self._get_token()
 
-    def _token_saver(
-        self,
-        token: dict[str, Any],
-        refresh_token: str | None = None,
-        access_token: str | None = None,
-    ) -> None:
+    def _fetch_token(self, data: dict[str, Any], auth: httpx2.Auth | None = None) -> dict[str, Any]:
         """
-        saves the token - this is needed for automatically refreshing the "resource owner" access token.
-        the "user_credentials" can not be refreshed
+        POST to the ``oauth/token`` endpoint and return the token dict.
 
-        This is the callback for Authlib's OAuth2Client update_token parameter.
+        ``expires_at`` (absolute unix time) is derived from ``expires_in`` so that
+        token expiry can be checked locally without another round trip.
 
-        parameter
-            token:             the token to be saved
-            refresh_token:     optional refresh token (Authlib callback parameter)
-            access_token:      optional access token (Authlib callback parameter)
+        parameters:
+            data: the OAuth2 request body (grant_type and grant-specific fields)
+            auth: optional HTTP Basic client auth (used by the client_credentials grant)
 
         returns
-            None
+            the token dict, with an added ``expires_at`` key
 
+        raises
+            ShopwareAPIError: if the token endpoint returns an error status
         """
-        _ = refresh_token, access_token  # unused, but required by Authlib callback signature
-        self.token = token
+        response = self.session.post(
+            self._format_admin_api_url("oauth/token"),
+            json=data,
+            auth=auth if auth is not None else httpx2.USE_CLIENT_DEFAULT,
+            headers={"Content-Type": "application/json", "Accept": "application/json"},
+            timeout=DEFAULT_REQUEST_TIMEOUT,
+            follow_redirects=self.config.follow_redirects,
+        )
+        try:
+            response.raise_for_status()
+        except httpx2.HTTPStatusError as exc:
+            detailed_error = f" : {exc.response.text}"
+            raise ShopwareAPIError(f"{exc}{detailed_error}") from exc
+        token = dict(response.json())
+        if "expires_in" in token:
+            token["expires_at"] = time.time() + int(token["expires_in"])
+        return token
+
+    def _refresh_token(self) -> dict[str, Any]:
+        """
+        refresh the access token using the stored refresh_token (password grant).
+        the "client_credentials" grant has no refresh_token and is re-fetched instead.
+        """
+        self.token = self._fetch_token(
+            {
+                "grant_type": "refresh_token",
+                "client_id": "administration",
+                "refresh_token": self.token["refresh_token"],
+            }
+        )
+        return self.token
+
+    def _token_is_expired(self) -> bool:
+        """
+        True if the current token has an ``expires_at`` in the past.
+        a token without ``expires_at`` is treated as not expired.
+        """
+        expires_at = self.token.get("expires_at")
+        if expires_at is None:
+            return False
+        return time.time() >= float(expires_at)
 
     def _is_refreshable_token(self) -> bool:
         """

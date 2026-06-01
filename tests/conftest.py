@@ -7,7 +7,7 @@ import sys
 import time
 from typing import TYPE_CHECKING
 
-import httpx
+import httpx2
 import pytest
 
 if TYPE_CHECKING:
@@ -435,10 +435,10 @@ def _docker_engine_is_linux() -> bool:
 def _is_docker_container_active() -> bool:
     """Check if the local docker container is running and responding."""
     try:
-        response = httpx.get("http://localhost/admin", timeout=REQUEST_TIMEOUT, follow_redirects=True)
+        response = httpx2.get("http://localhost/admin", timeout=REQUEST_TIMEOUT, follow_redirects=True)
         # Container is ready if we get a successful response or a redirect to login
         return response.status_code in (200, 302, 403)
-    except (httpx.ConnectError, httpx.ReadError, httpx.TimeoutException):
+    except (httpx2.ConnectError, httpx2.ReadError, httpx2.TimeoutException):
         return False
 
 

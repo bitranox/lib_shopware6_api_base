@@ -679,7 +679,7 @@ Continue numbering for all issues found. Each issue MUST have a specific, action
     (
         "Proper Usage of Libraries",
         "make sure that we use orjson, rtoml instead of stdlib. "
-        "make sure that we use httpx if applicable. "
+        "make sure that we use httpx2 if applicable. "
         "do not create compatibility shims, we dont care for backward compatibility. "
         "write tests for any new code you create - aim for good test coverage. "
         "dont ask back - decide yourself given all the systemprompts in claude.md. "

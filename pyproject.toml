@@ -1,6 +1,6 @@
 [project]
 name = "lib_shopware6_api_base"
-version = "3.0.2"
+version = "3.1.0"
 description = "python3 base API client for shopware6"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -10,8 +10,7 @@ dependencies = [
     "lib_cli_exit_tools>=2.2.4",
     "rich-click",
     "orjson",
-    "httpx>=0.28.1",
-    "authlib>=1.6.11",
+    "httpx2>=2.2.0",
 ]
 license = {text = "MIT"}
 authors = [{ name = "bitranox", email = "bitranox@gmail.com" }]
@@ -50,7 +49,7 @@ dev = [
   "textual>=7.5.0",
   "import-linter>=2.9",
   "rtoml>=0.13.0",
-  "httpx>=0.28.1",
+  "httpx2>=2.2.0",
   # Transitive CVE pins
   "jaraco-context>=6.1.0",       # CVE-2025-23949
   "python-multipart>=0.0.27",    # CVE-2025-24486, CVE-2026-40347, CVE-2026-42561
