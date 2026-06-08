@@ -1,6 +1,6 @@
 [project]
 name = "lib_shopware6_api_base"
-version = "3.1.0"
+version = "3.1.1"
 description = "python3 base API client for shopware6"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -267,4 +267,5 @@ ignore-vulns = [
   "CVE-2024-6345",     # setuptools 65.5.0 — bundled with macOS Py 3.10/3.11 runners
   "CVE-2026-3219",     # pip 26.0.1 — env-only, not a project dependency, no fix available
   "CVE-2026-6357",     # pip 26.0.1 — env-only (GHA runner image), fix in pip 26.1, awaiting runner bump
+  "PYSEC-2026-196",    # pip 26.1.1 — env-only (GHA runner image), fix in pip 26.1.2, awaiting runner bump
 ]
