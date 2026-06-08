@@ -5,12 +5,12 @@ description = "python3 base API client for shopware6"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "pydantic>=2.12.5",
-    "pydantic-settings>=2.12.0",
-    "lib_cli_exit_tools>=2.2.4",
+    "pydantic>=2.13.4",
+    "pydantic-settings>=2.14.1",
+    "lib_cli_exit_tools>=2.3.1",
     "rich-click",
     "orjson",
-    "httpx2>=2.2.0",
+    "httpx2>=2.3.0",
 ]
 license = {text = "MIT"}
 authors = [{ name = "bitranox", email = "bitranox@gmail.com" }]
@@ -36,27 +36,27 @@ Changelog = "https://github.com/bitranox/lib_shopware6_api_base/blob/master/CHAN
 
 [project.optional-dependencies]
 dev = [
-  "pytest>=9.0.2",
-  "pytest-cov>=7.0.0",
-  "hypothesis>=6.151.4",
-"ruff>=0.14.14",
-  "pyright[nodejs]>=1.1.408",
-  "bandit>=1.9.3",
-  "build>=1.4.0",
+  "pytest>=9.0.3",
+  "pytest-cov>=7.1.0",
+  "hypothesis>=6.155.2",
+  "ruff>=0.15.16",
+  "pyright[nodejs]>=1.1.410",
+  "bandit>=1.9.4",
+  "build>=1.5.0",
   "twine>=6.2.0",
-  "codecov-cli>=11.2.6",
+  "codecov-cli>=11.2.8",
   "pip-audit>=2.10.0",
-  "textual>=7.5.0",
-  "import-linter>=2.9",
+  "textual>=8.2.7",
+  "import-linter>=2.11",
   "rtoml>=0.13.0",
-  "httpx2>=2.2.0",
+  "httpx2>=2.3.0",
   # Transitive CVE pins
-  "jaraco-context>=6.1.0",       # CVE-2025-23949
-  "python-multipart>=0.0.27",    # CVE-2025-24486, CVE-2026-40347, CVE-2026-42561
-  "wheel>=0.46.3",               # CVE-2025-24049
+  "jaraco-context>=6.1.2",       # CVE-2025-23949
+  "python-multipart>=0.0.32",    # CVE-2025-24486, CVE-2026-40347, CVE-2026-42561
+  "wheel>=0.47.0",               # CVE-2025-24049
   "pynacl>=1.6.2",               # CVE-2025-69277
-  "urllib3>=2.6.3",              # CVE-2025-66471, CVE-2025-66418
-  "virtualenv>=20.36.1",         # CVE-2025-22702
+  "urllib3>=2.7.0",              # CVE-2025-66471, CVE-2025-66418
+  "virtualenv>=21.4.2",         # CVE-2025-22702
 ]
 
 [project.scripts]
@@ -64,7 +64,7 @@ lib_shopware6_api_base = "lib_shopware6_api_base.lib_shopware6_api_base_cli:main
 lib-shopware6-api-base = "lib_shopware6_api_base.lib_shopware6_api_base_cli:main"
 
 [build-system]
-requires = ["hatchling>=1.28.0"]
+requires = ["hatchling>=1.30.1"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
@@ -120,10 +120,8 @@ convention = "google"
 [tool.ruff.lint.per-file-ignores]
 # Notebooks: unused imports are often intentional for side effects
 "notebooks/*.ipynb" = ["F401"]
-# Scripts: tooling code with print(), subprocess, boolean params, large orchestrators
-"scripts/*.py" = ["T20", "S101", "S603", "S607", "ERA001", "FBT001", "FBT002", "FBT003", "PERF203", "PLR0912", "PLR0913", "PLR0915", "PLR2004", "RUF012"]
 # Tests: assert is standard, test fixtures have passwords, magic values are clearer inline, temp paths are fine
-# S603/S607: subprocess security - test code only, PLW1510: explicit check arg, G004: f-string logging, E501: local_testscripts
+# S603/S607: subprocess security - test code only, PLW1510: explicit check arg, G004: f-string logging
 "tests/**/*.py" = ["T20", "S101", "S105", "S106", "S108", "S603", "S607", "FBT001", "FBT003", "PLR0913", "PLR2004", "PLW1510", "G004", "E501"]
 # CLI module: boolean flags from click decorators, exception mapper with multiple returns
 "src/lib_shopware6_api_base/lib_shopware6_api_base_cli.py" = ["FBT001", "PLR0911"]
@@ -231,7 +229,7 @@ patterns = [
 default-remote = "origin"
 
 [tool.scripts.test]
-# Configuration for scripts/test.py test runner
+# Test-runner settings consumed by bmk (make test)
 pytest-verbosity = "-vv"
 coverage-report-file = "coverage.xml"
 src-path = "src"
@@ -268,4 +266,13 @@ ignore-vulns = [
   "CVE-2026-3219",     # pip 26.0.1 — env-only, not a project dependency, no fix available
   "CVE-2026-6357",     # pip 26.0.1 — env-only (GHA runner image), fix in pip 26.1, awaiting runner bump
   "PYSEC-2026-196",    # pip 26.1.1 — env-only (GHA runner image), fix in pip 26.1.2, awaiting runner bump
+  # Shared dev-venv audit noise — NOT dependencies of this project (absent from CI's clean env);
+  # present only because sibling editable projects share the local venv.
+  "CVE-2026-34993",    # aiohttp 3.13.5 — not a project dependency (shared-venv noise), fix in 3.14.0
+  "CVE-2026-47265",    # aiohttp 3.13.5 — not a project dependency (shared-venv noise), fix in 3.14.0
+  "CVE-2026-44405",    # paramiko 4.0.0 — not a project dependency (shared-venv noise), no fix available
+  "PYSEC-2026-175",    # pyjwt 2.12.1 — not a project dependency (shared-venv noise), fix in 2.13.0
+  "PYSEC-2026-177",    # pyjwt 2.12.1 — not a project dependency (shared-venv noise), fix in 2.13.0
+  "PYSEC-2026-178",    # pyjwt 2.12.1 — not a project dependency (shared-venv noise), fix in 2.13.0
+  "PYSEC-2026-179",    # pyjwt 2.12.1 — not a project dependency (shared-venv noise), fix in 2.13.0
 ]
