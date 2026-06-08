@@ -2,7 +2,7 @@
 import json
 import logging
 import re
-from typing import Any
+from typing import Any, TypeGuard
 from urllib.parse import urljoin
 
 # EXT
@@ -55,7 +55,7 @@ HEADER_SINGLE_OPERATION = "single-operation"
 # Legacy alias for backward compatibility
 REQUEST_TIMEOUT = DEFAULT_REQUEST_TIMEOUT
 
-PayLoad = dict[str, Any] | Criteria | None
+PayLoad = dict[str, Any] | Criteria | bytes | None
 
 # Endpoints like /api/_action/sync require request specific custom headers to manipulate the api behavior
 # see : https://shopware.stoplight.io/docs/admin-api/faf8f8e4e13a0-bulk-payloads#performance
@@ -75,23 +75,25 @@ HEADER_fail_on_error: dict[str, str] = {"fail-on-error": "true"}  # default
 HEADER_do_not_fail_on_error: dict[str, str] = {"fail-on-error": "false"}
 
 
-def is_type_bytes(payload: Any) -> bool:
+def is_type_bytes(payload: Any) -> TypeGuard[bytes]:
     """True if the passed type is bytes"""
     return isinstance(payload, bytes)
 
 
-def is_type_criteria(payload: Any) -> bool:
+def is_type_criteria(payload: Any) -> TypeGuard[Criteria]:
     """True if the passed type is Criteria"""
     return isinstance(payload, Criteria)
 
 
 def get_payload_dict(payload: PayLoad) -> dict[str, Any]:
-    """Return the payload as dictionary"""
+    """Return the payload as a dictionary (a bytes payload is not convertible)."""
     if payload is None:
-        payload = {}
-    elif is_type_criteria(payload):
-        payload = payload.get_dict()  # type: ignore
-    return payload  # type: ignore
+        return {}
+    if isinstance(payload, Criteria):
+        return payload.get_dict()
+    if isinstance(payload, bytes):
+        raise ShopwareAPIError("a bytes payload cannot be converted to a dict")
+    return payload
 
 
 def handle_json_decode_error(response: httpx2.Response) -> dict[str, Any]:

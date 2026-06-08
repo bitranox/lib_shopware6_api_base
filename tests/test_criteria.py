@@ -11,6 +11,7 @@ from lib_shopware6_api_base import (
     ContainsFilter,
     Criteria,
     DescFieldSorting,
+    EqualsAnyFilter,
     EqualsFilter,
     FieldSorting,
     FilterAggregation,
@@ -250,7 +251,8 @@ class TestCriteria:
         """Test Criteria with total_count_mode."""
         my_criteria = Criteria(limit=10, total_count_mode=1)
         data = my_criteria.get_dict()
-        assert data["total_count_mode"] == 1
+        # serialized with the hyphenated DAL key (by_alias)
+        assert data["total-count-mode"] == 1
 
     @pytest.mark.os_agnostic
     def test_criteria_get_dict_excludes_empty(self) -> None:
@@ -306,13 +308,13 @@ class TestCriteria:
         assert len(criteria2.filter) == 0
 
     @pytest.mark.os_agnostic
-    def test_criteria_with_post_filter_placeholder(self) -> None:
-        """Test Criteria with post_filter (not implemented, but field exists)."""
+    def test_criteria_with_post_filter(self) -> None:
+        """post_filter holds filters and serializes under the hyphenated DAL key 'post-filter'."""
         my_criteria = Criteria()
-        # post_filter exists but is not implemented
         assert my_criteria.post_filter == []
-        my_criteria.post_filter.append({"placeholder": "value"})
-        assert len(my_criteria.post_filter) == 1
+        my_criteria.post_filter.append(EqualsFilter(field="active", value="true"))
+        data = my_criteria.get_dict()
+        assert data["post-filter"] == [{"field": "active", "value": "true", "type": "equals"}]
 
     @pytest.mark.os_agnostic
     def test_criteria_fixture_usage(self, complex_criteria: Criteria) -> None:
@@ -322,3 +324,36 @@ class TestCriteria:
         assert len(complex_criteria.filter) == 1
         assert len(complex_criteria.aggregations) == 1
         assert len(complex_criteria.sort) == 1
+
+
+class TestCriteriaGetDictRoundTrip:
+    """get_dict() output must re-validate into the same Criteria (alias symmetry)."""
+
+    @pytest.mark.os_agnostic
+    def test_get_dict_round_trips_hyphenated_keys(self) -> None:
+        """total_count_mode / post_filter survive model_validate(get_dict())."""
+        src = Criteria(total_count_mode=2)
+        src.post_filter.append(EqualsFilter(field="active", value="true"))
+        restored = Criteria.model_validate(src.get_dict())
+        assert restored.total_count_mode == 2
+        assert len(restored.post_filter) == 1
+
+    @pytest.mark.os_agnostic
+    def test_construct_by_field_name_still_serializes_hyphenated(self) -> None:
+        """Building by the python field name still emits the hyphenated DAL key."""
+        assert Criteria(total_count_mode=3).get_dict()["total-count-mode"] == 3
+
+
+class TestEqualsAnyFilterValue:
+    """An explicitly-empty equalsAny value must survive serialization; a missing value must fail."""
+
+    @pytest.mark.os_agnostic
+    def test_empty_value_is_preserved(self) -> None:
+        criteria = Criteria()
+        criteria.filter.append(EqualsAnyFilter(field="id", value=[]))
+        assert criteria.get_dict()["filter"][0] == {"field": "id", "value": [], "type": "equalsAny"}
+
+    @pytest.mark.os_agnostic
+    def test_missing_value_is_rejected(self) -> None:
+        with pytest.raises(ValidationError):
+            EqualsAnyFilter(field="id")  # type: ignore[call-arg]

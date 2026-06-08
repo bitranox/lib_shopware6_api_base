@@ -27,7 +27,7 @@ class FieldSorting(BaseModel):
 
     >>> # Test
     >>> my_sorting = FieldSorting(field='name', order='ASC', naturalSorting=True)
-    >>> pprint_attrs(my_sorting)
+    >>> pprint_model(my_sorting)
     {'field': 'name', 'order': 'ASC', 'naturalSorting': True}
 
     """
@@ -51,7 +51,7 @@ class AscFieldSorting(BaseModel):
 
     >>> # Test
     >>> my_sorting = AscFieldSorting(field='name', naturalSorting=True)
-    >>> pprint_attrs(my_sorting)
+    >>> pprint_model(my_sorting)
     {'field': 'name', 'naturalSorting': True, 'order': 'ASC'}
 
     """
@@ -79,7 +79,7 @@ class DescFieldSorting(BaseModel):
 
     >>> # Test
     >>> my_sorting = DescFieldSorting(field='name', naturalSorting=True)
-    >>> pprint_attrs(my_sorting)
+    >>> pprint_model(my_sorting)
     {'field': 'name', 'naturalSorting': True, 'order': 'DESC'}
 
     """

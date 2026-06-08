@@ -49,16 +49,16 @@ class Shopware6StoreFrontClientBase:
         self, request_url: str, payload: PayLoad = None, update_header_fields: dict[str, str] | None = None
     ) -> dict[str, Any]:
         """
-        make a delete request
+        Run a DELETE against the Store API.
 
         parameters:
             http_method: get, post, put, delete
-            request_url: API Url, without the common api prefix
-            payload : a dictionary
-            update_header_fields: allows to modify or add header fields
+            request_url: the endpoint path, without the /store-api prefix
+            payload: an optional dict or Criteria request body
+            update_header_fields: extra headers to merge in (or override)
 
         returns
-            response_dict: dictionary with the response as dict
+            the decoded response as a dict
 
         """
         response_dict = self._request_dict(
@@ -73,18 +73,18 @@ class Shopware6StoreFrontClientBase:
         self, request_url: str, payload: PayLoad = None, update_header_fields: dict[str, str] | None = None
     ) -> dict[str, Any]:
         """
-        make a get request
+        Run a GET against the Store API.
 
         parameters:
-            request_url: API Url, without the common api prefix
-            payload : a dictionary
-            update_header_fields: allows to modify or add header fields
+            request_url: the endpoint path, without the /store-api prefix
+            payload: an optional dict or Criteria request body
+            update_header_fields: extra headers to merge in (or override)
 
         returns
-            response_dict: dictionary with the response as dict
+            the decoded response as a dict
 
         >>> # Setup
-        >>> my_storefront_client = Shopware6StoreFrontClientBase()
+        >>> my_storefront_client = Shopware6StoreFrontClientBase(config=my_config)
 
         >>> # test GET a dictionary
         >>> my_response = my_storefront_client.request_get(request_url='context')
@@ -108,18 +108,18 @@ class Shopware6StoreFrontClientBase:
         self, request_url: str, payload: PayLoad = None, update_header_fields: dict[str, str] | None = None
     ) -> list[dict[str, Any]]:
         """
-        make a get request, expecting a list of dictionaries as result
+        Run a GET against the Store API that returns a list of records.
 
         parameters:
-            request_url: API Url, without the common api prefix
-            payload : a dictionary
-            update_header_fields: allows to modify or add header fields
+            request_url: the endpoint path, without the /store-api prefix
+            payload: an optional dict or Criteria request body
+            update_header_fields: extra headers to merge in (or override)
 
         returns
-            List[response_dict]: a list of dictionaries
+            the decoded response as a list of dicts
 
         >>> # Setup
-        >>> my_storefront_client = Shopware6StoreFrontClientBase()
+        >>> my_storefront_client = Shopware6StoreFrontClientBase(config=my_config)
 
         >>> # test GET a List
         >>> my_response = my_storefront_client.request_get_list(request_url='sitemap')
@@ -144,15 +144,15 @@ class Shopware6StoreFrontClientBase:
         self, request_url: str, payload: PayLoad = None, update_header_fields: dict[str, str] | None = None
     ) -> dict[str, Any]:
         """
-        makes a patch request
+        Run a PATCH against the Store API.
 
         parameters:
-            request_url: API Url, without the common api prefix
-            payload : a dictionary
-            update_header_fields: allows to modify or add header fields
+            request_url: the endpoint path, without the /store-api prefix
+            payload: an optional dict or Criteria request body
+            update_header_fields: extra headers to merge in (or override)
 
         returns
-            response_dict: dictionary with the response as dict
+            the decoded response as a dict
 
         """
         response_dict = self._request_dict(
@@ -167,18 +167,18 @@ class Shopware6StoreFrontClientBase:
         self, request_url: str, payload: PayLoad = None, update_header_fields: dict[str, str] | None = None
     ) -> dict[str, Any]:
         """
-        make a post request
+        Run a POST against the Store API.
 
         parameters:
-            request_url: API Url, without the common api prefix
-            payload : a dictionary
-            update_header_fields: allows to modify or add header fields
+            request_url: the endpoint path, without the /store-api prefix
+            payload: an optional dict or Criteria request body
+            update_header_fields: extra headers to merge in (or override)
 
         returns
-            response_dict: dictionary with the response as dict
+            the decoded response as a dict
 
         >>> # Setup
-        >>> my_storefront_client = Shopware6StoreFrontClientBase()
+        >>> my_storefront_client = Shopware6StoreFrontClientBase(config=my_config)
 
         >>> # test POST without payload
         >>> my_response = my_storefront_client.request_post(request_url='product')
@@ -204,16 +204,16 @@ class Shopware6StoreFrontClientBase:
         self, request_url: str, payload: PayLoad = None, update_header_fields: dict[str, str] | None = None
     ) -> dict[str, Any]:
         """
-        make a put request
+        Run a PUT against the Store API.
 
         parameters:
             http_method: get, post, put, delete
-            request_url: API Url, without the common api prefix
-            payload : a dictionary
-            update_header_fields: allows to modify or add header fields
+            request_url: the endpoint path, without the /store-api prefix
+            payload: an optional dict or Criteria request body
+            update_header_fields: extra headers to merge in (or override)
 
         returns
-            response_dict: dictionary with the response as dict
+            the decoded response as a dict
 
         """
         response_dict = self._request_dict(
@@ -242,17 +242,14 @@ class Shopware6StoreFrontClientBase:
         response = self._request(
             http_method=http_method, request_url=request_url, payload=payload, update_header_fields=update_header_fields
         )
-        response_dict: dict[str, Any]
-        if hasattr(response, "json"):  # pragma: no cover
-            response_json = response.json()  # type: ignore
-            if isinstance(response_json, list):
-                raise ShopwareAPIError(
-                    f"received a list instead of a dict - You need to use the method request_{http_method.value}_list"
-                )
-            response_dict = dict(response_json)
-        else:
-            response_dict = {}  # pragma: no cover
-        return response_dict
+        if response is None or not response.content:
+            return {}  # no body to decode (e.g. a DELETE returning 204 No Content)
+        response_json = response.json()
+        if isinstance(response_json, list):
+            raise ShopwareAPIError(
+                f"received a list instead of a dict - You need to use the method request_{http_method.value}_list"
+            )
+        return dict(response_json)
 
     def _request_list(
         self,
@@ -272,17 +269,12 @@ class Shopware6StoreFrontClientBase:
         response = self._request(
             http_method=http_method, request_url=request_url, payload=payload, update_header_fields=update_header_fields
         )
-        response_l_dict: list[dict[str, Any]]
-        if hasattr(response, "json"):  # pragma: no cover
-            response_json = response.json()  # type: ignore
-            if isinstance(response_json, dict):
-                raise ShopwareAPIError(
-                    f"received a dict instead of a list - You need to use the method request_{http_method.value}"
-                )
-            response_l_dict = list(response_json)
-        else:
-            response_l_dict = []  # pragma: no cover
-        return response_l_dict
+        if response is None or not response.content:
+            return []  # no body to decode (e.g. an empty 204 response)
+        response_json = response.json()
+        if isinstance(response_json, dict):
+            raise ShopwareAPIError(f"received a dict instead of a list - You need to use the method request_{http_method.value}")
+        return list(response_json)
 
     def _request(
         self,
@@ -292,20 +284,20 @@ class Shopware6StoreFrontClientBase:
         update_header_fields: dict[str, str] | None = None,
     ) -> httpx2.Response | None:
         """
-        makes a request, using the conf.store_api_sw_access_key for authentication
+        Send a request, authenticating with conf.store_api_sw_access_key.
 
         parameters:
             http_method: HttpMethod.GET, HttpMethod.PATCH, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE
-            request_url: API Url, without the common api prefix
-            payload : a dictionary
+            request_url: the endpoint path, without the /store-api prefix
+            payload: an optional dict or Criteria request body
             update_header_fields : allows to modify or add header fields
 
         returns
-            response_dict: dictionary with the response as dict
+            the decoded response as a dict
 
 
         >>> # Setup
-        >>> my_api_client = Shopware6StoreFrontClientBase()
+        >>> my_api_client = Shopware6StoreFrontClientBase(config=my_config)
 
         >>> # test GET (a new cart)
         >>> my_api_client._request(http_method=HttpMethod.GET, request_url='checkout/cart', payload={'name': 'rn_doctest'})
@@ -327,6 +319,10 @@ class Shopware6StoreFrontClientBase:
         conf_shopware6_api_base_classes.ShopwareAPIError: Client error '400 Bad Request' for url ...
 
         """
+        if isinstance(payload, (bytes, bytearray, memoryview)):
+            # Binary/octet-stream uploads are an Admin API feature (media upload); the Store API
+            # has no binary-body endpoints, so reject raw bytes here instead of crashing in orjson.
+            raise ShopwareAPIError("the Store API client does not accept a bytes payload")
         if isinstance(payload, Criteria):
             payload = payload.get_dict()
         storefront_api_url = self._build_storefront_api_url(endpoint=request_url)
@@ -398,7 +394,7 @@ class Shopware6StoreFrontClientBase:
         returns the default header fields
 
 
-        >>> my_api_client = Shopware6StoreFrontClientBase()
+        >>> my_api_client = Shopware6StoreFrontClientBase(config=my_config)
         >>> my_api_client._get_headers()
         {'Content-Type': 'application/json', 'Accept': 'application/json', 'sw-access-key': '...'}
         >>> # add keys
@@ -444,7 +440,7 @@ class Shopware6StoreFrontClientBase:
             ShopwareAPIError: If the endpoint contains invalid characters or path traversal attempts.
 
         Example:
-        >>> my_api_client = Shopware6StoreFrontClientBase()
+        >>> my_api_client = Shopware6StoreFrontClientBase(config=my_config)
         >>> my_api_client._build_storefront_api_url('test')
         'http.../store-api/test'
 

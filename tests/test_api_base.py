@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import base64
+import uuid
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -466,3 +469,62 @@ class TestShopware6StoreFrontAPIClientBaseIntegration:
         client = Shopware6StoreFrontClientBase(config=docker_test_config)
         response = client.request_get_list("currency")
         assert isinstance(response, list)
+
+
+def _empty_body_response(**_kwargs: object) -> SimpleNamespace:
+    """Stand-in for the storefront _request that returns a response with an empty body."""
+    return SimpleNamespace(content=b"")
+
+
+class TestStorefrontEmptyBody:
+    """A storefront DELETE / empty 204 body must decode to {} / [] instead of crashing."""
+
+    @pytest.mark.os_agnostic
+    def test_request_delete_handles_empty_body(self, full_config: ConfShopware6ApiBase, monkeypatch: pytest.MonkeyPatch) -> None:
+        client = Shopware6StoreFrontClientBase(config=full_config)
+        monkeypatch.setattr(client, "_request", _empty_body_response)
+        assert client.request_delete("checkout/cart") == {}
+
+    @pytest.mark.os_agnostic
+    def test_request_get_list_handles_empty_body(
+        self, full_config: ConfShopware6ApiBase, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        client = Shopware6StoreFrontClientBase(config=full_config)
+        monkeypatch.setattr(client, "_request", _empty_body_response)
+        assert client.request_get_list("sitemap") == []
+
+    @pytest.mark.os_agnostic
+    @pytest.mark.parametrize("blob", [b"\x00bin", bytearray(b"\x00bin"), memoryview(b"\x00bin")])
+    def test_binary_payload_rejected_cleanly(self, full_config: ConfShopware6ApiBase, blob: object) -> None:
+        """The Store API has no binary upload; bytes/bytearray/memoryview raise ShopwareAPIError, not a raw orjson error."""
+        from lib_shopware6_api_base.conf_shopware6_api_base_classes import ShopwareAPIError
+
+        client = Shopware6StoreFrontClientBase(config=full_config)
+        with pytest.raises(ShopwareAPIError, match="bytes"):
+            client.request_post("product", payload=blob)  # type: ignore[arg-type]
+
+
+# a valid 1x1 PNG, used to prove a binary upload stores the exact bytes
+_TINY_PNG = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==")
+
+
+class TestBytesUploadRoundTrip:
+    """A bytes / octet-stream upload must store the exact bytes, not str(bytes)."""
+
+    @pytest.mark.integration
+    def test_bytes_upload_is_not_corrupted(self, docker_test_config: ConfShopware6ApiBase) -> None:
+        media_id = uuid.uuid4().hex
+        with Shopware6AdminAPIClientBase(config=docker_test_config) as client:
+            client.request_post("media", payload={"id": media_id})
+            try:
+                client.request_post(
+                    f"_action/media/{media_id}/upload",
+                    payload=_TINY_PNG,
+                    content_type="octet-stream",
+                    additional_query_params={"extension": "png", "fileName": f"bytes_rt_{media_id}"},
+                )
+                stored = client.request_get(f"media/{media_id}").data
+                # The stored file must be the 70-byte PNG, not the 212-byte str(bytes) repr.
+                assert stored["fileSize"] == len(_TINY_PNG)
+            finally:
+                client.request_delete(f"media/{media_id}")

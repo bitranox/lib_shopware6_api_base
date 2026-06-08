@@ -9,6 +9,7 @@ from pydantic import ValidationError
 
 from lib_shopware6_api_base import (
     ContainsFilter,
+    Criteria,
     EqualsAnyFilter,
     EqualsFilter,
     MultiFilter,
@@ -415,17 +416,39 @@ class TestFilterEnums:
         assert FilterOperator.OR == "or"
         assert FilterOperator.AND == "and"
 
-    @pytest.mark.os_agnostic
-    def test_backward_compatibility_aliases(self) -> None:
-        """Test backward compatibility aliases exist."""
-        from lib_shopware6_api_base.lib_shopware6_api_base_criteria_filter import (
-            equal_filter_type,
-            multi_filter_operator,
-            not_filter_operator,
-            range_filter,
-        )
 
-        assert equal_filter_type is FilterTypeName
-        assert range_filter is RangeParam
-        assert not_filter_operator is FilterOperator
-        assert multi_filter_operator is FilterOperator
+class TestFilterTypeDiscrimination:
+    """FilterType is a discriminated union: re-validating a serialized filter keeps its class."""
+
+    @pytest.mark.os_agnostic
+    @pytest.mark.parametrize(
+        ("tag", "expected"),
+        [
+            ("equals", "EqualsFilter"),
+            ("contains", "ContainsFilter"),
+            ("prefix", "PrefixFilter"),
+            ("suffix", "SuffixFilter"),
+        ],
+    )
+    def test_model_validate_routes_by_type(self, tag: str, expected: str) -> None:
+        """A serialized filter dict re-validates to its own class, not the first union member."""
+        criteria = Criteria.model_validate({"filter": [{"field": "n", "value": "x", "type": tag}]})
+        assert type(criteria.filter[0]).__name__ == expected
+
+    @pytest.mark.os_agnostic
+    def test_round_trip_preserves_filter_types(self) -> None:
+        """get_dict() -> model_validate() keeps Contains/Prefix and a nested Multi/queries intact."""
+        original = Criteria()
+        original.filter.append(ContainsFilter(field="name", value="x"))
+        original.filter.append(MultiFilter(operator="or", queries=[PrefixFilter(field="p", value="y")]))
+        restored = Criteria.model_validate(original.get_dict())
+        assert isinstance(restored.filter[0], ContainsFilter)
+        nested = restored.filter[1]
+        assert isinstance(nested, MultiFilter)
+        assert isinstance(nested.queries[0], PrefixFilter)
+
+    @pytest.mark.os_agnostic
+    def test_value_less_equals_any_fails_loudly(self) -> None:
+        """A serialized equalsAny without a value raises instead of silently becoming a RangeFilter."""
+        with pytest.raises(ValidationError):
+            Criteria.model_validate({"filter": [{"field": "id", "type": "equalsAny"}]})

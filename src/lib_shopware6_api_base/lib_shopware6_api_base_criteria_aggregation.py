@@ -1,8 +1,8 @@
 # STDLIB
-from typing import Literal
+from typing import Annotated, Literal
 
 # EXT
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Discriminator, Field, Tag, computed_field
 
 from ._compat import StrEnum
 from .lib_shopware6_api_base_criteria_filter import FilterType
@@ -62,7 +62,7 @@ class AvgAggregation(BaseModel):
 
     >>> # Test
     >>> my_aggregation = AvgAggregation(name='avg-price', field='price')
-    >>> pprint_attrs(my_aggregation)
+    >>> pprint_model(my_aggregation)
     {'name': 'avg-price', 'field': 'price', 'type': 'avg'}
 
     """
@@ -88,7 +88,7 @@ class CountAggregation(BaseModel):
 
     >>> # Test
     >>> my_aggregation = CountAggregation(name='count-manufacturers', field='manufacturerId')
-    >>> pprint_attrs(my_aggregation)
+    >>> pprint_model(my_aggregation)
     {'name': 'count-manufacturers', 'field': 'manufacturerId', 'type': 'count'}
 
     """
@@ -114,7 +114,7 @@ class MaxAggregation(BaseModel):
 
     >>> # Test
     >>> my_aggregation = MaxAggregation(name='max-price', field='price')
-    >>> pprint_attrs(my_aggregation)
+    >>> pprint_model(my_aggregation)
     {'name': 'max-price', 'field': 'price', 'type': 'max'}
 
     """
@@ -140,7 +140,7 @@ class MinAggregation(BaseModel):
 
     >>> # Test
     >>> my_aggregation = MinAggregation(name='min-price', field='price')
-    >>> pprint_attrs(my_aggregation)
+    >>> pprint_model(my_aggregation)
     {'name': 'min-price', 'field': 'price', 'type': 'min'}
 
     """
@@ -166,7 +166,7 @@ class SumAggregation(BaseModel):
 
     >>> # Test
     >>> my_aggregation = SumAggregation(name='sum-price', field='price')
-    >>> pprint_attrs(my_aggregation)
+    >>> pprint_model(my_aggregation)
     {'name': 'sum-price', 'field': 'price', 'type': 'sum'}
 
     """
@@ -193,7 +193,7 @@ class StatsAggregation(BaseModel):
 
     >>> # Test
     >>> my_aggregation = StatsAggregation(name='stats-price', field='price')
-    >>> pprint_attrs(my_aggregation)
+    >>> pprint_model(my_aggregation)
     {'name': 'stats-price', 'field': 'price', 'type': 'stats'}
 
     """
@@ -230,7 +230,7 @@ class TermsAggregation(BaseModel):
 
     >>> # Test
     >>> my_aggregation = TermsAggregation(name='manufacturer-ids', limit=3, sort=DescFieldSorting(field='manufacturer.name'), field='manufacturerId')
-    >>> pprint_attrs(my_aggregation)
+    >>> pprint_model(my_aggregation)
     {'name': 'manufacturer-ids',
      'field': 'manufacturerId',
      'sort': {'field': 'manufacturer.name', 'order': 'DESC'},
@@ -273,7 +273,7 @@ class FilterAggregation(BaseModel):
     ...     name='active-price-avg',
     ...     filter=[EqualsFilter(field='active', value=True)],
     ...     aggregation=AvgAggregation(name='avg-price',field='price'))
-    >>> pprint_attrs(my_aggregation)
+    >>> pprint_model(my_aggregation)
     {'name': 'active-price-avg',
      'filter': [{'field': 'active', 'value': True, 'type': 'equals'}],
      'aggregation': {'name': 'avg-price', 'field': 'price', 'type': 'avg'},
@@ -306,7 +306,7 @@ class EntityAggregation(BaseModel):
 
     >>> # Test
     >>> my_aggregation = EntityAggregation(name='manufacturers', definition='product_manufacturer', field='manufacturerId')
-    >>> pprint_attrs(my_aggregation)
+    >>> pprint_model(my_aggregation)
     {'name': 'manufacturers',
      'definition': 'product_manufacturer',
      'field': 'manufacturerId',
@@ -339,7 +339,7 @@ class DateHistogramAggregation(BaseModel):
 
     >>> # Test
     >>> my_aggregation = DateHistogramAggregation(name='release-dates', field='releaseDate', interval='month')
-    >>> pprint_attrs(my_aggregation)
+    >>> pprint_model(my_aggregation)
     {'name': 'release-dates', 'field': 'releaseDate', 'interval': 'month', 'type': 'histogram'}
 
     """
@@ -358,18 +358,29 @@ class DateHistogramAggregation(BaseModel):
 see: https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/aggregations-reference#nesting-aggregations
 """
 
-AggregationType = (
-    AvgAggregation
-    | CountAggregation
-    | MaxAggregation
-    | MinAggregation
-    | SumAggregation
-    | StatsAggregation
-    | TermsAggregation
-    | FilterAggregation
-    | EntityAggregation
-    | DateHistogramAggregation
-)
+
+def _aggregation_type_tag(value: object) -> str | None:
+    """Discriminate an aggregation by its ``type`` tag (a dict key on input, or the computed attribute on a model)."""
+    if isinstance(value, dict):
+        return value.get("type")
+    return getattr(value, "type", None)
+
+
+# Discriminated union: re-validating a serialized aggregation routes to the right class by its
+# "type" tag instead of collapsing to the first structurally-compatible member.
+AggregationType = Annotated[
+    Annotated[AvgAggregation, Tag("avg")]
+    | Annotated[CountAggregation, Tag("count")]
+    | Annotated[MaxAggregation, Tag("max")]
+    | Annotated[MinAggregation, Tag("min")]
+    | Annotated[SumAggregation, Tag("sum")]
+    | Annotated[StatsAggregation, Tag("stats")]
+    | Annotated[TermsAggregation, Tag("terms")]
+    | Annotated[FilterAggregation, Tag("filter")]
+    | Annotated[EntityAggregation, Tag("entity")]
+    | Annotated[DateHistogramAggregation, Tag("histogram")],
+    Discriminator(_aggregation_type_tag),
+]
 
 # Rebuild models with forward references
 TermsAggregation.model_rebuild()

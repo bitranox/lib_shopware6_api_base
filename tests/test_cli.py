@@ -11,6 +11,8 @@ import sys
 import pytest
 from click.testing import CliRunner
 
+from lib_shopware6_api_base.conf_shopware6_api_base_classes import ConfShopware6ApiBase
+
 logger = logging.getLogger()
 os.environ["PYTEST_IS_RUNNING"] = "True"  # to be able to detect pytest when running the cli command
 
@@ -253,3 +255,142 @@ def test_cli_commands() -> None:
     assert call_cli_command("-h")
     assert call_cli_command("info")
     assert call_cli_command("--traceback info")
+
+
+# =============================================================================
+# Config / test-connection / get commands
+# =============================================================================
+
+
+class TestCommandHelpers:
+    """Unit tests for the pure helpers behind the config commands."""
+
+    @pytest.mark.os_agnostic
+    def test_mask_section_masks_secrets(self) -> None:
+        """Secret-ish keys are masked; non-secret keys pass through."""
+        from lib_shopware6_api_base.lib_shopware6_api_base_cli import _mask_section
+
+        masked = _mask_section(
+            {
+                "username": "admin",
+                "admin_api_url": "http://shop/api",
+                "password": "sekret",
+                "client_id": "ci",
+                "client_secret": "cs",
+                "store_api_sw_access_key": "ak",
+            }
+        )
+        assert masked["username"] == "admin"
+        assert masked["admin_api_url"] == "http://shop/api"
+        assert masked["password"] != "sekret"
+        assert masked["client_id"] != "ci"
+        assert masked["client_secret"] != "cs"
+        assert masked["store_api_sw_access_key"] != "ak"
+
+    @pytest.mark.os_agnostic
+    def test_mask_section_keeps_empty_values(self) -> None:
+        """An empty secret stays empty (nothing to hide)."""
+        from lib_shopware6_api_base.lib_shopware6_api_base_cli import _mask_section
+
+        assert _mask_section({"password": ""})["password"] == ""
+
+    @pytest.mark.os_agnostic
+    def test_config_locations_cover_app_host_user(self) -> None:
+        """All three lib_layered_config layers are reported; app/user are config.toml, host is under hosts/."""
+        from lib_shopware6_api_base.lib_shopware6_api_base_cli import _config_locations
+
+        locations = dict(_config_locations())
+        assert {"app", "host", "user"} <= set(locations)
+        assert locations["app"].name == "config.toml"
+        assert locations["user"].name == "config.toml"
+        assert locations["host"].parent.name == "hosts"
+
+
+class TestConfigCommands:
+    """CliRunner tests for the config sub-commands (no network)."""
+
+    @pytest.mark.os_agnostic
+    def test_config_paths_succeeds(self) -> None:
+        """`config paths` lists the bundled default and the slug-based locations."""
+        from lib_shopware6_api_base.lib_shopware6_api_base_cli import cli_main
+
+        result = CliRunner().invoke(cli_main, ["config", "paths"])
+        assert result.exit_code == 0
+        assert "bundled" in result.output
+        assert "lib-shopware6-api-base" in result.output
+
+    @pytest.mark.os_agnostic
+    def test_config_show_emits_json(self) -> None:
+        """`config show` prints a JSON object with the requested section."""
+        import json
+
+        from lib_shopware6_api_base.lib_shopware6_api_base_cli import cli_main
+
+        result = CliRunner().invoke(cli_main, ["config", "show", "--section", "shopware"])
+        assert result.exit_code == 0
+        assert "shopware" in json.loads(result.output)
+
+    @pytest.mark.os_agnostic
+    def test_new_commands_are_registered(self) -> None:
+        """The new commands show up in --help."""
+        from lib_shopware6_api_base.lib_shopware6_api_base_cli import cli_main
+
+        output = CliRunner().invoke(cli_main, ["-h"]).output.lower()
+        assert "test-connection" in output
+        assert "config" in output
+        assert "get" in output
+
+    @pytest.mark.os_agnostic
+    def test_get_command_help_succeeds(self) -> None:
+        """`get -h` is reachable."""
+        from lib_shopware6_api_base.lib_shopware6_api_base_cli import cli_main
+
+        result = CliRunner().invoke(cli_main, ["get", "-h"])
+        assert result.exit_code == 0
+
+
+class TestConnectionCommandsIntegration:
+    """test-connection / get against the dockware container (config via env vars)."""
+
+    @staticmethod
+    def _dockware_env(config: ConfShopware6ApiBase) -> dict[str, str]:
+        prefix = "LIB_SHOPWARE6_API_BASE___SHOPWARE__"
+        env = _env.copy()
+        env.update(
+            {
+                prefix + "ADMIN_API_URL": config.shopware_admin_api_url,
+                prefix + "STOREFRONT_API_URL": config.shopware_storefront_api_url,
+                prefix + "USERNAME": config.username,
+                prefix + "PASSWORD": config.password,
+                prefix + "CLIENT_ID": config.client_id,
+                prefix + "CLIENT_SECRET": config.client_secret,
+                prefix + "GRANT_TYPE": config.grant_type.name,
+                prefix + "STORE_API_SW_ACCESS_KEY": config.store_api_sw_access_key,
+            }
+        )
+        return env
+
+    @pytest.mark.integration
+    def test_test_connection_reports_ok(self, docker_test_config: ConfShopware6ApiBase) -> None:
+        """test-connection reaches the Admin and Store APIs on dockware."""
+        result = subprocess.run(
+            [sys.executable, "-m", "lib_shopware6_api_base", "test-connection"],
+            env=self._dockware_env(docker_test_config),
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stdout + result.stderr
+        assert "Admin API  OK" in result.stdout
+        assert "Store API  OK" in result.stdout
+
+    @pytest.mark.integration
+    def test_get_returns_version(self, docker_test_config: ConfShopware6ApiBase) -> None:
+        """get _info/version returns the shop version JSON."""
+        result = subprocess.run(
+            [sys.executable, "-m", "lib_shopware6_api_base", "get", "_info/version"],
+            env=self._dockware_env(docker_test_config),
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stdout + result.stderr
+        assert '"version"' in result.stdout

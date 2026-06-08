@@ -218,3 +218,43 @@ class TestShopwareAPIError:
         """Test ShopwareAPIError inherits from BaseException."""
         error = ShopwareAPIError("Test error")
         assert isinstance(error, BaseException)
+
+
+class TestStringFieldStrictTyping:
+    """String fields reject numbers instead of silently stringifying them (avoids corrupting a mistyped secret)."""
+
+    @pytest.mark.os_agnostic
+    def test_numeric_value_is_rejected(self) -> None:
+        """A numeric value on a secret/string field raises rather than becoming a corrupted string."""
+        from pydantic import ValidationError
+
+        with pytest.raises(ValidationError):
+            ConfShopware6ApiBase.model_validate({"client_secret": 71})
+
+    @pytest.mark.os_agnostic
+    def test_plain_string_is_unchanged(self) -> None:
+        """An explicit string passes straight through."""
+        assert ConfShopware6ApiBase.model_validate({"username": "admin"}).username == "admin"
+
+
+class TestGrantTypeValidator:
+    """grant_type accepts strings/enums and rejects bad input with a clean ValidationError."""
+
+    @pytest.mark.os_agnostic
+    def test_string_is_parsed(self) -> None:
+        assert ConfShopware6ApiBase.model_validate({"grant_type": "RESOURCE_OWNER"}).grant_type == GrantType.RESOURCE_OWNER
+
+    @pytest.mark.os_agnostic
+    def test_invalid_string_raises_validation_error(self) -> None:
+        from pydantic import ValidationError
+
+        with pytest.raises(ValidationError):
+            ConfShopware6ApiBase.model_validate({"grant_type": "nope"})
+
+    @pytest.mark.os_agnostic
+    def test_non_string_raises_validation_error_not_attributeerror(self) -> None:
+        """A non-string (e.g. a TOML int) must surface as ValidationError, not a raw AttributeError."""
+        from pydantic import ValidationError
+
+        with pytest.raises(ValidationError):
+            ConfShopware6ApiBase.model_validate({"grant_type": 123})

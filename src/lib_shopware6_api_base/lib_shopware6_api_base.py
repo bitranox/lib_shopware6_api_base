@@ -158,18 +158,6 @@ from .lib_shopware6_api_base_criteria import (
 from .lib_shopware6_api_base_criteria import (
     aggregation_names as aggregation_names,
 )
-from .lib_shopware6_api_base_criteria import (
-    equal_filter_type as equal_filter_type,
-)
-from .lib_shopware6_api_base_criteria import (
-    multi_filter_operator as multi_filter_operator,
-)
-from .lib_shopware6_api_base_criteria import (
-    not_filter_operator as not_filter_operator,
-)
-from .lib_shopware6_api_base_criteria import (
-    range_filter as range_filter,
-)
 
 # Re-export client classes
 from .lib_shopware6_storefront_client import (
@@ -218,10 +206,6 @@ __all__ = [
     "SumAggregation",
     "TermsAggregation",
     "aggregation_names",
-    "equal_filter_type",
-    "multi_filter_operator",
-    "not_filter_operator",
-    "range_filter",
     # Local exports
     "PayLoad",
     # Module constants

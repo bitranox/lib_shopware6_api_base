@@ -49,7 +49,7 @@ class ShopwareApiResponse(BaseModel):
     """Typed envelope for a Shopware Admin API response.
 
     The envelope metadata is typed, while the entity ``data`` stays dynamic
-    (``Any``) — the base client is intentionally entity-agnostic, so the actual
+    (``Any``) - the base client is intentionally entity-agnostic, so the actual
     Shopware entity contents are not modelled. Unknown envelope keys (``links``,
     ``included``, ``extensions``, ``meta``, ...) are preserved via ``extra="allow"``.
 
@@ -59,12 +59,12 @@ class ShopwareApiResponse(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    #: Entity records — list[dict] for search/list, dict for a single GET, or None.
+    #: Entity records - list[dict] for search/list, dict for a single GET, or None.
     data: Any = None
     #: Total record count reported by search endpoints.
     total: int | None = None
     #: Aggregation results, when requested via the Criteria (Shopware returns a dict, or
-    #: an empty list when there are none) — left dynamic.
+    #: an empty list when there are none) - left dynamic.
     aggregations: Any = None
     #: Error entries returned on a failed request.
     errors: Any = None
@@ -86,6 +86,8 @@ class ConfShopware6ApiBase(BaseModel):
         SHOPWARE__ADMIN_API_URL=https://shop.example.com/api
     """
 
+    # Strict typing: a numeric/bool value from a config layer is rejected (ValidationError)
+    # rather than silently stringified, so a mistyped secret surfaces instead of corrupting.
     model_config = ConfigDict(populate_by_name=True, validate_assignment=True, extra="ignore")
 
     # API Endpoints (TOML keys drop the redundant ``shopware_`` prefix).
@@ -108,9 +110,6 @@ class ConfShopware6ApiBase(BaseModel):
     # Storefront API access key.
     store_api_sw_access_key: str = ""
 
-    # Allow plain HTTP (development only); "1" enables it.
-    insecure_transport: str = "0"
-
     # Follow HTTP redirects (may expose auth tokens to redirect targets).
     follow_redirects: bool = False
 
@@ -119,17 +118,15 @@ class ConfShopware6ApiBase(BaseModel):
 
     @field_validator("grant_type", mode="before")
     @classmethod
-    def parse_grant_type(cls, v: str | GrantType) -> GrantType:
-        """Parse grant_type from a string ("USER_CREDENTIALS"/"user_credentials") or enum."""
+    def parse_grant_type(cls, v: object) -> GrantType:
+        """Parse grant_type from a GrantType or a string ("USER_CREDENTIALS"/"user_credentials")."""
         if isinstance(v, GrantType):
             return v
-        v_upper = v.upper()
-        if v_upper in ("USER_CREDENTIALS", "RESOURCE_OWNER"):
-            return GrantType(v.lower())
-        try:
-            return GrantType(v.lower())
-        except ValueError:
-            pass
+        if isinstance(v, str):
+            try:
+                return GrantType(v.lower())
+            except ValueError:
+                pass
         raise ValueError(f"Invalid grant_type: {v!r}. Must be 'USER_CREDENTIALS' or 'RESOURCE_OWNER'")
 
 

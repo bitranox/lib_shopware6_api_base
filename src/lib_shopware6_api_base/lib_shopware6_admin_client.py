@@ -8,6 +8,7 @@ from typing import Any
 import httpx2
 import orjson
 
+from ._compat import Self
 from ._http_common import (
     CONTENT_TYPE_JSON,
     DEFAULT_REQUEST_TIMEOUT,
@@ -55,22 +56,32 @@ class Shopware6AdminAPIClientBase:
         self.token: dict[str, Any] = {}
         self.session: httpx2.Client = httpx2.Client()
 
+    def close(self) -> None:
+        """Close the underlying HTTP session and release its connection pool."""
+        self.session.close()
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(self, *exc_info: object) -> None:
+        self.close()
+
     def request_get(
         self, request_url: str, payload: PayLoad = None, update_header_fields: dict[str, str] | None = None
     ) -> ShopwareApiResponse:
         """
-        makes a get request
+        Run a GET against the Admin API.
 
         parameters:
-            request_url: API Url, without the common api prefix
-            payload : a dictionary
-            update_header_fields: allows to modify or add header fields
+            request_url: the endpoint path, without the /api prefix
+            payload: an optional dict or Criteria request body
+            update_header_fields: extra headers to merge in (or override)
 
         returns
-            response_dict: dictionary with the response as dict
+            a ShopwareApiResponse; read .data and .total
 
         >>> # Setup
-        >>> my_api_client = Shopware6AdminAPIClientBase()
+        >>> my_api_client = Shopware6AdminAPIClientBase(config=my_config)
 
         >>> # test resource owner token
         >>> ignore = my_api_client._get_access_token_by_user_credentials()
@@ -113,47 +124,47 @@ class Shopware6AdminAPIClientBase:
         update_header_fields: dict[str, str] | None = None,
     ) -> ShopwareApiResponse:
         """
-        get the data paginated - metadata 'total' and 'totalCountMode' will be updated
-        the paginated request reads those records in junks of junk_size=100 for performance reasons.
+        Fetch every record, page by page (the 'total' / 'totalCountMode' metadata is filled in).
+        Records are read in chunks of junk_size (default 100) so no single request is huge.
 
         payload "limit" will be respected (meaning we deliver only 'limit' results back)
         payload "page" will be ignored
 
         parameters:
-            request_url: API Url, without the common api prefix
-            payload : a dictionary
+            request_url: the endpoint path, without the /api prefix
+            payload: an optional dict or Criteria request body
             limit : the junk size
-            update_header_fields: allows to modify or add header fields
+            update_header_fields: extra headers to merge in (or override)
 
         returns
-            response_dict: dictionary with the response as dict
+            a ShopwareApiResponse; read .data and .total
 
         >>> # Setup
-        >>> my_api_client = Shopware6AdminAPIClientBase()
+        >>> my_api_client = Shopware6AdminAPIClientBase(config=my_config)
 
         >>> # test read product junk_size=3, limit = 4
         >>> my_payload={'limit': 4}
         >>> my_response_dict = my_api_client.request_get_paginated(request_url='product', payload=my_payload, junk_size=3)
-        >>> assert 4 == len(my_response_dict['data'])
+        >>> assert 4 == len(my_response_dict.data)
 
         >>> # test read product junk_size=3, no limit
         >>> my_response_dict = my_api_client.request_get_paginated(request_url='product', junk_size=3)
-        >>> assert 3 < len(my_response_dict['data'])
+        >>> assert 3 < len(my_response_dict.data)
 
         >>> # test read product junk_size=3, limit = 2
         >>> my_payload={'limit': 2}
         >>> my_response_dict = my_api_client.request_get_paginated(request_url='product', payload=my_payload, junk_size=3)
-        >>> assert 2 == len(my_response_dict['data'])
+        >>> assert 2 == len(my_response_dict.data)
 
         >>> # test read product junk_size=3, limit = 4
         >>> my_payload={'limit': 4}
         >>> my_response_dict = my_api_client.request_get_paginated(request_url='product', payload=my_payload, junk_size=3)
-        >>> assert 4 == len(my_response_dict['data'])
+        >>> assert 4 == len(my_response_dict.data)
 
         >>> # test read product junk_size=10, limit = None
         >>> my_payload=Criteria()
         >>> my_response_dict = my_api_client.request_get_paginated(request_url='product', payload=my_payload, junk_size=10)
-        >>> assert 5 < len(my_response_dict['data'])
+        >>> assert 5 < len(my_response_dict.data)
         """
         response_dict = self._request_paginated(
             http_method=HttpMethod.GET,
@@ -173,17 +184,17 @@ class Shopware6AdminAPIClientBase:
         update_header_fields: dict[str, str] | None = None,
     ) -> ShopwareApiResponse:
         """
-        makes a patch request
+        Run a PATCH against the Admin API.
 
         parameters:
-            request_url: API Url, without the common api prefix
-            payload : a dictionary or bytes
+            request_url: the endpoint path, without the /api prefix
+            payload: the request body as a dict, Criteria, or raw bytes
             content_type: any valid content type like json, octet-stream, ...
             additional_query_params: additional query parameters for patch, post, put, delete
-            update_header_fields: allows to modify or add header fields
+            update_header_fields: extra headers to merge in (or override)
 
         returns
-            response_dict: dictionary with the response as dict
+            a ShopwareApiResponse; read .data and .total
 
         """
         response_dict = self._make_request(
@@ -205,17 +216,17 @@ class Shopware6AdminAPIClientBase:
         update_header_fields: dict[str, str] | None = None,
     ) -> ShopwareApiResponse:
         """
-        makes a post request
+        Run a POST against the Admin API.
 
         parameters:
-            request_url: API Url, without the common api prefix
-            payload : a dictionary or bytes
+            request_url: the endpoint path, without the /api prefix
+            payload: the request body as a dict, Criteria, or raw bytes
             content_type: any valid content type like json, octet-stream, ...
             additional_query_params: additional query parameters for patch, post, put, delete
-            update_header_fields: allows to modify or add header fields
+            update_header_fields: extra headers to merge in (or override)
 
         returns
-            response_dict: dictionary with the response as dict
+            a ShopwareApiResponse; read .data and .total
 
         """
         response_dict = self._make_request(
@@ -243,68 +254,62 @@ class Shopware6AdminAPIClientBase:
         payload "page" will be ignored
 
         parameters:
-            request_url: API Url, without the common api prefix
-            payload : a dictionary
+            request_url: the endpoint path, without the /api prefix
+            payload: an optional dict or Criteria request body
             junk_size : the junk size
-            update_header_fields: allows to modify or add header fields
+            update_header_fields: extra headers to merge in (or override)
 
         returns
-            response_dict: dictionary with the response as dict
+            a ShopwareApiResponse; read .data and .total
 
         >>> # Setup
-        >>> my_api_client = Shopware6AdminAPIClientBase()
+        >>> my_api_client = Shopware6AdminAPIClientBase(config=my_config)
         >>> my_url = 'search/product'
 
         >>> # test read product junk_size=10, limit = None
         >>> my_payload=Criteria()
         >>> my_response_dict = my_api_client.request_post_paginated(request_url=my_url, payload=my_payload, junk_size=10)
-        >>> assert 5 < len(my_response_dict['data'])
+        >>> assert 5 < len(my_response_dict.data)
 
         >>> # test read product junk_size=10, no limit
         >>> my_payload=None
         >>> my_response_dict = my_api_client.request_post_paginated(request_url=my_url, payload=my_payload, junk_size=10)
-        >>> assert 10 < len(my_response_dict['data'])
+        >>> assert 10 < len(my_response_dict.data)
 
         >>> # test read product junk_size=3, limit = 2
         >>> my_payload={'limit': 2}
         >>> my_response_dict = my_api_client.request_post_paginated(request_url=my_url, payload=my_payload, junk_size=3)
-        >>> assert 2 == len(my_response_dict['data'])
+        >>> assert 2 == len(my_response_dict.data)
 
         >>> # test read product junk_size=3, limit = 4
         >>> my_payload={'limit': 4}
         >>> my_response_dict = my_api_client.request_post_paginated(request_url=my_url, payload=my_payload, junk_size=3)
-        >>> assert 4 == len(my_response_dict['data'])
+        >>> assert 4 == len(my_response_dict.data)
 
         >>> # search for orders
         >>> # test https://github.com/bitranox/lib_shopware6_api_base/issues/11
-        >>> import pprint
         >>> date_from = '2024-09-29T00:00:00.000Z'
         >>> date_to = '2024-09-29T23:59:59.999Z'
         >>> my_criteria = Criteria()
         >>> my_criteria.filter.append(RangeFilter(field="orderDate", parameters = {'gte': date_from, 'lte': date_to}))
-        >>> my_criteria.filter.append(MultiFilter('or', [
+        >>> my_criteria.filter.append(MultiFilter(operator='or', queries=[
         ...     EqualsFilter(field='documents.documentType.technicalName', value='invoice'),
         ...     EqualsFilter(field='documents.documentType.technicalName', value='storno')]))
-        >>> pprint_attrs(my_criteria)
-        {'limit': None,
-         'page': None,
-         'filter': [{'type': 'range',
-                     'field': 'orderDate',
+        >>> pprint_model(my_criteria)
+        {'filter': [{'field': 'orderDate',
                      'parameters': {'gte': '2024-09-29T00:00:00.000Z',
-                                    'lte': '2024-09-29T23:59:59.999Z'}},
-                    {'type': 'multi',
-                     'operator': 'or',
-                     'queries': [{'type': 'equals',
-                                  'field': 'documents.documentType.technicalName',
-                                  'value': 'invoice'},
-                                 {'type': 'equals',
-                                  'field': 'documents.documentType.technicalName',
-                                  'value': 'storno'}]}],
-         'term': None,
-         'total_count_mode': None}
+                                    'lte': '2024-09-29T23:59:59.999Z'},
+                     'type': 'range'},
+                    {'operator': 'or',
+                     'queries': [{'field': 'documents.documentType.technicalName',
+                                  'value': 'invoice',
+                                  'type': 'equals'},
+                                 {'field': 'documents.documentType.technicalName',
+                                  'value': 'storno',
+                                  'type': 'equals'}],
+                     'type': 'multi'}]}
         >>> my_response_dict = my_api_client.request_post_paginated(request_url='search/order', payload=my_criteria)
-        >>> pprint.pprint(my_response_dict)
-        {'data': []}
+        >>> assert isinstance(my_response_dict.data, list)
         """
         response_dict = self._request_paginated(
             http_method=HttpMethod.POST,
@@ -324,18 +329,18 @@ class Shopware6AdminAPIClientBase:
         update_header_fields: dict[str, str] | None = None,
     ) -> ShopwareApiResponse:
         """
-        makes a put request
+        Run a PUT against the Admin API.
 
         parameters:
             http_method: get, post, put, delete
-            request_url: API Url, without the common api prefix
-            payload : a dictionary or bytes
+            request_url: the endpoint path, without the /api prefix
+            payload: the request body as a dict, Criteria, or raw bytes
             content_type: any valid content type like json, octet-stream, ...
             additional_query_params: additional query parameters for patch, post, put, delete
-            update_header_fields: allows to modify or add header fields
+            update_header_fields: extra headers to merge in (or override)
 
         returns
-            response_dict: dictionary with the response as dict
+            a ShopwareApiResponse; read .data and .total
 
         """
         response_dict = self._make_request(
@@ -356,17 +361,17 @@ class Shopware6AdminAPIClientBase:
         update_header_fields: dict[str, str] | None = None,
     ) -> ShopwareApiResponse:
         """
-        makes a delete request
+        Run a DELETE against the Admin API.
 
         parameters:
             http_method: get, post, put, delete
-            request_url: API Url, without the common api prefix
-            payload : a dictionary
+            request_url: the endpoint path, without the /api prefix
+            payload: an optional dict or Criteria request body
             additional_query_params: additional query parameters for patch, post, put, delete
-            update_header_fields: allows to modify or add header fields
+            update_header_fields: extra headers to merge in (or override)
 
         returns
-            response_dict: dictionary with the response as dict
+            a ShopwareApiResponse; read .data and .total
 
         """
         response_dict = self._make_request(
@@ -388,20 +393,20 @@ class Shopware6AdminAPIClientBase:
     ) -> ShopwareApiResponse:
         """
         request the data paginated for performance reasons - metadata 'total' and 'totalCountMode' will be updated
-        the paginated request reads all records in junks of junk_size=100 up to "limit"
+        Records are read in chunks of junk_size (default 100), up to the payload's "limit".
 
         payload "limit" will be respected (meaning we deliver only 'limit' results back)
         "page" will be ignored
 
         parameters:
             http_method: HttpMethod.GET, HttpMethod.PATCH, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE
-            request_url: API Url, without the common api prefix
-            payload : a dictionary
+            request_url: the endpoint path, without the /api prefix
+            payload: an optional dict or Criteria request body
             junk_size : the junk size
-            update_header_fields: allows to modify or add header fields
+            update_header_fields: extra headers to merge in (or override)
 
         returns
-            response_dict: dictionary with the response as dict
+            a ShopwareApiResponse; read .data and .total
 
         """
         accumulated: list[Any] = []
@@ -420,7 +425,7 @@ class Shopware6AdminAPIClientBase:
         total_limit = payload_dict.get("limit")
 
         if total_limit is None:
-            payload_dict["limit"] = str(junk_size)
+            payload_dict["limit"] = junk_size
             records_left = 0
         else:
             payload_dict["limit"] = min(total_limit, junk_size)
@@ -460,22 +465,22 @@ class Shopware6AdminAPIClientBase:
         update_header_fields: dict[str, str] | None = None,
     ) -> ShopwareApiResponse:
         """
-        makes a request - creates and refresh a token and sessions as needed
+        Send a request, creating or refreshing the token and session as needed.
 
         parameters:
             http_method: HttpMethod.GET, HttpMethod.PATCH, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE
-            request_url: API Url, without the common api prefix
-            payload : a dictionary , a criteria object, or bytes (for file uploads)
+            request_url: the endpoint path, without the /api prefix
+            payload: a dict, a Criteria, or raw bytes (for file uploads)
             content_type: any valid content type like json, octet-stream, ...
             additional_query_params: additional query parameters for patch, post, put, delete
-            update_header_fields: allows to modify or add header fields
+            update_header_fields: extra headers to merge in (or override)
 
         returns
-            response_dict: dictionary with the response as dict
+            a ShopwareApiResponse; read .data and .total
 
 
         >>> # Setup
-        >>> my_api_client = Shopware6AdminAPIClientBase()
+        >>> my_api_client = Shopware6AdminAPIClientBase(config=my_config)
 
         >>> # test resource owner token
         >>> ignore = my_api_client._get_access_token_by_user_credentials()
@@ -555,29 +560,29 @@ class Shopware6AdminAPIClientBase:
         update_header_fields: dict[str, str] | None = None,
     ) -> httpx2.Response:
         """
-        makes a request, needs a "self.session" to be set up and authenticated
+        Send a request; requires an authenticated self.session to be set up.
 
         parameters:
             http_method: HttpMethod.GET, HttpMethod.PATCH, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE
-            request_url: API Url, without the common api prefix
-            payload : a dictionary , a criteria object, or bytes (for file uploads)
+            request_url: the endpoint path, without the /api prefix
+            payload: a dict, a Criteria, or raw bytes (for file uploads)
             content_type: any valid content type like json, octet-stream, ...
             additional_query_params: additional query parameters for patch, post, put, delete
-            update_header_fields: allows to modify or add header fields
+            update_header_fields: extra headers to merge in (or override)
 
         returns
-            response_dict: dictionary with the response as dict
+            a ShopwareApiResponse; read .data and .total
 
         see : https://www.encode.io/httpx2/
 
         """
-        request_data: str
+        request_data: str | bytes
         payload_dict: dict[str, Any] = {}
 
         if is_type_bytes(payload):
-            request_data = str(payload)
             if content_type.lower() == CONTENT_TYPE_JSON:
                 raise ShopwareAPIError('Content type "json" does not match the payload data type "bytes"')
+            request_data = payload  # raw bytes, sent unchanged (e.g. octet-stream / file uploads)
         else:
             payload_dict = get_payload_dict(payload)
             request_data = orjson.dumps(payload_dict).decode()
@@ -654,7 +659,7 @@ class Shopware6AdminAPIClientBase:
             the token, also saved in "self.token"
 
         >>> # Setup
-        >>> my_api_client = Shopware6AdminAPIClientBase()
+        >>> my_api_client = Shopware6AdminAPIClientBase(config=my_config)
         >>> save_conf = my_api_client.config.grant_type
 
         >>> # test "Client Credentials Grant Type"
@@ -667,14 +672,7 @@ class Shopware6AdminAPIClientBase:
         >>> my_api_client._get_token()
         {'token_type': 'Bearer', 'expires_in': ..., 'access_token': '...', 'expires_at': ...}
 
-        >>> # test invalid type, which should fail
-        >>> my_api_client.config.grant_type = None
-        >>> my_api_client._get_token()
-        Traceback (most recent call last):
-            ...
-        conf_shopware6_api_base_classes.ShopwareAPIError: config.grant_type must be GrantType.USER_CREDENTIALS or GrantType.RESOURCE_OWNER, not None
-
-        >>> # Teardown
+        >>> # Teardown - restore the shared config's grant type
         >>> my_api_client.config.grant_type = save_conf
 
         """
@@ -711,7 +709,7 @@ class Shopware6AdminAPIClientBase:
             "self.token"
 
         >>> # Setup
-        >>> my_api_client = Shopware6AdminAPIClientBase()
+        >>> my_api_client = Shopware6AdminAPIClientBase(config=my_config)
         >>> save_shopware_admin_api_url = my_api_client.config.shopware_admin_api_url
         >>> save_client_id = my_api_client.config.client_id
         >>> save_client_secret = my_api_client.config.client_secret
@@ -780,7 +778,7 @@ class Shopware6AdminAPIClientBase:
 
 
         >>> # Setup
-        >>> my_api_client = Shopware6AdminAPIClientBase()
+        >>> my_api_client = Shopware6AdminAPIClientBase(config=my_config)
         >>> save_shopware_admin_api_url = my_api_client.config.shopware_admin_api_url
         >>> save_username = my_api_client.config.username
         >>> save_password = my_api_client.config.password
@@ -845,7 +843,7 @@ class Shopware6AdminAPIClientBase:
 
 
         >>> # Setup
-        >>> my_api_client = Shopware6AdminAPIClientBase()
+        >>> my_api_client = Shopware6AdminAPIClientBase(config=my_config)
 
         >>> # Test client credentials token
         >>> ignore = my_api_client._get_access_token_by_resource_owner()
@@ -943,7 +941,7 @@ class Shopware6AdminAPIClientBase:
 
     def _format_admin_api_url(self, request_url: str) -> str:
         """
-        formatted url to make a request
+        Build the absolute Admin API URL for an endpoint path.
 
         :parameter
             request_url:                        the request url, for instance "oauth/token"
@@ -955,7 +953,7 @@ class Shopware6AdminAPIClientBase:
         :raises
             ShopwareAPIError: If the endpoint contains invalid characters or path traversal attempts.
 
-        >>> my_api_client = Shopware6AdminAPIClientBase()
+        >>> my_api_client = Shopware6AdminAPIClientBase(config=my_config)
         >>> my_api_client._format_admin_api_url('test')
         'http.../api/test'
 
@@ -968,10 +966,10 @@ class Shopware6AdminAPIClientBase:
         content_type can be any valid content type like json, octet-stream,
 
         parameters:
-            update_header_fields: allows to modify or add header fields
+            update_header_fields: extra headers to merge in (or override)
 
 
-        >>> my_api_client = Shopware6AdminAPIClientBase()
+        >>> my_api_client = Shopware6AdminAPIClientBase(config=my_config)
         >>> my_api_client._get_headers()
         {'Content-Type': 'application/json', 'Accept': 'application/json'}
 

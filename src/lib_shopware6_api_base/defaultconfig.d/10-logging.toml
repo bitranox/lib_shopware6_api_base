@@ -1,26 +1,163 @@
 # ==============================================================================
-# [lib_log_rich] — Rich-powered structured logging
+# [lib_log_rich] - Rich-powered structured logging
 # ==============================================================================
 #
-# Loaded via lib_layered_config and passed to lib_log_rich.runtime.RuntimeConfig.
-# Override via host/user config, a .env file, or environment variables:
+# This section is loaded via lib_layered_config and passed straight to
+# lib_log_rich.runtime.RuntimeConfig(**section). Every RuntimeConfig field is a
+# valid key here; this file documents all of them.
 #
+# Only the keys that are NOT commented out below are shipped as package defaults.
+# Everything else is commented out and shows lib_log_rich's own default, so you
+# can copy a line into a higher layer (host/user config, a .env file, or an
+# environment variable) and change just that one value.
+#
+# Override examples for a single key:
 #   .env:        LIB_LOG_RICH__CONSOLE_LEVEL=DEBUG
 #   environment: LIB_SHOPWARE6_API_BASE___LIB_LOG_RICH__CONSOLE_LEVEL=DEBUG
 #
-# Only the most common keys are listed here; every RuntimeConfig field is
-# accepted. See https://github.com/bitranox/lib_log_rich for the full reference.
+# Full reference: https://github.com/bitranox/lib_log_rich
 #
 [lib_log_rich]
 
-# Logical service name recorded on each log event.
+# ------------------------------------------------------------------------------
+# Core identity (shipped defaults)
+# ------------------------------------------------------------------------------
+
+# Logical service name recorded on every log event.
 service = "lib_shopware6_api_base"
 
 # Deployment environment label (dev, staging, prod, local, ...).
 environment = "prod"
 
-# Minimum console severity: DEBUG, INFO, WARNING, ERROR, CRITICAL.
+# ------------------------------------------------------------------------------
+# Severity levels  (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+# ------------------------------------------------------------------------------
+
+# Minimum level printed to the console.
 console_level = "INFO"
 
-# Minimum severity for backend adapters (journald / Windows Event Log).
+# Minimum level handed to the OS backends (journald / Windows Event Log).
 backend_level = "WARNING"
+
+# Minimum level forwarded to Graylog (only used when enable_graylog = true).
+# graylog_level = "WARNING"
+
+# ------------------------------------------------------------------------------
+# Console appearance
+# ------------------------------------------------------------------------------
+
+# Where console output goes: "stderr" or "stdout".
+# console_stream = "stderr"
+
+# Colour palette / theme name (e.g. "dark", "classic"). See the lib_log_rich
+# palette reference for the full list.
+# console_theme = "dark"
+
+# Named line-format preset (e.g. "full", "short"). Leave unset to use the default.
+# console_format_preset = ""
+
+# Custom line-format template; overrides the preset when set. Empty = unset.
+# console_format_template = ""
+
+# Force ANSI colour even when the stream is not a TTY.
+# force_color = false
+
+# Disable colour entirely (wins over force_color and any theme).
+# no_color = false
+
+# Per-level style overrides. Uncomment the sub-table to customise:
+# [lib_log_rich.console_styles]
+# DEBUG = "dim"
+# INFO = "green"
+# WARNING = "yellow"
+# ERROR = "bold red"
+# CRITICAL = "bold white on red"
+
+# ------------------------------------------------------------------------------
+# OS log backends
+# ------------------------------------------------------------------------------
+
+# Send records to systemd-journald (Linux only).
+# enable_journald = false
+
+# Send records to the Windows Event Log (Windows only).
+# enable_eventlog = false
+
+# ------------------------------------------------------------------------------
+# Graylog / GELF
+# ------------------------------------------------------------------------------
+
+# Master switch for the Graylog adapter.
+# enable_graylog = false
+
+# Graylog input as [host, port], e.g. ["graylog.example.com", 12201].
+# graylog_endpoint = ["graylog.example.com", 12201]
+
+# Transport protocol: "tcp" or "udp".
+# graylog_protocol = "tcp"
+
+# Wrap the Graylog connection in TLS.
+# graylog_tls = false
+
+# ------------------------------------------------------------------------------
+# Async logging queue (decouples the caller from slow adapters)
+# ------------------------------------------------------------------------------
+
+# Process records on a background queue instead of inline.
+# queue_enabled = true
+
+# Maximum number of queued records before the full-policy kicks in.
+# queue_maxsize = 2048
+
+# What to do when the queue is full: "block" (apply backpressure) or "drop".
+# queue_full_policy = "block"
+
+# Seconds to wait when enqueuing under the "block" policy.
+# queue_put_timeout = 1.0
+
+# Seconds to wait for a graceful queue drain on shutdown.
+# queue_stop_timeout = 5.0
+
+# ------------------------------------------------------------------------------
+# In-memory ring buffer (recent events kept for dump())
+# ------------------------------------------------------------------------------
+
+# Keep the most recent events in memory so they can be dumped on demand.
+# enable_ring_buffer = true
+
+# How many recent events to retain.
+# ring_buffer_size = 25000
+
+# ------------------------------------------------------------------------------
+# Dump formatting (used by lib_log_rich dump())
+# ------------------------------------------------------------------------------
+
+# Named dump preset, e.g. "full" or "short".
+# dump_format_preset = "full"
+
+# Custom dump template; overrides the preset when set. Empty = unset.
+# dump_format_template = ""
+
+# ------------------------------------------------------------------------------
+# Redaction, payload limits, rate limiting
+# ------------------------------------------------------------------------------
+
+# Regex patterns whose matches are scrubbed from messages/fields before logging.
+# Key = a label, value = the regex. Uncomment the sub-table to enable:
+# [lib_log_rich.scrub_patterns]
+# password = "(?i)password"
+# token = "(?i)(api[_-]?key|secret|token)"
+
+# Caps on how much of each event is kept (truncates oversized payloads):
+# [lib_log_rich.payload_limits]
+# message_max_chars = 4096
+# extra_max_keys = 25
+
+# Throttle bursts as [max_events, window_seconds], e.g. [100, 60.0].
+# rate_limit = [100, 60.0]
+
+# ------------------------------------------------------------------------------
+# Code-only options (cannot be expressed in TOML)
+# ------------------------------------------------------------------------------
+# diagnostic_hook, console_adapter_factory, and console_stream_target are
+# callables/objects; set them programmatically via RuntimeConfig if you need them.

@@ -1,5 +1,5 @@
 # ==============================================================================
-# [shopware] — Shopware 6 API connection settings
+# [shopware] - Shopware 6 API connection settings
 # ==============================================================================
 #
 # These map 1:1 onto the ConfShopware6ApiBase model. Override via host/user
@@ -29,9 +29,6 @@ grant_type = "USER_CREDENTIALS"
 
 # Storefront API access key (from the Sales Channel settings)
 store_api_sw_access_key = ""
-
-# Allow plain HTTP instead of HTTPS — set to "1" only for local development.
-insecure_transport = "0"
 
 # Follow HTTP redirects (may expose auth tokens to redirect targets).
 follow_redirects = false

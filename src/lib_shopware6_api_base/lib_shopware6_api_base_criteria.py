@@ -2,7 +2,7 @@
 from typing import Any
 
 # EXT
-from pydantic import BaseModel, Field, model_validator
+from pydantic import AliasChoices, BaseModel, Field, model_validator
 
 from .lib_shopware6_api_base_criteria_aggregation import (
     AggregationType as AggregationType,
@@ -79,18 +79,6 @@ from .lib_shopware6_api_base_criteria_filter import (
 from .lib_shopware6_api_base_criteria_filter import (
     SuffixFilter as SuffixFilter,
 )
-from .lib_shopware6_api_base_criteria_filter import (
-    equal_filter_type as equal_filter_type,
-)
-from .lib_shopware6_api_base_criteria_filter import (
-    multi_filter_operator as multi_filter_operator,
-)
-from .lib_shopware6_api_base_criteria_filter import (
-    not_filter_operator as not_filter_operator,
-)
-from .lib_shopware6_api_base_criteria_filter import (
-    range_filter as range_filter,
-)
 from .lib_shopware6_api_base_criteria_sorting import (
     AscFieldSorting as AscFieldSorting,
 )
@@ -132,10 +120,6 @@ __all__ = [
     "RangeFilter",
     "RangeParam",
     "SuffixFilter",
-    "equal_filter_type",
-    "multi_filter_operator",
-    "not_filter_operator",
-    "range_filter",
     # From sorting
     "AscFieldSorting",
     "DescFieldSorting",
@@ -145,8 +129,6 @@ __all__ = [
     "Query",
     "Criteria",
 ]
-
-PostFilterType = "T"  # not implemented now
 
 
 class Query(BaseModel):
@@ -167,7 +149,7 @@ class Query(BaseModel):
     ...           Query(score=500, query=EqualsFilter(field='active', value='true')),
     ...           Query(score=100, query=EqualsFilter(field='manufacturerId', value='db3c17b1e572432eb4a4c881b6f9d68f'))])
 
-    >>> pprint_attrs(my_criteria)
+    >>> pprint_model(my_criteria)
     {'query': [{'score': 500,
                 'query': {'field': 'name', 'value': 'Bronze', 'type': 'contains'}},
                {'score': 500,
@@ -199,7 +181,7 @@ class Criteria(BaseModel):
     includes      Dict['apiAlias', List[<fieldname>]]  Restricts the output to the defined fields
     limit         Optional[int]                        Defines the number of entries to be determined
     page          Optional[int]                        Defines at which page the search result should start
-    post-filter                           not implemented at the moment
+    post_filter   List[Filter]                         Filters the result like 'filter', but does not affect the aggregations
     query         List[Query]                          Enables you to determine a ranking for the search result
     sort          List[Sort]                           Defines the sorting of the search result
     term          Optional[str]                        text search on all records based on their data model and weighting
@@ -209,7 +191,7 @@ class Criteria(BaseModel):
 
     >>> # Test empty
     >>> my_criteria = Criteria()
-    >>> pprint_attrs(my_criteria)
+    >>> pprint_model(my_criteria)
     {}
 
     >>> # Test Average aggregation
@@ -217,7 +199,7 @@ class Criteria(BaseModel):
     >>> my_criteria.limit=1
     >>> my_criteria.includes['product'] = ['id', 'name']
     >>> my_criteria.aggregations = [AvgAggregation(name='average-price', field='price')]
-    >>> pprint_attrs(my_criteria)
+    >>> pprint_model(my_criteria)
     {'limit': 1,
      'aggregations': [{'name': 'average-price', 'field': 'price', 'type': 'avg'}],
      'includes': {'product': ['id', 'name']}}
@@ -227,7 +209,7 @@ class Criteria(BaseModel):
     ...     aggregations=[FilterAggregation(name='active-price-avg',
     ...                                    filter=[EqualsFilter(field='active', value=True)],
     ...                                    aggregation=AvgAggregation(name='avg-price',field='price'))])
-    >>> pprint_attrs(my_criteria)
+    >>> pprint_model(my_criteria)
     {'limit': 1,
      'aggregations': [{'name': 'active-price-avg',
                        'filter': [{'field': 'active', 'value': True, 'type': 'equals'}],
@@ -240,7 +222,7 @@ class Criteria(BaseModel):
     >>> # Test Association
     >>> my_criteria = Criteria()
     >>> my_criteria.associations['products'] = Criteria(limit=5, filter=[EqualsFilter(field='active', value='true')])
-    >>> pprint_attrs(my_criteria)
+    >>> pprint_model(my_criteria)
     {'associations': {'products': {'limit': 5,
                                    'filter': [{'field': 'active',
                                                'value': 'true',
@@ -253,7 +235,7 @@ class Criteria(BaseModel):
     >>> my_criteria.filter.append(EqualsFilter(field='a', value='a'))
     >>> my_criteria.filter.append(EqualsFilter(field='b', value='b'))
     >>> my_criteria.filter.append(EqualsFilter(field='d', value='d'))
-    >>> pprint_attrs(my_criteria)
+    >>> pprint_model(my_criteria)
     {'limit': 1,
      'page': 0,
      'filter': [{'field': 'a', 'value': 'a', 'type': 'equals'},
@@ -263,23 +245,29 @@ class Criteria(BaseModel):
     >>> # Test set filters
     >>> my_criteria = Criteria()
     >>> my_criteria.filter = [EqualsFilter(field='a', value='a'), EqualsFilter(field='b', value='b'), EqualsFilter(field='d', value='d')]
-    >>> pprint_attrs(my_criteria)
+    >>> pprint_model(my_criteria)
     {'filter': [{'field': 'a', 'value': 'a', 'type': 'equals'},
                 {'field': 'b', 'value': 'b', 'type': 'equals'},
                 {'field': 'd', 'value': 'd', 'type': 'equals'}]}
+
+    >>> # Test post-filter (filters the result, but not the aggregations); serialized as "post-filter"
+    >>> my_criteria = Criteria()
+    >>> my_criteria.post_filter.append(EqualsFilter(field='active', value='true'))
+    >>> pprint_model(my_criteria)
+    {'post-filter': [{'field': 'active', 'value': 'true', 'type': 'equals'}]}
 
     >>> # Test Grouping
     >>> my_criteria = Criteria()
     >>> my_criteria.limit=5
     >>> my_criteria.grouping=['active']
-    >>> pprint_attrs(my_criteria)
+    >>> pprint_model(my_criteria)
     {'limit': 5, 'grouping': ['active']}
 
     >>> # Test ids
     >>> # note that the limit is automatically set to 3, and page to 1, which is for our paginated request
     >>> my_criteria = Criteria()
     >>> my_criteria.ids=["012cd563cf8e4f0384eed93b5201cc98", "075fb241b769444bb72431f797fd5776", "090fcc2099794771935acf814e3fdb24"]
-    >>> pprint_attrs(my_criteria)
+    >>> pprint_model(my_criteria)
     {'ids': ['012cd563cf8e4f0384eed93b5201cc98',
              '075fb241b769444bb72431f797fd5776',
              '090fcc2099794771935acf814e3fdb24']}
@@ -297,11 +285,11 @@ class Criteria(BaseModel):
     >>> # Test includes
     >>> my_criteria = Criteria()
     >>> my_criteria.includes['product'] = ['id', 'name']
-    >>> pprint_attrs(my_criteria)
+    >>> pprint_model(my_criteria)
     {'includes': {'product': ['id', 'name']}}
 
     >>> my_criteria = Criteria(page=1, limit=5)
-    >>> pprint_attrs(my_criteria)
+    >>> pprint_model(my_criteria)
     {'limit': 5, 'page': 1}
 
     >>> # Test Query
@@ -309,7 +297,7 @@ class Criteria(BaseModel):
     ...    query=[Query(score=500, query=ContainsFilter(field='name', value='Bronze')),
     ...           Query(score=500, query=EqualsFilter(field='active', value='true')),
     ...           Query(score=100, query=EqualsFilter(field='manufacturerId', value='db3c17b1e572432eb4a4c881b6f9d68f'))])
-    >>> pprint_attrs(my_criteria)
+    >>> pprint_model(my_criteria)
     {'query': [{'score': 500,
                 'query': {'field': 'name', 'value': 'Bronze', 'type': 'contains'}},
                {'score': 500,
@@ -323,7 +311,7 @@ class Criteria(BaseModel):
     >>> my_criteria = Criteria(limit=5,
     ...                        sort=[FieldSorting(field='name', order='ASC', naturalSorting=True),
     ...                              DescFieldSorting(field='active')])
-    >>> pprint_attrs(my_criteria)
+    >>> pprint_model(my_criteria)
     {'limit': 5,
      'sort': [{'field': 'name', 'order': 'ASC', 'naturalSorting': True},
               {'field': 'active', 'order': 'DESC'}]}
@@ -338,11 +326,19 @@ class Criteria(BaseModel):
     grouping: list[str] = Field(default_factory=list)
     ids: list[str] = Field(default_factory=list)
     includes: dict[str, list[str]] = Field(default_factory=dict)
-    post_filter: list[Any] = Field(default_factory=list)  # not implemented now
+    post_filter: list[FilterType] = Field(
+        default_factory=list,
+        serialization_alias="post-filter",
+        validation_alias=AliasChoices("post_filter", "post-filter"),
+    )
     query: list[Query] = Field(default_factory=list)
     sort: list[SortType] = Field(default_factory=list)
     term: str | None = None
-    total_count_mode: int | None = None
+    total_count_mode: int | None = Field(
+        default=None,
+        serialization_alias="total-count-mode",
+        validation_alias=AliasChoices("total_count_mode", "total-count-mode"),
+    )
 
     @model_validator(mode="after")
     def check_limit_ids_mutual_exclusivity(self) -> "Criteria":
@@ -354,17 +350,15 @@ class Criteria(BaseModel):
         return self
 
     def get_dict(self) -> dict[str, Any]:
-        """Returns the data of the Pydantic model as a dictionary.
-        None values, empty lists, and empty dictionaries will be filtered out.
+        """Return the criteria as the JSON-ready dict that is sent to Shopware's DAL.
+
+        ``exclude_defaults`` prunes unset/empty fields recursively (at every nesting
+        level, so nested associations/aggregations stay clean too), ``by_alias`` emits
+        the hyphenated DAL keys (``total-count-mode``, ``post-filter``), and the
+        computed ``type`` discriminators are preserved.
         """
-        data = self.model_dump(mode="python")
-        return {k: v for k, v in data.items() if v not in (None, [], {})}
+        return self.model_dump(mode="json", exclude_defaults=True, by_alias=True)
 
 
 # Rebuild model for forward references
 Criteria.model_rebuild()
-
-
-def _is_not_empty(attribute: Any, value: Any) -> bool:
-    """Filter out empty Lists and Dictionaries - kept for backward compatibility."""
-    return value not in ({}, [])

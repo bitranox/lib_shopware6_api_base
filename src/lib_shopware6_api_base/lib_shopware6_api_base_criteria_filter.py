@@ -1,9 +1,9 @@
 # STDLIB
 from datetime import datetime
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 # EXT
-from pydantic import BaseModel, Field, computed_field, field_validator
+from pydantic import BaseModel, Discriminator, Field, Tag, computed_field, field_validator
 
 from ._compat import StrEnum
 
@@ -12,11 +12,6 @@ __all__ = [
     "FilterTypeName",
     "RangeParam",
     "FilterOperator",
-    # Backward compatibility aliases
-    "equal_filter_type",
-    "range_filter",
-    "not_filter_operator",
-    "multi_filter_operator",
     # Filter classes
     "EqualsFilter",
     "EqualsAnyFilter",
@@ -60,13 +55,6 @@ class FilterOperator(StrEnum):
     AND = "and"
 
 
-# Backward compatibility aliases
-equal_filter_type = FilterTypeName
-range_filter = RangeParam
-not_filter_operator = FilterOperator
-multi_filter_operator = FilterOperator
-
-
 class EqualsFilter(BaseModel):
     """
     see filter reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/filters-reference
@@ -79,12 +67,12 @@ class EqualsFilter(BaseModel):
 
     >>> # Test
     >>> my_filter = EqualsFilter(field='stock', value=10)
-    >>> pprint_attrs(my_filter)
+    >>> pprint_model(my_filter)
     {'field': 'stock', 'value': 10, 'type': 'equals'}
 
     >>> my_filter = EqualsFilter(field='stock', value=None)
-    >>> pprint_attrs(my_filter)
-    {'field': 'stock', 'type': 'equals'}
+    >>> pprint_model(my_filter)
+    {'field': 'stock', 'value': None, 'type': 'equals'}
 
     """
 
@@ -110,7 +98,7 @@ class EqualsAnyFilter(BaseModel):
 
     >>> # Test Keyword param
     >>> my_filter = EqualsAnyFilter(field = 'productNumber', value = ["3fed029475fa4d4585f3a119886e0eb1", "77d26d011d914c3aa2c197c81241a45b"])
-    >>> pprint_attrs(my_filter)
+    >>> pprint_model(my_filter)
     {'field': 'productNumber',
      'value': ['3fed029475fa4d4585f3a119886e0eb1',
                '77d26d011d914c3aa2c197c81241a45b'],
@@ -118,7 +106,7 @@ class EqualsAnyFilter(BaseModel):
 
     >>> # Test positional param
     >>> my_filter = EqualsAnyFilter(field='productNumber', value=["3fed029475fa4d4585f3a119886e0eb1", "77d26d011d914c3aa2c197c81241a45b"])
-    >>> pprint_attrs(my_filter)
+    >>> pprint_model(my_filter)
     {'field': 'productNumber',
      'value': ['3fed029475fa4d4585f3a119886e0eb1',
                '77d26d011d914c3aa2c197c81241a45b'],
@@ -127,7 +115,9 @@ class EqualsAnyFilter(BaseModel):
     """
 
     field: str
-    value: list[str] = Field(default_factory=list)
+    # Required (no default): an explicitly-empty list must survive get_dict()'s exclude_defaults,
+    # and an equalsAny without values is a caller error that should fail loudly.
+    value: list[str]
 
     @computed_field
     @property
@@ -147,7 +137,7 @@ class ContainsFilter(BaseModel):
 
     >>> # Test
     >>> my_filter = ContainsFilter(field = 'productNumber', value = 'Lightweight')
-    >>> pprint_attrs(my_filter)
+    >>> pprint_model(my_filter)
     {'field': 'productNumber', 'value': 'Lightweight', 'type': 'contains'}
 
     """
@@ -166,10 +156,10 @@ class RangeFilter(BaseModel):
     see filter reference : https://developer.shopware.com/docs/resources/references/core-reference/dal-reference/filters-reference
     The Range filter allows you to filter a field to a value space. This can work with date or numerical values.
     Within the parameter property the following values are possible:
-        gte => Greater than equals  (You might pass 'gte' or range_filter.GTE)
-        lte => Less than equals     (You might pass 'lte' or range_filter.LTE)
-        gt => Greater than          (You might pass 'gt' or range_filter.GT)
-        lt => Less than             (You might pass 'lt' or range_filter.LT)
+        gte => Greater than equals  (You might pass 'gte' or RangeParam.GTE)
+        lte => Less than equals     (You might pass 'lte' or RangeParam.LTE)
+        gt => Greater than          (You might pass 'gt' or RangeParam.GT)
+        lt => Less than             (You might pass 'lt' or RangeParam.LT)
 
     :parameter:
         field: str
@@ -177,12 +167,12 @@ class RangeFilter(BaseModel):
 
     >>> # Test (pass range type as string)
     >>> my_filter = RangeFilter(field = 'stock', parameters = {'gte': 20, 'lte': 30})
-    >>> pprint_attrs(my_filter)
+    >>> pprint_model(my_filter)
     {'field': 'stock', 'parameters': {'gte': 20, 'lte': 30}, 'type': 'range'}
 
-    >>> # Test (pass range type from 'range_filter' object)
-    >>> my_filter = RangeFilter(field = 'stock', parameters = {range_filter.GTE: 20, range_filter.LTE: 30})
-    >>> pprint_attrs(my_filter)
+    >>> # Test (pass range type from 'RangeParam' enum)
+    >>> my_filter = RangeFilter(field = 'stock', parameters = {RangeParam.GTE: 20, RangeParam.LTE: 30})
+    >>> pprint_model(my_filter)
     {'field': 'stock', 'parameters': {'gte': 20, 'lte': 30}, 'type': 'range'}
 
     >>> # Test (wrong range)
@@ -197,7 +187,9 @@ class RangeFilter(BaseModel):
     """
 
     field: str
-    parameters: dict[str, int | datetime] = Field(default_factory=dict)
+    # Accept str so a caller's exact date/timestamp string is sent verbatim (no datetime
+    # round-trip that would rewrite '2024-09-29' -> '2024-09-29T00:00:00' or reformat millis).
+    parameters: dict[str, int | str | datetime] = Field(default_factory=dict)
 
     @computed_field
     @property
@@ -227,15 +219,15 @@ class NotFilter(BaseModel):
 
     >>> # Test (pass operator as string)
     >>> my_filter = NotFilter(operator='or', queries=[EqualsFilter(field='stock', value=1), EqualsFilter(field='availableStock', value=10)])
-    >>> pprint_attrs(my_filter)
+    >>> pprint_model(my_filter)
     {'operator': 'or',
      'queries': [{'field': 'stock', 'value': 1, 'type': 'equals'},
                  {'field': 'availableStock', 'value': 10, 'type': 'equals'}],
      'type': 'not'}
 
-    >>> # Test (pass operator from 'not_filter_operator' object)
-    >>> my_filter = NotFilter(operator=not_filter_operator.OR, queries=[EqualsFilter(field='stock', value=1), EqualsFilter(field='availableStock', value=10)])
-    >>> pprint_attrs(my_filter)
+    >>> # Test (pass operator from 'FilterOperator' enum)
+    >>> my_filter = NotFilter(operator=FilterOperator.OR, queries=[EqualsFilter(field='stock', value=1), EqualsFilter(field='availableStock', value=10)])
+    >>> pprint_model(my_filter)
     {'operator': 'or',
      'queries': [{'field': 'stock', 'value': 1, 'type': 'equals'},
                  {'field': 'availableStock', 'value': 10, 'type': 'equals'}],
@@ -274,15 +266,15 @@ class MultiFilter(BaseModel):
 
     >>> # Test (pass operator as string)
     >>> my_filter = MultiFilter(operator='or', queries=[EqualsFilter(field='stock', value=1), EqualsFilter(field='availableStock', value=10)])
-    >>> pprint_attrs(my_filter)
+    >>> pprint_model(my_filter)
     {'operator': 'or',
      'queries': [{'field': 'stock', 'value': 1, 'type': 'equals'},
                  {'field': 'availableStock', 'value': 10, 'type': 'equals'}],
      'type': 'multi'}
 
-    >>> # Test (pass operator from 'multi_filter_operator' object)
-    >>> my_filter = MultiFilter(operator=multi_filter_operator.OR, queries=[EqualsFilter(field='stock', value=1), EqualsFilter(field='availableStock', value=10)])
-    >>> pprint_attrs(my_filter)
+    >>> # Test (pass operator from 'FilterOperator' enum)
+    >>> my_filter = MultiFilter(operator=FilterOperator.OR, queries=[EqualsFilter(field='stock', value=1), EqualsFilter(field='availableStock', value=10)])
+    >>> pprint_model(my_filter)
     {'operator': 'or',
      'queries': [{'field': 'stock', 'value': 1, 'type': 'equals'},
                  {'field': 'availableStock', 'value': 10, 'type': 'equals'}],
@@ -320,7 +312,7 @@ class PrefixFilter(BaseModel):
 
     >>> # Test
     >>> my_filter = PrefixFilter(field='name', value='Lightweight')
-    >>> pprint_attrs(my_filter)
+    >>> pprint_model(my_filter)
     {'field': 'name', 'value': 'Lightweight', 'type': 'prefix'}
 
     """
@@ -346,7 +338,7 @@ class SuffixFilter(BaseModel):
 
     >>> # Test
     >>> my_filter = SuffixFilter(field='name', value='Lightweight')
-    >>> pprint_attrs(my_filter)
+    >>> pprint_model(my_filter)
     {'field': 'name', 'value': 'Lightweight', 'type': 'suffix'}
 
     """
@@ -360,7 +352,26 @@ class SuffixFilter(BaseModel):
         return "suffix"
 
 
-FilterType = EqualsFilter | EqualsAnyFilter | ContainsFilter | RangeFilter | NotFilter | MultiFilter | PrefixFilter | SuffixFilter
+def _filter_type_tag(value: object) -> str | None:
+    """Discriminate a filter by its ``type`` tag (a dict key on input, or the computed attribute on a model)."""
+    if isinstance(value, dict):
+        return value.get("type")
+    return getattr(value, "type", None)
+
+
+# Discriminated union: re-validating a serialized filter routes to the right class by its "type"
+# tag, instead of silently collapsing (e.g. a 'contains' dict resolving to EqualsFilter).
+FilterType = Annotated[
+    Annotated[EqualsFilter, Tag("equals")]
+    | Annotated[EqualsAnyFilter, Tag("equalsAny")]
+    | Annotated[ContainsFilter, Tag("contains")]
+    | Annotated[RangeFilter, Tag("range")]
+    | Annotated[NotFilter, Tag("not")]
+    | Annotated[MultiFilter, Tag("multi")]
+    | Annotated[PrefixFilter, Tag("prefix")]
+    | Annotated[SuffixFilter, Tag("suffix")],
+    Discriminator(_filter_type_tag),
+]
 
 # Rebuild models with forward references
 NotFilter.model_rebuild()

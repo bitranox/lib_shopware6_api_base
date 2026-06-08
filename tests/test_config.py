@@ -53,7 +53,6 @@ class TestConfigModel:
         assert config.shopware_admin_api_url == ""
         assert config.shopware_storefront_api_url == ""
         assert config.grant_type == GrantType.USER_CREDENTIALS
-        assert config.insecure_transport == "0"
         assert config.follow_redirects is False
 
     @pytest.mark.os_agnostic

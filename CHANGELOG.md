@@ -5,6 +5,64 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [6.0.0] - 2026-06-08
+
+### Breaking Changes
+
+- **Removed the backward-compatibility aliases** `equal_filter_type`, `range_filter`,
+  `not_filter_operator`, and `multi_filter_operator`. Use `FilterTypeName`, `RangeParam`,
+  and `FilterOperator` directly.
+- **Removed the `insecure_transport` config field.** It had no effect after the authlib
+  removal in 3.1.0 (httpx2 talks to plain-HTTP endpoints without it). The TOML key and the
+  `SHOPWARE__INSECURE_TRANSPORT` env var are no longer read.
+- **`EqualsAnyFilter.value` is now required** (previously defaulted to an empty list); an
+  `equalsAny` without values raises a `ValidationError`.
+- **`Criteria.get_dict()` serialization changed.** It now uses
+  `model_dump(mode="json", exclude_defaults=True, by_alias=True)`: empty fields are pruned
+  recursively (nested associations/aggregations stay clean), and `total_count_mode` /
+  `post_filter` serialize as the hyphenated DAL keys `total-count-mode` / `post-filter`.
+- **String config fields reject numeric values** instead of silently stringifying them, so a
+  mistyped secret surfaces as a `ValidationError` rather than being corrupted.
+
+### Added
+
+- CLI commands for connectivity and config inspection: `test-connection`, `get <endpoint>`
+  (read-only Admin GET), `config show` (secrets masked), and `config paths`.
+- `init_logging` / `shutdown_logging` are exported from the package so library users can opt
+  in to `lib_log_rich` logging (the library stays silent by default; the CLI initialises it).
+- `post_filter` is implemented as a real `list[FilterType]` (serialized as `post-filter`).
+- `Shopware6AdminAPIClientBase` is now a context manager (`with ...`) and exposes `close()`
+  to release its HTTP connection pool.
+
+### Fixed
+
+- **Binary uploads (Admin media upload) were corrupted**: the client sent `str(bytes)` (the
+  Python repr) instead of the raw bytes. It now sends the bytes unchanged.
+- **`FilterType` / `AggregationType` are discriminated unions**, so re-validating a serialized
+  `Criteria` keeps the correct classes (previously a `contains` filter collapsed to `equals`,
+  `multi` to `not`, etc.).
+- Storefront `request_delete` and other empty (HTTP 204) responses no longer crash on JSON
+  decode; they return `{}` / `[]`.
+- The Storefront client rejects a binary payload with a clear `ShopwareAPIError` instead of an
+  opaque serialization error.
+- `RangeFilter.parameters` accepts `str`, so a caller's exact date string is sent verbatim
+  (no `'2024-09-29'` -> `'2024-09-29T00:00:00'` rewrite).
+- `grant_type` validation raises a clean `ValidationError` (not `AttributeError`) on a
+  non-string value.
+- `config show` masks `client_id` and the Store API access key.
+- `config paths` reports the host configuration layer.
+
+### Changed
+
+- Doctests now run as part of the test suite (`tests/test_doctests.py`): offline doctests in
+  `make test`, the Admin/Storefront client doctests in `make testintegration`.
+- The `pprint_attrs` helper was renamed to `pprint_model` and reimplemented with idiomatic
+  Pydantic (`model_dump(mode="json", exclude_defaults=True, by_alias=True)`).
+- README and inline documentation rewritten (plain ASCII), with a layered-config and logging
+  guide; refreshed dependency minimums.
+
 ## [5.0.0] - 2026-06-08
 
 ### Breaking Changes
@@ -12,17 +70,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Admin API methods now return a typed `ShopwareApiResponse`** instead of a raw `dict`.
   `request_get` / `request_post` / `request_patch` / `request_put` / `request_delete` and the
   paginated variants return a Pydantic envelope with typed `.total` and dynamic `.data` /
-  `.aggregations` / `.errors` (entity contents stay `Any` — the client is entity-agnostic).
+  `.aggregations` / `.errors` (entity contents stay `Any` - the client is entity-agnostic).
   Replace `response["data"]` with `response.data`, `response["total"]` with `response.total`, etc.
-  (The Storefront client is unchanged — its responses have no uniform envelope.)
+  (The Storefront client is unchanged - its responses have no uniform envelope.)
 
 ## [4.0.0] - 2026-06-08
 
 ### Breaking Changes
 
-- **Configuration is now loaded through `lib_layered_config`.** All settings — the
-  `[shopware]` connection settings and the `[lib_log_rich]` logging settings — are merged
-  across bundled defaults → app → host → user → `.env` → environment variables.
+- **Configuration is now loaded through `lib_layered_config`.** All settings - the
+  `[shopware]` connection settings and the `[lib_log_rich]` logging settings - are merged
+  across bundled defaults -> app -> host -> user -> `.env` -> environment variables.
 - **Environment variables renamed.** The old single-underscore `SHOPWARE_*` variables are
   no longer read. Use `SHOPWARE__<KEY>` in a `.env` file, or
   `LIB_SHOPWARE6_API_BASE___SHOPWARE__<KEY>` as a real environment variable. See the README
@@ -61,13 +119,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- pip-audit: ignore shared dev-venv audit noise (`aiohttp`, `paramiko`, `pyjwt`) — not dependencies of this project and absent from CI's clean env; present only because sibling editable projects share the local venv.
+- pip-audit: ignore shared dev-venv audit noise (`aiohttp`, `paramiko`, `pyjwt`) - not dependencies of this project and absent from CI's clean env; present only because sibling editable projects share the local venv.
 
 ## [3.1.1] - 2026-06-08
 
 ### Fixed
 
-- pip-audit: ignore `PYSEC-2026-196` (pip 26.1.1, env-only GHA runner image, fix in pip 26.1.2, awaiting runner bump) — unblocks the scheduled CI vulnerability scan.
+- pip-audit: ignore `PYSEC-2026-196` (pip 26.1.1, env-only GHA runner image, fix in pip 26.1.2, awaiting runner bump) - unblocks the scheduled CI vulnerability scan.
 
 ## [3.1.0] - 2026-06-01
 
@@ -78,7 +136,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- Dropped the `authlib` dependency — OAuth2 token handling is now performed in-library. As a side effect, `insecure_transport` is no longer required to talk to plain-HTTP endpoints (the previous `OAUTHLIB_INSECURE_TRANSPORT` guard is gone); the config field is retained for backward compatibility but is now a no-op.
+- Dropped the `authlib` dependency - OAuth2 token handling is now performed in-library. As a side effect, `insecure_transport` is no longer required to talk to plain-HTTP endpoints (the previous `OAUTHLIB_INSECURE_TRANSPORT` guard is gone); the config field is retained for backward compatibility but is now a no-op.
 
 ## [3.0.2] - 2026-05-08
 

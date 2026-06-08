@@ -171,22 +171,16 @@ from .lib_shopware6_api_base import (
     aggregation_names as aggregation_names,
 )
 from .lib_shopware6_api_base import (
-    equal_filter_type as equal_filter_type,
-)
-from .lib_shopware6_api_base import (
     log_request as log_request,
 )
 from .lib_shopware6_api_base import (
     log_response as log_response,
 )
-from .lib_shopware6_api_base import (
-    multi_filter_operator as multi_filter_operator,
+from .logging_setup import (
+    init_logging as init_logging,
 )
-from .lib_shopware6_api_base import (
-    not_filter_operator as not_filter_operator,
-)
-from .lib_shopware6_api_base import (
-    range_filter as range_filter,
+from .logging_setup import (
+    shutdown_logging as shutdown_logging,
 )
 
 __title__ = __init__conf__.title

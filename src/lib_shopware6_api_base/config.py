@@ -1,10 +1,10 @@
 """Layered configuration loading via ``lib_layered_config``.
 
-All configuration for this package — both the Shopware connection settings
-(``[shopware]``) and logging (``[lib_log_rich]``) — is loaded through
+All configuration for this package - both the Shopware connection settings
+(``[shopware]``) and logging (``[lib_log_rich]``) - is loaded through
 ``lib_layered_config``, which merges, in increasing precedence:
 
-    defaults (bundled) → app → host → user → ``.env`` → environment variables
+    defaults (bundled) -> app -> host -> user -> ``.env`` -> environment variables
 
 The vendor / app / slug identifiers (see :mod:`__init__conf__`) determine the
 platform-specific config file locations and the environment-variable prefix.
@@ -39,6 +39,11 @@ def get_config(*, profile: str | None = None, start_dir: str | None = None) -> C
     Returns:
         An immutable :class:`lib_layered_config.Config`. Sections are read with
         ``config.get("<section>", default={})``.
+
+    Note:
+        The result is cached for the process lifetime (read once, on first use).
+        Configuration is treated as static: to pick up changed env vars, ``.env``,
+        or config files, restart the process (or reload the library).
     """
     return read_config(
         vendor=__init__conf__.LAYEREDCONF_VENDOR,

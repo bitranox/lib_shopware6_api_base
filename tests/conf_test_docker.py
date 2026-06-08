@@ -23,5 +23,4 @@ conf_shopware6_api_base = ConfShopware6ApiBase(
     client_id="SWIACWJOMUTXV1RMNGJUAKTUAA",
     client_secret="UkhvUG1qdmpuMjFudGJCdG1Xc0xMbEt2ck9CQ2xDTUtXMUZHRUQ",
     grant_type=GrantType.USER_CREDENTIALS,
-    insecure_transport="1",
 )
