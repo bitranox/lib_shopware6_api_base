@@ -105,17 +105,17 @@ SHOPWARE_STORE_API_SW_ACCESS_KEY="SWSCXXXXXXXXXXXXXXXXXX"
 
 All environment variables use the `SHOPWARE_` prefix to avoid collision with system variables.
 
-| Variable | Description                                                   | Example |
-|----------|---------------------------------------------------------------|---------|
-| `SHOPWARE_ADMIN_API_URL` | Admin API endpoint                                            | `https://shop.example.com/api` |
-| `SHOPWARE_STOREFRONT_API_URL` | Storefront API endpoint                                       | `https://shop.example.com/store-api` |
-| `SHOPWARE_INSECURE_TRANSPORT` | Allow HTTP (dev only)                                         | `0` (production) or `1` (dev) |
-| `SHOPWARE_USERNAME` | Admin user email                                              | `admin@example.com` |
-| `SHOPWARE_PASSWORD` | Admin user password                                           | `secret` |
-| `SHOPWARE_CLIENT_ID` | Integration Access ID | `SWIA...` |
-| `SHOPWARE_CLIENT_SECRET` | Integration Secret                                            | `...` |
-| `SHOPWARE_GRANT_TYPE` | Auth method                                                   | `USER_CREDENTIALS` or `RESOURCE_OWNER` |
-| `SHOPWARE_STORE_API_SW_ACCESS_KEY` | Storefront access key                                         | `SWSC...` |
+| Variable                           | Description             | Example                                |
+|------------------------------------|-------------------------|----------------------------------------|
+| `SHOPWARE_ADMIN_API_URL`           | Admin API endpoint      | `https://shop.example.com/api`         |
+| `SHOPWARE_STOREFRONT_API_URL`      | Storefront API endpoint | `https://shop.example.com/store-api`   |
+| `SHOPWARE_INSECURE_TRANSPORT`      | Allow HTTP (dev only)   | `0` (production) or `1` (dev)          |
+| `SHOPWARE_USERNAME`                | Admin user email        | `admin@example.com`                    |
+| `SHOPWARE_PASSWORD`                | Admin user password     | `secret`                               |
+| `SHOPWARE_CLIENT_ID`               | Integration Access ID   | `SWIA...`                              |
+| `SHOPWARE_CLIENT_SECRET`           | Integration Secret      | `...`                                  |
+| `SHOPWARE_GRANT_TYPE`              | Auth method             | `USER_CREDENTIALS` or `RESOURCE_OWNER` |
+| `SHOPWARE_STORE_API_SW_ACCESS_KEY` | Storefront access key   | `SWSC...`                              |
 
 ### Loading Configuration
 
@@ -205,18 +205,18 @@ products = client.request_post("product", payload=criteria)
 
 All request methods accept these parameters:
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `request_url` | `str` | API endpoint (without base URL) |
-| `payload` | `dict \| Criteria \| None` | Request body |
-| `update_header_fields` | `dict[str, str] \| None` | Custom headers |
+| Parameter              | Type                       | Description                     |
+|------------------------|----------------------------|---------------------------------|
+| `request_url`          | `str`                      | API endpoint (without base URL) |
+| `payload`              | `dict \| Criteria \| None` | Request body                    |
+| `update_header_fields` | `dict[str, str] \| None`   | Custom headers                  |
 
 Admin API methods also support:
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `content_type` | `str` | Content type (`json`, `octet-stream`) |
-| `additional_query_params` | `dict` | URL query parameters |
+| Parameter                 | Type   | Description                           |
+|---------------------------|--------|---------------------------------------|
+| `content_type`            | `str`  | Content type (`json`, `octet-stream`) |
+| `additional_query_params` | `dict` | URL query parameters                  |
 
 ### Custom Headers
 
@@ -389,10 +389,10 @@ except ShopwareAPIError as e:
 
 ### Exception Types
 
-| Exception | When Raised |
-|-----------|-------------|
+| Exception            | When Raised                                     |
+|----------------------|-------------------------------------------------|
 | `ConfigurationError` | Missing .env file, invalid configuration values |
-| `ShopwareAPIError` | HTTP errors from the API (4xx, 5xx responses) |
+| `ShopwareAPIError`   | HTTP errors from the API (4xx, 5xx responses)   |
 
 ---
 
