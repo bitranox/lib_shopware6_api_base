@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.2] - 2026-06-08
+
+### Changed
+
+- **Tooling**: project automation converted to the standard BMK `Makefile`; `make test`, `make testintegration`, `make push`, `make release`, and `make bump-*` now run via the `bmk` uv-tool. The vendored `scripts/` package (plus `mk` / `mk.py`) and the dead `tests/local_testscripts/` helpers were removed.
+- **Docs**: README gained a "Development" section documenting how to run the unit suite (`make test`) and the dockware-backed integration suite (`make testintegration`), including prerequisites.
+- Refreshed dependency minimums to current releases (`pydantic`, `pydantic-settings`, `httpx2`, `lib_cli_exit_tools`, and dev/build tooling) via the bmk dependency update.
+
+### Fixed
+
+- pip-audit: ignore shared dev-venv audit noise (`aiohttp`, `paramiko`, `pyjwt`) — not dependencies of this project and absent from CI's clean env; present only because sibling editable projects share the local venv.
+
 ## [3.1.1] - 2026-06-08
 
 ### Fixed

@@ -58,6 +58,9 @@ This is the base abstraction layer. For higher-level functions, see [lib_shopwar
   - [Associations](#associations)
 - [CLI Usage](#cli-usage)
 - [Installation](#installation)
+- [Development](#development)
+  - [Running tests](#running-tests)
+  - [Integration tests](#integration-tests)
 - [Requirements](#requirements)
 - [Changelog](CHANGELOG.md)
 - [License](#license)
@@ -102,17 +105,17 @@ SHOPWARE_STORE_API_SW_ACCESS_KEY="SWSCXXXXXXXXXXXXXXXXXX"
 
 All environment variables use the `SHOPWARE_` prefix to avoid collision with system variables.
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `SHOPWARE_ADMIN_API_URL` | Admin API endpoint | `https://shop.example.com/api` |
-| `SHOPWARE_STOREFRONT_API_URL` | Storefront API endpoint | `https://shop.example.com/store-api` |
-| `SHOPWARE_INSECURE_TRANSPORT` | Allow HTTP (dev only) | `0` (production) or `1` (dev) |
-| `SHOPWARE_USERNAME` | Admin user email | `admin@example.com` |
-| `SHOPWARE_PASSWORD` | Admin user password | `secret` |
+| Variable | Description                                                   | Example |
+|----------|---------------------------------------------------------------|---------|
+| `SHOPWARE_ADMIN_API_URL` | Admin API endpoint                                            | `https://shop.example.com/api` |
+| `SHOPWARE_STOREFRONT_API_URL` | Storefront API endpoint                                       | `https://shop.example.com/store-api` |
+| `SHOPWARE_INSECURE_TRANSPORT` | Allow HTTP (dev only)                                         | `0` (production) or `1` (dev) |
+| `SHOPWARE_USERNAME` | Admin user email                                              | `admin@example.com` |
+| `SHOPWARE_PASSWORD` | Admin user password                                           | `secret` |
 | `SHOPWARE_CLIENT_ID` | Integration Access ID | `SWIA...` |
-| `SHOPWARE_CLIENT_SECRET` | Integration Secret | `...` |
-| `SHOPWARE_GRANT_TYPE` | Auth method | `USER_CREDENTIALS` or `RESOURCE_OWNER` |
-| `SHOPWARE_STORE_API_SW_ACCESS_KEY` | Storefront access key | `SWSC...` |
+| `SHOPWARE_CLIENT_SECRET` | Integration Secret                                            | `...` |
+| `SHOPWARE_GRANT_TYPE` | Auth method                                                   | `USER_CREDENTIALS` or `RESOURCE_OWNER` |
+| `SHOPWARE_STORE_API_SW_ACCESS_KEY` | Storefront access key                                         | `SWSC...` |
 
 ### Loading Configuration
 
@@ -431,6 +434,52 @@ uv pip install lib_shopware6_api_base
 ```bash
 pip install lib_shopware6_api_base
 ```
+
+---
+
+## Development
+
+Project automation runs through a `Makefile` that delegates to [`bmk`](https://pypi.org/project/bmk/)
+(installed automatically as a persistent `uv` tool on first use). Run `make help` to list all targets.
+
+### Running tests
+
+```bash
+make test               # lint (ruff), type-check (pyright), import-linter,
+                        # bandit, pip-audit, and the unit test suite with coverage
+make testintegration    # integration tests only (see prerequisites below)
+```
+
+`make test` runs the full quality gate but **excludes** the integration tests
+(`pytest -m "not integration"`). `make testintegration` runs **only** the
+integration suite (`pytest -m integration`).
+
+### Integration tests
+
+The integration tests exercise the Admin and Storefront clients against a real
+Shopware instance using the [dockware](https://developer.shopware.com/docs/guides/installation/dockware)
+container. The test harness starts and stops the container automatically — no
+manual setup or credentials are required (`tests/docker.env` ships the dockware
+defaults).
+
+Prerequisites:
+
+- **Docker** installed and running, with a **Linux** container engine
+  (`docker info --format '{{.OSType}}'` → `linux`). If Docker is unavailable or
+  not Linux, the integration tests are **skipped** (not failed).
+- **Port 80** free — the container is published on `-p 80:80`.
+- First run pulls `dockware/dev:latest` (a few GB), so it takes a while.
+
+Tip: for fast repeated runs, start the container once and leave it up — the
+harness reuses a running container (and only tears down one it started itself):
+
+```bash
+docker run -d --rm -p 80:80 --name dockware dockware/dev:latest
+make testintegration    # reuses the running container, finishes in seconds
+```
+
+CI runs the unit and integration suites as separate jobs across Linux, macOS,
+and Windows for Python 3.10–3.14.
 
 ---
 
