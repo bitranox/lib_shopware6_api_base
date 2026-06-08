@@ -246,6 +246,61 @@ class TestExitCodeMapping:
         # lib_cli_exit_tools returns 1 for generic exceptions
         assert exit_code == 1
 
+    @pytest.mark.os_agnostic
+    def test_error_prints_diagnostic_message(self, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
+        """A live error must print its message - run_cli's custom handler used to swallow it."""
+        import lib_cli_exit_tools
+
+        from lib_shopware6_api_base.exit_codes import ExitCode
+        from lib_shopware6_api_base.lib_shopware6_api_base_cli import _get_exit_code
+
+        # pin the terse format so the assertion does not depend on a leaked global --traceback state
+        monkeypatch.setattr(lib_cli_exit_tools.config, "traceback", False)
+        try:
+            raise ValueError("diagnostic_marker_42")
+        except ValueError as exc:
+            code = _get_exit_code(exc)
+        captured = capsys.readouterr()
+        assert code == ExitCode.INVALID_ARGUMENT
+        assert "diagnostic_marker_42" in (captured.out + captured.err)
+
+    @pytest.mark.os_agnostic
+    def test_configuration_error_prints_message(
+        self, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        """A domain exception must also print its diagnostic, not just map an exit code."""
+        import lib_cli_exit_tools
+
+        from lib_shopware6_api_base.conf_shopware6_api_base_classes import ConfigurationError
+        from lib_shopware6_api_base.exit_codes import ExitCode
+        from lib_shopware6_api_base.lib_shopware6_api_base_cli import _get_exit_code
+
+        monkeypatch.setattr(lib_cli_exit_tools.config, "traceback", False)
+        try:
+            raise ConfigurationError("config_marker_99")
+        except ConfigurationError as exc:
+            code = _get_exit_code(exc)
+        captured = capsys.readouterr()
+        assert code == ExitCode.CONFIGURATION_ERROR
+        assert "config_marker_99" in (captured.out + captured.err)
+
+    @pytest.mark.os_agnostic
+    def test_signal_exit_is_quiet(self, capsys: pytest.CaptureFixture[str]) -> None:
+        """Signals exit cleanly with no printed traceback, even with an active exception."""
+        import lib_cli_exit_tools
+
+        from lib_shopware6_api_base.exit_codes import ExitCode
+        from lib_shopware6_api_base.lib_shopware6_api_base_cli import _get_exit_code
+
+        try:
+            raise lib_cli_exit_tools.SigIntInterrupt()
+        except lib_cli_exit_tools.SigIntInterrupt as exc:
+            code = _get_exit_code(exc)
+        captured = capsys.readouterr()
+        assert code == ExitCode.SIGINT
+        assert captured.out == ""
+        assert captured.err == ""
+
 
 # Keep the original test for backward compatibility
 def test_cli_commands() -> None:

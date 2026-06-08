@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.0.1] - 2026-06-08
+
+### Fixed
+
+- **CLI no longer swallows error messages.** `run_cli` was given a custom
+  `exception_handler` that returned an exit code but never printed, so every failure
+  (bad config, API error, invalid argument) exited non-zero with no diagnostic. The
+  handler now prints the message (terse, or a full traceback under `--traceback`)
+  for non-signal errors, while signals still exit cleanly and quietly.
+- **`--traceback` no longer leaks across invocations.** `main()` snapshots and restores
+  the process-global `lib_cli_exit_tools.config.traceback`, so running the CLI once with
+  `--traceback` in a long-lived process no longer forces full tracebacks on later commands.
+
 ## [6.0.0] - 2026-06-08
 
 ### Breaking Changes

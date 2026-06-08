@@ -39,21 +39,25 @@ _EXTRA_SENSITIVE_KEYS = frozenset({"store_api_sw_access_key", "client_id"})
 
 
 def _get_exit_code(exc: BaseException) -> int:
-    """Map exceptions to exit codes.
+    """Map exceptions to exit codes, printing the diagnostic the user needs to see.
 
-    Custom exceptions get specific exit codes.
-    Standard exceptions are delegated to lib_cli_exit_tools.
+    run_cli installs this in place of its default exception handler, so it must also
+    emit the message the default would have printed - otherwise every error exits with
+    a bare code and no output. Signals exit cleanly and quietly (no traceback); all
+    other errors print the message (terse, or a full traceback when --traceback is set)
+    before the mapped exit code is returned.
     """
-    if isinstance(exc, ConfigurationError):
-        return ExitCode.CONFIGURATION_ERROR
-    if isinstance(exc, ShopwareAPIError):
-        return ExitCode.API_ERROR
     if isinstance(exc, lib_cli_exit_tools.SigIntInterrupt):
         return ExitCode.SIGINT
     if isinstance(exc, lib_cli_exit_tools.SigTermInterrupt):
         return ExitCode.SIGTERM
     if isinstance(exc, BrokenPipeError):
         return ExitCode.SIGPIPE
+    lib_cli_exit_tools.print_exception_message()
+    if isinstance(exc, ConfigurationError):
+        return ExitCode.CONFIGURATION_ERROR
+    if isinstance(exc, ShopwareAPIError):
+        return ExitCode.API_ERROR
     if isinstance(exc, ValueError):
         return ExitCode.INVALID_ARGUMENT
     # Delegate to lib_cli_exit_tools for standard exceptions
@@ -203,6 +207,9 @@ def cli_config_paths() -> None:
 def main() -> int:
     """Entry point with logging setup and proper signal handling."""
     init_logging()
+    # cli_main sets the process-global lib_cli_exit_tools.config.traceback from --traceback;
+    # snapshot and restore it so the flag does not leak into later in-process invocations.
+    traceback_default = lib_cli_exit_tools.config.traceback
     try:
         return lib_cli_exit_tools.run_cli(
             cli_main,
@@ -210,6 +217,7 @@ def main() -> int:
             install_signals=True,
         )
     finally:
+        lib_cli_exit_tools.config.traceback = traceback_default
         shutdown_logging()
 
 
