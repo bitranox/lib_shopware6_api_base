@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from lib_shopware6_api_base import Criteria, EqualsFilter
+from lib_shopware6_api_base import Criteria, EqualsFilter, ShopwareApiResponse
 from lib_shopware6_api_base.conf_shopware6_api_base_classes import (
     ConfShopware6ApiBase,
     GrantType,
@@ -302,24 +302,24 @@ class TestShopware6AdminAPIClientBaseIntegration:
         """Test GET request to admin API."""
         client = Shopware6AdminAPIClientBase(config=docker_test_config)
         response = client.request_get("currency")
-        assert "data" in response
-        assert isinstance(response["data"], list)
+        assert response.data is not None
+        assert isinstance(response.data, list)
 
     def test_admin_client_request_get_paginated(self, docker_test_config: ConfShopware6ApiBase) -> None:
         """Test paginated GET request."""
         client = Shopware6AdminAPIClientBase(config=docker_test_config)
         criteria = Criteria(limit=1, page=1)
         response = client.request_get_paginated("currency", payload=criteria)
-        assert "data" in response
-        assert isinstance(response["data"], list)
+        assert response.data is not None
+        assert isinstance(response.data, list)
 
     def test_admin_client_request_post(self, docker_test_config: ConfShopware6ApiBase) -> None:
         """Test POST request to admin API (search)."""
         client = Shopware6AdminAPIClientBase(config=docker_test_config)
         criteria = Criteria(limit=5)
         response = client.request_post("search/currency", payload=criteria)
-        assert "data" in response
-        assert isinstance(response["data"], list)
+        assert response.data is not None
+        assert isinstance(response.data, list)
 
 
 @pytest.mark.integration
@@ -346,8 +346,8 @@ class TestShopware6AdminAPIClientBaseIntegrationAdvanced:
 
         # READ - GET the created tag (Shopware returns flat structure, not JSON:API)
         response = client.request_get(f"tag/{tag_id}")
-        assert response["data"]["id"] == tag_id
-        assert response["data"]["name"] == tag_name
+        assert response.data["id"] == tag_id
+        assert response.data["name"] == tag_name
 
         # UPDATE - PATCH the tag
         updated_name = f"updated-{tag_name}"
@@ -356,7 +356,7 @@ class TestShopware6AdminAPIClientBaseIntegrationAdvanced:
 
         # Verify update
         response = client.request_get(f"tag/{tag_id}")
-        assert response["data"]["name"] == updated_name
+        assert response.data["name"] == updated_name
 
         # DELETE - Remove the tag
         client.request_delete(f"tag/{tag_id}")
@@ -382,11 +382,11 @@ class TestShopware6AdminAPIClientBaseIntegrationAdvanced:
         new_name = f"patched-{tag_name}"
         patch_response = client.request_patch(f"tag/{tag_id}", payload={"name": new_name})
         # PATCH returns empty dict on success (204 No Content)
-        assert isinstance(patch_response, dict)
+        assert isinstance(patch_response, ShopwareApiResponse)
 
         # Verify patch worked
         response = client.request_get(f"tag/{tag_id}")
-        assert response["data"]["name"] == new_name
+        assert response.data["name"] == new_name
 
         # Clean up
         client.request_delete(f"tag/{tag_id}")
@@ -407,7 +407,7 @@ class TestShopware6AdminAPIClientBaseIntegrationAdvanced:
         # DELETE the tag
         delete_response = client.request_delete(f"tag/{tag_id}")
         # DELETE returns empty dict on success (204 No Content)
-        assert isinstance(delete_response, dict)
+        assert isinstance(delete_response, ShopwareApiResponse)
 
     def test_admin_client_with_custom_headers(self, docker_test_config: ConfShopware6ApiBase) -> None:
         """Test request with custom header fields."""
@@ -416,7 +416,7 @@ class TestShopware6AdminAPIClientBaseIntegrationAdvanced:
         # Test with indexing behavior header
         custom_headers = {"indexing-behavior": "use-queue-indexing"}
         response = client.request_get("currency", update_header_fields=custom_headers)
-        assert "data" in response
+        assert response.data is not None
 
     def test_admin_client_search_with_criteria(self, docker_test_config: ConfShopware6ApiBase) -> None:
         """Test search with complex Criteria object."""
@@ -427,8 +427,8 @@ class TestShopware6AdminAPIClientBaseIntegrationAdvanced:
         criteria.filter.append(EqualsFilter(field="active", value=True))
 
         response = client.request_post("search/product", payload=criteria)
-        assert "data" in response
-        assert isinstance(response["data"], list)
+        assert response.data is not None
+        assert isinstance(response.data, list)
 
 
 @pytest.mark.integration

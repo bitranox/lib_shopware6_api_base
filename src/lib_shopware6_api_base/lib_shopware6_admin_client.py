@@ -25,6 +25,7 @@ from .conf_shopware6_api_base_classes import (
     GrantType,
     HttpMethod,
     ShopwareAPIError,
+    ShopwareApiResponse,
 )
 
 logger = logging.getLogger(__name__)
@@ -56,7 +57,7 @@ class Shopware6AdminAPIClientBase:
 
     def request_get(
         self, request_url: str, payload: PayLoad = None, update_header_fields: dict[str, str] | None = None
-    ) -> dict[str, Any]:
+    ) -> ShopwareApiResponse:
         """
         makes a get request
 
@@ -110,7 +111,7 @@ class Shopware6AdminAPIClientBase:
         payload: PayLoad = None,
         junk_size: int = 100,
         update_header_fields: dict[str, str] | None = None,
-    ) -> dict[str, Any]:
+    ) -> ShopwareApiResponse:
         """
         get the data paginated - metadata 'total' and 'totalCountMode' will be updated
         the paginated request reads those records in junks of junk_size=100 for performance reasons.
@@ -170,7 +171,7 @@ class Shopware6AdminAPIClientBase:
         content_type: str = CONTENT_TYPE_JSON,
         additional_query_params: dict[str, Any] | None = None,
         update_header_fields: dict[str, str] | None = None,
-    ) -> dict[str, Any]:
+    ) -> ShopwareApiResponse:
         """
         makes a patch request
 
@@ -202,7 +203,7 @@ class Shopware6AdminAPIClientBase:
         content_type: str = CONTENT_TYPE_JSON,
         additional_query_params: dict[str, Any] | None = None,
         update_header_fields: dict[str, str] | None = None,
-    ) -> dict[str, Any]:
+    ) -> ShopwareApiResponse:
         """
         makes a post request
 
@@ -233,7 +234,7 @@ class Shopware6AdminAPIClientBase:
         payload: PayLoad = None,
         junk_size: int = 100,
         update_header_fields: dict[str, str] | None = None,
-    ) -> dict[str, Any]:
+    ) -> ShopwareApiResponse:
         """
         post the data paginated - metadata 'total' and 'totalCountMode' will be updated
         if You expect a big number of records, the paginated request reads those records in junks of junk_size=100 for performance reasons.
@@ -321,7 +322,7 @@ class Shopware6AdminAPIClientBase:
         content_type: str = CONTENT_TYPE_JSON,
         additional_query_params: dict[str, Any] | None = None,
         update_header_fields: dict[str, str] | None = None,
-    ) -> dict[str, Any]:
+    ) -> ShopwareApiResponse:
         """
         makes a put request
 
@@ -353,7 +354,7 @@ class Shopware6AdminAPIClientBase:
         payload: PayLoad = None,
         additional_query_params: dict[str, Any] | None = None,
         update_header_fields: dict[str, str] | None = None,
-    ) -> dict[str, Any]:
+    ) -> ShopwareApiResponse:
         """
         makes a delete request
 
@@ -384,7 +385,7 @@ class Shopware6AdminAPIClientBase:
         payload: PayLoad = None,
         junk_size: int = 100,
         update_header_fields: dict[str, str] | None = None,
-    ) -> dict[str, Any]:
+    ) -> ShopwareApiResponse:
         """
         request the data paginated for performance reasons - metadata 'total' and 'totalCountMode' will be updated
         the paginated request reads all records in junks of junk_size=100 up to "limit"
@@ -403,8 +404,7 @@ class Shopware6AdminAPIClientBase:
             response_dict: dictionary with the response as dict
 
         """
-        response_dict: dict[str, Any] = {}
-        response_dict["data"] = []
+        accumulated: list[Any] = []
         payload_dict = get_payload_dict(payload)
 
         # when 'ids' are given, limit does not apply, so we need to set
@@ -437,17 +437,18 @@ class Shopware6AdminAPIClientBase:
                 payload=payload_dict,
                 update_header_fields=update_header_fields,
             )
-            if partial_data["data"]:
-                response_dict["data"] = response_dict["data"] + partial_data["data"]
+            partial_records = list(partial_data.data) if partial_data.data else []
+            if partial_records:
+                accumulated = accumulated + partial_records
                 page = page + 1
                 if total_limit is not None:
-                    records_left = records_left - len(partial_data["data"])
+                    records_left = records_left - len(partial_records)
                     if records_left < 1:
-                        response_dict["data"] = response_dict["data"][:total_limit]
+                        accumulated = accumulated[:total_limit]
                         break
             else:
                 break
-        return response_dict
+        return ShopwareApiResponse(data=accumulated, total=len(accumulated))
 
     def _make_request(
         self,
@@ -457,7 +458,7 @@ class Shopware6AdminAPIClientBase:
         content_type: str = CONTENT_TYPE_JSON,
         additional_query_params: dict[str, Any] | None = None,
         update_header_fields: dict[str, str] | None = None,
-    ) -> dict[str, Any]:
+    ) -> ShopwareApiResponse:
         """
         makes a request - creates and refresh a token and sessions as needed
 
@@ -535,13 +536,14 @@ class Shopware6AdminAPIClientBase:
             if not retry:
                 break
 
-        response_dict: dict[str, Any]
         try:
-            response_dict = dict(response.json())  # type: ignore[possibly-undefined]
+            raw = response.json()  # type: ignore[possibly-undefined]
         except (json.JSONDecodeError, ValueError) as exc:
             logger.debug("Failed to decode JSON response: %s", exc)
-            response_dict = {}
-        return response_dict
+            raw = {}
+        if not isinstance(raw, dict):
+            raw = {"data": raw}
+        return ShopwareApiResponse.model_validate(raw)
 
     def _request(
         self,

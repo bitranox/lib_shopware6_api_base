@@ -52,6 +52,9 @@ from .conf_shopware6_api_base_classes import (
     ShopwareAPIError as ShopwareAPIError,
 )
 from .conf_shopware6_api_base_classes import (
+    ShopwareApiResponse as ShopwareApiResponse,
+)
+from .conf_shopware6_api_base_classes import (
     load_config_from_env as load_config_from_env,
 )
 from .conf_shopware6_api_base_classes import (
@@ -180,6 +183,7 @@ __all__ = [
     "GrantType",
     "HttpMethod",
     "ShopwareAPIError",
+    "ShopwareApiResponse",
     "load_config_from_env",
     "require_config_from_env",
     # Re-exports from criteria

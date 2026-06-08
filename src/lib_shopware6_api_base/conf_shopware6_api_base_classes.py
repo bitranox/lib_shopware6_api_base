@@ -13,6 +13,7 @@ __all__ = [
     "HttpMethod",
     "ShopwareAPIError",
     "ConfigurationError",
+    "ShopwareApiResponse",
     "ConfShopware6ApiBase",
     "load_config_from_env",
     "require_config_from_env",
@@ -42,6 +43,31 @@ class ShopwareAPIError(Exception):
 
 class ConfigurationError(Exception):
     """Exception raised for configuration errors."""
+
+
+class ShopwareApiResponse(BaseModel):
+    """Typed envelope for a Shopware Admin API response.
+
+    The envelope metadata is typed, while the entity ``data`` stays dynamic
+    (``Any``) — the base client is intentionally entity-agnostic, so the actual
+    Shopware entity contents are not modelled. Unknown envelope keys (``links``,
+    ``included``, ``extensions``, ``meta``, ...) are preserved via ``extra="allow"``.
+
+    Access the records with ``response.data`` (a list for search/list endpoints,
+    a dict for single-entity GETs, ``None`` for empty 204 responses).
+    """
+
+    model_config = ConfigDict(extra="allow")
+
+    #: Entity records — list[dict] for search/list, dict for a single GET, or None.
+    data: Any = None
+    #: Total record count reported by search endpoints.
+    total: int | None = None
+    #: Aggregation results, when requested via the Criteria (Shopware returns a dict, or
+    #: an empty list when there are none) — left dynamic.
+    aggregations: Any = None
+    #: Error entries returned on a failed request.
+    errors: Any = None
 
 
 class ConfShopware6ApiBase(BaseModel):

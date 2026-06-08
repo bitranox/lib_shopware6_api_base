@@ -150,6 +150,9 @@ from .lib_shopware6_api_base import (
     ShopwareAPIError as ShopwareAPIError,
 )
 from .lib_shopware6_api_base import (
+    ShopwareApiResponse as ShopwareApiResponse,
+)
+from .lib_shopware6_api_base import (
     SortType as SortType,
 )
 from .lib_shopware6_api_base import (

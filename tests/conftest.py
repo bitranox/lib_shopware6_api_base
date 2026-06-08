@@ -548,7 +548,7 @@ def _get_docker_test_container_store_access_key(config: ConfShopware6ApiBase) ->
     admin_api_client._get_access_token_by_user_credentials()
     admin_api_client._get_session()
     response_dict = admin_api_client.request_get("sales-channel")
-    return str(response_dict["data"][0]["accessKey"])
+    return str(response_dict.data[0]["accessKey"])
 
 
 def _is_resource_owner_credentials_present(config: ConfShopware6ApiBase) -> bool:
@@ -557,7 +557,7 @@ def _is_resource_owner_credentials_present(config: ConfShopware6ApiBase) -> bool
     admin_api_client._get_access_token_by_user_credentials()
     admin_api_client._get_session()
     response_dict = admin_api_client.request_post("search/integration")
-    return bool(response_dict["total"])
+    return bool(response_dict.total)
 
 
 def _create_docker_test_container_resource_owner_credentials(config: ConfShopware6ApiBase) -> None:

@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.0] - 2026-06-08
+
+### Breaking Changes
+
+- **Admin API methods now return a typed `ShopwareApiResponse`** instead of a raw `dict`.
+  `request_get` / `request_post` / `request_patch` / `request_put` / `request_delete` and the
+  paginated variants return a Pydantic envelope with typed `.total` and dynamic `.data` /
+  `.aggregations` / `.errors` (entity contents stay `Any` — the client is entity-agnostic).
+  Replace `response["data"]` with `response.data`, `response["total"]` with `response.total`, etc.
+  (The Storefront client is unchanged — its responses have no uniform envelope.)
+
 ## [4.0.0] - 2026-06-08
 
 ### Breaking Changes
