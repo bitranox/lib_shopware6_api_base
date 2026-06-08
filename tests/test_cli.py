@@ -311,13 +311,16 @@ class TestConfigCommands:
 
     @pytest.mark.os_agnostic
     def test_config_paths_succeeds(self) -> None:
-        """`config paths` lists the bundled default and the slug-based locations."""
+        """`config paths` lists the bundled default, all three layers, and the env prefix (platform-agnostic)."""
         from lib_shopware6_api_base.lib_shopware6_api_base_cli import cli_main
 
         result = CliRunner().invoke(cli_main, ["config", "paths"])
         assert result.exit_code == 0
         assert "bundled" in result.output
-        assert "lib-shopware6-api-base" in result.output
+        # The slug only appears in Linux XDG paths; assert the OS-independent parts instead.
+        for layer in ("app", "host", "user", "dotenv"):
+            assert layer in result.output
+        assert "LIB_SHOPWARE6_API_BASE___" in result.output
 
     @pytest.mark.os_agnostic
     def test_config_show_emits_json(self) -> None:
