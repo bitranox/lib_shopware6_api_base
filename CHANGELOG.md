@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2026-06-08
+
+### Breaking Changes
+
+- **Configuration is now loaded through `lib_layered_config`.** All settings — the
+  `[shopware]` connection settings and the `[lib_log_rich]` logging settings — are merged
+  across bundled defaults → app → host → user → `.env` → environment variables.
+- **Environment variables renamed.** The old single-underscore `SHOPWARE_*` variables are
+  no longer read. Use `SHOPWARE__<KEY>` in a `.env` file, or
+  `LIB_SHOPWARE6_API_BASE___SHOPWARE__<KEY>` as a real environment variable. See the README
+  migration table.
+- `ConfShopware6ApiBase` is now a plain Pydantic `BaseModel` (no longer `pydantic-settings`
+  `BaseSettings`); the removed helpers `from_env_file` / `from_env_vars` are gone.
+  `load_config_from_env()` / `require_config_from_env()` remain and now take no arguments.
+- The `OAUTHLIB_INSECURE_TRANSPORT` side effect was removed (authlib is no longer a
+  dependency); `insecure_transport` is still accepted as a config field.
+
+### Added
+
+- `lib_log_rich` structured logging, configured via the `[lib_log_rich]` config section and
+  initialized by the CLI (`logging_setup.py`). Library modules continue to use stdlib
+  `logging`, which is bridged into `lib_log_rich`.
+- Bundled `defaultconfig.toml` + `defaultconfig.d/{10-logging,20-shopware}.toml` shipped with
+  the package as the lowest-precedence config layer.
+
+### Removed
+
+- `pydantic-settings` dependency.
+
 ## [3.1.3] - 2026-06-08
 
 ### Fixed

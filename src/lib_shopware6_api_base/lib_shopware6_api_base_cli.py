@@ -13,6 +13,7 @@ import rich_click as click
 from . import __init__conf__
 from .conf_shopware6_api_base_classes import ConfigurationError, ShopwareAPIError
 from .exit_codes import ExitCode
+from .logging_setup import init_logging, shutdown_logging
 
 # CONSTANTS
 CLICK_CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
@@ -69,12 +70,16 @@ def cli_info() -> None:
 
 
 def main() -> int:
-    """Entry point with proper signal handling."""
-    return lib_cli_exit_tools.run_cli(
-        cli_main,
-        exception_handler=_get_exit_code,
-        install_signals=True,
-    )
+    """Entry point with logging setup and proper signal handling."""
+    init_logging()
+    try:
+        return lib_cli_exit_tools.run_cli(
+            cli_main,
+            exception_handler=_get_exit_code,
+            install_signals=True,
+        )
+    finally:
+        shutdown_logging()
 
 
 # entry point if main

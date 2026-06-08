@@ -1,0 +1,26 @@
+# ==============================================================================
+# [lib_log_rich] — Rich-powered structured logging
+# ==============================================================================
+#
+# Loaded via lib_layered_config and passed to lib_log_rich.runtime.RuntimeConfig.
+# Override via host/user config, a .env file, or environment variables:
+#
+#   .env:        LIB_LOG_RICH__CONSOLE_LEVEL=DEBUG
+#   environment: LIB_SHOPWARE6_API_BASE___LIB_LOG_RICH__CONSOLE_LEVEL=DEBUG
+#
+# Only the most common keys are listed here; every RuntimeConfig field is
+# accepted. See https://github.com/bitranox/lib_log_rich for the full reference.
+#
+[lib_log_rich]
+
+# Logical service name recorded on each log event.
+service = "lib_shopware6_api_base"
+
+# Deployment environment label (dev, staging, prod, local, ...).
+environment = "prod"
+
+# Minimum console severity: DEBUG, INFO, WARNING, ERROR, CRITICAL.
+console_level = "INFO"
+
+# Minimum severity for backend adapters (journald / Windows Event Log).
+backend_level = "WARNING"

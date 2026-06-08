@@ -1,0 +1,40 @@
+# ==============================================================================
+# [shopware] — Shopware 6 API connection settings
+# ==============================================================================
+#
+# These map 1:1 onto the ConfShopware6ApiBase model. Override via host/user
+# config files, a .env file, or environment variables.
+#
+#   .env:        SHOPWARE__ADMIN_API_URL=https://shop.example.com/api
+#   environment: LIB_SHOPWARE6_API_BASE___SHOPWARE__ADMIN_API_URL=https://shop.example.com/api
+#
+[shopware]
+
+# Admin API endpoint, e.g. "https://shop.example.com/api"
+admin_api_url = ""
+
+# Storefront API endpoint, e.g. "https://shop.example.com/store-api"
+storefront_api_url = ""
+
+# --- User-Credentials grant (interactive apps; issues a refresh token) ---
+username = ""
+password = ""
+
+# --- Resource-Owner / Integration grant (machine-to-machine; no refresh token) ---
+client_id = ""
+client_secret = ""
+
+# Grant type: "USER_CREDENTIALS" or "RESOURCE_OWNER"
+grant_type = "USER_CREDENTIALS"
+
+# Storefront API access key (from the Sales Channel settings)
+store_api_sw_access_key = ""
+
+# Allow plain HTTP instead of HTTPS — set to "1" only for local development.
+insecure_transport = "0"
+
+# Follow HTTP redirects (may expose auth tokens to redirect targets).
+follow_redirects = false
+
+# Emit debug logging for every HTTP request/response (may expose secrets).
+enable_request_logging = false

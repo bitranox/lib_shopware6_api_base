@@ -1,0 +1,25 @@
+# Default configuration for lib_shopware6_api_base
+#
+# This file ships with the package and provides the lowest-precedence defaults.
+# Additional bundled defaults live in defaultconfig.d/*.toml.
+#
+# Configuration is loaded via lib_layered_config and merged in increasing
+# precedence:
+#
+#   defaults (this file + defaultconfig.d) -> app -> host -> user -> .env -> env
+#
+# Override locations (examples, Linux):
+#   - app:  /etc/xdg/lib-shopware6-api-base/config.toml (+ config.d/*.toml)
+#   - user: ~/.config/lib-shopware6-api-base/config.toml (+ config.d/*.toml)
+#   - .env: a .env file in the current or a parent directory
+#
+# Environment variables (highest precedence):
+#   Format: LIB_SHOPWARE6_API_BASE___<SECTION>__<KEY>=<value>
+#   Example: LIB_SHOPWARE6_API_BASE___SHOPWARE__ADMIN_API_URL=https://shop.example.com/api
+#
+# In a .env file the slug prefix is omitted:
+#   SHOPWARE__ADMIN_API_URL=https://shop.example.com/api
+#   LIB_LOG_RICH__CONSOLE_LEVEL=DEBUG
+#
+# See defaultconfig.d/20-shopware.toml and defaultconfig.d/10-logging.toml for
+# the available keys.

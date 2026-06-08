@@ -69,10 +69,28 @@ This is the base abstraction layer. For higher-level functions, see [lib_shopwar
 
 ## Configuration
 
-Configuration is managed via the `ConfShopware6ApiBase` class (Pydantic-based) which can load settings from:
-1. Environment variables
-2. A `.env` file
-3. Direct instantiation
+Configuration is managed via the `ConfShopware6ApiBase` class (Pydantic) and loaded
+through [`lib_layered_config`](https://github.com/bitranox/lib_layered_config), which
+merges, in increasing precedence:
+
+```
+bundled defaults  ->  app  ->  host  ->  user  ->  .env  ->  environment variables
+```
+
+You can also instantiate `ConfShopware6ApiBase(...)` directly with keyword arguments.
+
+> **⚠️ Breaking change in 4.0.0 — env vars renamed.** Configuration moved to
+> `lib_layered_config`, so the old single-underscore `SHOPWARE_*` variables are **no
+> longer read**. Rename them to the `[shopware]` section form:
+>
+> | Old (≤ 3.x)                        | New — `.env` file              | New — environment variable                              |
+> |------------------------------------|--------------------------------|---------------------------------------------------------|
+> | `SHOPWARE_ADMIN_API_URL`           | `SHOPWARE__ADMIN_API_URL`      | `LIB_SHOPWARE6_API_BASE___SHOPWARE__ADMIN_API_URL`      |
+> | `SHOPWARE_STOREFRONT_API_URL`      | `SHOPWARE__STOREFRONT_API_URL` | `LIB_SHOPWARE6_API_BASE___SHOPWARE__STOREFRONT_API_URL` |
+> | `SHOPWARE_<NAME>`                  | `SHOPWARE__<NAME>`             | `LIB_SHOPWARE6_API_BASE___SHOPWARE__<NAME>`             |
+>
+> i.e. in a `.env` file replace the single `_` after `SHOPWARE` with `__`; as a real
+> environment variable also add the `LIB_SHOPWARE6_API_BASE___` slug prefix.
 
 ### Environment File (.env)
 
@@ -80,42 +98,44 @@ Copy `example.env` to `.env` and adjust values for your shop:
 
 ```bash
 # API Endpoints
-SHOPWARE_ADMIN_API_URL="https://shop.example.com/api"
-SHOPWARE_STOREFRONT_API_URL="https://shop.example.com/store-api"
+SHOPWARE__ADMIN_API_URL="https://shop.example.com/api"
+SHOPWARE__STOREFRONT_API_URL="https://shop.example.com/store-api"
 
-# OAuth2 Security (set to "1" only for local HTTP development)
-SHOPWARE_INSECURE_TRANSPORT="0"
+# Transport (set to "1" only for local HTTP development)
+SHOPWARE__INSECURE_TRANSPORT="0"
 
-# User Credentials Grant (for interactive apps with refresh tokens)
-SHOPWARE_USERNAME="admin@example.com"
-SHOPWARE_PASSWORD="your-password"
+# User-Credentials grant (interactive apps with refresh tokens)
+SHOPWARE__USERNAME="admin@example.com"
+SHOPWARE__PASSWORD="your-password"
 
-# Resource Owner Grant (for automation/CLI - no refresh tokens)
-SHOPWARE_CLIENT_ID="SWIAXXXXXXXXXXXXXXXXXXXX"
-SHOPWARE_CLIENT_SECRET="your-integration-secret"
+# Resource-Owner grant (automation/CLI - no refresh tokens)
+SHOPWARE__CLIENT_ID="SWIAXXXXXXXXXXXXXXXXXXXX"
+SHOPWARE__CLIENT_SECRET="your-integration-secret"
 
 # Grant type: USER_CREDENTIALS or RESOURCE_OWNER
-SHOPWARE_GRANT_TYPE="RESOURCE_OWNER"
+SHOPWARE__GRANT_TYPE="RESOURCE_OWNER"
 
 # Storefront API access key (from Sales Channel settings)
-SHOPWARE_STORE_API_SW_ACCESS_KEY="SWSCXXXXXXXXXXXXXXXXXX"
+SHOPWARE__STORE_API_SW_ACCESS_KEY="SWSCXXXXXXXXXXXXXXXXXX"
 ```
 
-#### .env Settings Reference
+#### `[shopware]` Settings Reference
 
-All environment variables use the `SHOPWARE_` prefix to avoid collision with system variables.
+In a `.env` file use the `SHOPWARE__<KEY>` form; as a real environment variable prefix
+with `LIB_SHOPWARE6_API_BASE___`. The same keys can be set in a TOML config file under
+`[shopware]` (dropping the `SHOPWARE__` prefix).
 
-| Variable                           | Description             | Example                                |
+| `.env` key                         | Description             | Example                                |
 |------------------------------------|-------------------------|----------------------------------------|
-| `SHOPWARE_ADMIN_API_URL`           | Admin API endpoint      | `https://shop.example.com/api`         |
-| `SHOPWARE_STOREFRONT_API_URL`      | Storefront API endpoint | `https://shop.example.com/store-api`   |
-| `SHOPWARE_INSECURE_TRANSPORT`      | Allow HTTP (dev only)   | `0` (production) or `1` (dev)          |
-| `SHOPWARE_USERNAME`                | Admin user email        | `admin@example.com`                    |
-| `SHOPWARE_PASSWORD`                | Admin user password     | `secret`                               |
-| `SHOPWARE_CLIENT_ID`               | Integration Access ID   | `SWIA...`                              |
-| `SHOPWARE_CLIENT_SECRET`           | Integration Secret      | `...`                                  |
-| `SHOPWARE_GRANT_TYPE`              | Auth method             | `USER_CREDENTIALS` or `RESOURCE_OWNER` |
-| `SHOPWARE_STORE_API_SW_ACCESS_KEY` | Storefront access key   | `SWSC...`                              |
+| `SHOPWARE__ADMIN_API_URL`          | Admin API endpoint      | `https://shop.example.com/api`         |
+| `SHOPWARE__STOREFRONT_API_URL`     | Storefront API endpoint | `https://shop.example.com/store-api`   |
+| `SHOPWARE__INSECURE_TRANSPORT`     | Allow HTTP (dev only)   | `0` (production) or `1` (dev)          |
+| `SHOPWARE__USERNAME`               | Admin user email        | `admin@example.com`                    |
+| `SHOPWARE__PASSWORD`               | Admin user password     | `secret`                               |
+| `SHOPWARE__CLIENT_ID`              | Integration Access ID   | `SWIA...`                              |
+| `SHOPWARE__CLIENT_SECRET`          | Integration Secret      | `...`                                  |
+| `SHOPWARE__GRANT_TYPE`             | Auth method             | `USER_CREDENTIALS` or `RESOURCE_OWNER` |
+| `SHOPWARE__STORE_API_SW_ACCESS_KEY`| Storefront access key   | `SWSC...`                              |
 
 ### Loading Configuration
 
