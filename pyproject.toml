@@ -1,14 +1,14 @@
 [project]
 name = "lib_shopware6_api_base"
-version = "6.0.1"
+version = "6.0.2"
 description = "python3 base API client for shopware6"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "pydantic>=2.13.4",
-    "lib_layered_config>=5.5.1",
-    "lib_log_rich>=6.3.4",
-    "lib_cli_exit_tools>=2.3.1",
+    "lib_layered_config>=5.5.2",
+    "lib_log_rich>=6.3.5",
+    "lib_cli_exit_tools>=2.3.2",
     "rich-click",
     "orjson",
     "httpx2>=2.3.0",

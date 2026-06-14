@@ -24,6 +24,7 @@ from .exit_codes import ExitCode
 from .lib_shopware6_admin_client import Shopware6AdminAPIClientBase
 from .lib_shopware6_storefront_client import Shopware6StoreFrontClientBase
 from .logging_setup import init_logging, shutdown_logging
+from .typed_click import argument, option, version_option
 
 # CONSTANTS
 CLICK_CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
@@ -111,12 +112,12 @@ def info() -> None:
 
 
 @click.group(help=__init__conf__.title, context_settings=CLICK_CONTEXT_SETTINGS)  # type: ignore
-@click.version_option(
+@version_option(
     version=__init__conf__.version,
     prog_name=__init__conf__.shell_command,
     message=f"{__init__conf__.shell_command} version {__init__conf__.version}",
 )
-@click.option("--traceback/--no-traceback", is_flag=True, type=bool, default=None, help="return traceback information on cli")
+@option("--traceback/--no-traceback", is_flag=True, type=bool, default=None, help="return traceback information on cli")
 def cli_main(traceback: bool | None = None) -> None:
     """Main CLI entry point."""
     if traceback is not None:
@@ -130,7 +131,7 @@ def cli_info() -> None:
 
 
 @cli_main.command("test-connection", context_settings=CLICK_CONTEXT_SETTINGS)  # type: ignore
-@click.option("--storefront/--no-storefront", default=True, help="also verify the Store API access key")
+@option("--storefront/--no-storefront", default=True, help="also verify the Store API access key")
 def cli_test_connection(storefront: bool) -> None:
     """Check that the configured credentials can reach Shopware.
 
@@ -154,7 +155,7 @@ def cli_test_connection(storefront: bool) -> None:
 
 
 @cli_main.command("get", context_settings=CLICK_CONTEXT_SETTINGS)  # type: ignore
-@click.argument("endpoint")
+@argument("endpoint")
 def cli_get(endpoint: str) -> None:
     """Run a read-only Admin API GET and print the JSON response.
 
@@ -173,7 +174,7 @@ def cli_config() -> None:
 
 
 @cli_config.command("show", context_settings=CLICK_CONTEXT_SETTINGS)  # type: ignore
-@click.option(
+@option(
     "--section",
     type=click.Choice(["shopware", "lib_log_rich", "all"]),
     default="all",
