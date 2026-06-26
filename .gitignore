@@ -187,3 +187,6 @@ uv.lock
 CLAUDE.md
 prompts.md
 .grimp_cache/
+
+# Local, per-developer settings (Claude Code etc.) - never commit
+*.local.json
