@@ -1,17 +1,17 @@
 [project]
 name = "lib_shopware6_api_base"
-version = "6.0.2"
+version = "6.0.3"
 description = "python3 base API client for shopware6"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "pydantic>=2.13.4",
-    "lib_layered_config>=5.5.2",
+    "lib_layered_config>=5.6.0",
     "lib_log_rich>=6.3.5",
     "lib_cli_exit_tools>=2.3.2",
     "rich-click",
     "orjson",
-    "httpx2>=2.3.0",
+    "httpx2>=2.5.0",
 ]
 license = {text = "MIT"}
 authors = [{ name = "bitranox", email = "bitranox@gmail.com" }]
@@ -37,27 +37,33 @@ Changelog = "https://github.com/bitranox/lib_shopware6_api_base/blob/master/CHAN
 
 [project.optional-dependencies]
 dev = [
-  "pytest>=9.0.3",
+  "pytest>=9.1.1",
   "pytest-cov>=7.1.0",
-  "hypothesis>=6.155.2",
-  "ruff>=0.15.16",
-  "pyright[nodejs]>=1.1.410",
+  "hypothesis>=6.156.6",
+  "ruff>=0.15.21",
+  "pyright[nodejs]>=1.1.411",
   "bandit>=1.9.4",
-  "build>=1.5.0",
+  "build>=1.5.1",
   "twine>=6.2.0",
-  "codecov-cli>=11.2.8",
-  "pip-audit>=2.10.0",
-  "textual>=8.2.7",
-  "import-linter>=2.11",
+  # codecov-cli is disabled, not dropped: it requires click<8.3.0, which drags click back to
+  # 8.2.1 - the version with CVE-2026-7246 (command injection in click.edit(), fixed in 8.3.3).
+  # Nothing else here caps click, so with this line active the audit gate goes red on every
+  # clean install. Leaving it off costs nothing: CI uploads coverage via codecov/codecov-action,
+  # not this CLI, and "bmk codecov" resolves codecovcli from PATH and only warns when absent.
+  # Re-enable once codecov-cli relaxes its click<8.3.0 pin.
+  # "codecov-cli>=11.3.1",
+  "pip-audit>=2.10.1",
+  "textual>=8.2.8",
+  "import-linter>=2.13",
   "rtoml>=0.13.0",
-  "httpx2>=2.3.0",
+  "httpx2>=2.5.0",
   # Transitive CVE pins
   "jaraco-context>=6.1.2",       # CVE-2025-23949
   "python-multipart>=0.0.32",    # CVE-2025-24486, CVE-2026-40347, CVE-2026-42561
   "wheel>=0.47.0",               # CVE-2025-24049
   "pynacl>=1.6.2",               # CVE-2025-69277
   "urllib3>=2.7.0",              # CVE-2025-66471, CVE-2025-66418
-  "virtualenv>=21.4.2",         # CVE-2025-22702
+  "virtualenv>=21.6.1",         # CVE-2025-22702
 ]
 
 [project.scripts]
@@ -65,7 +71,7 @@ lib_shopware6_api_base = "lib_shopware6_api_base.lib_shopware6_api_base_cli:main
 lib-shopware6-api-base = "lib_shopware6_api_base.lib_shopware6_api_base_cli:main"
 
 [build-system]
-requires = ["hatchling>=1.30.1"]
+requires = ["hatchling>=1.31.0"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]

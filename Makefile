@@ -1,4 +1,4 @@
-# BMK MAKEFILE 2.9.4
+# BMK MAKEFILE 3.1.7
 # do not alter this file - it might be overwritten on new versions of BMK
 # if You want to alter it, remove the first line # BMK MAKEFILE 1.0 - then it is a custom makefile and will not be overwritten
 # bmk Makefile — thin wrapper using `uv tool install` for persistent bmk
@@ -30,10 +30,13 @@ ARGS ?=
 # Ensure bmk + project deps are installed as a persistent uv tool
 # ──────────────────────────────────────────────────────────────
 # --reinstall re-resolves deps on every call (fast when cached).
-# Fallback handles first-time install where --reinstall would fail.
+# Prefer the project's [dev] extra so test-only deps (test-import libraries,
+# fakes, property-test helpers) land in bmk's tool venv and `make test` matches
+# CI; fall back to base deps when the project has no [dev] extra, and to a plain
+# install on first run where --reinstall would fail.
 .PHONY: _ensure_bmk
 _ensure_bmk:
-	@uv tool install --reinstall bmk --with . 2>/dev/null || uv tool install bmk --with .
+	@uv tool install --reinstall bmk --with ".[dev]" 2>/dev/null || uv tool install --reinstall bmk --with . 2>/dev/null || uv tool install bmk --with .
 
 # ──────────────────────────────────────────────────────────────
 # Argument forwarding via MAKECMDGOALS
@@ -44,9 +47,9 @@ _ensure_bmk:
 # All targets that accept trailing arguments
 _BMK_TARGETS := test t test-human th testintegration testi ti testintegration-human tih \
 	codecov coverage cov \
-	build bld clean cln cl run \
+	build bld clean cln cl run ensure \
 	bump-major bump-minor bump-patch bump \
-	commit c push psh p release rel r \
+	commit c push psh p release rel r ship sh \
 	dependencies deps d dependencies-update \
 	config config-deploy config-generate-examples \
 	send-email send-notification custom \
@@ -117,6 +120,10 @@ cln cl: _ensure_bmk
 run: _ensure_bmk  ## Run the project CLI
 	$(BMK) run $(ARGS)
 
+.PHONY: ensure
+ensure: _ensure_bmk  ## Install missing external tools for this OS
+	$(BMK) ensure $(ARGS)
+
 # ──────────────────────────────────────────────────────────────
 # Version Bumping
 # ──────────────────────────────────────────────────────────────
@@ -157,6 +164,12 @@ release: _ensure_bmk  ## Create a versioned release (tag + GitHub release) [alia
 	$(BMK) release $(ARGS)
 rel r: _ensure_bmk
 	$(BMK) release $(ARGS)
+
+.PHONY: ship sh
+ship: _ensure_bmk  ## Push, wait for CI, release, wait for release CI (CI-gated) [alias: sh]
+	$(BMK) ship $(ARGS)
+sh: _ensure_bmk
+	$(BMK) ship $(ARGS)
 
 # ──────────────────────────────────────────────────────────────
 # Dependencies

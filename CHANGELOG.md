@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.0.3] 2026-07-14 11:12:29
+
+### Fixed
+- Green pip-audit gate again. The nightly CI run failed on `click` 8.2.1 (CVE-2026-7246 / PYSEC-2026-2132), a command injection in `click.edit()` fixed in click 8.3.3. This was a dev-toolchain exposure only: `click.edit()` is never called here and `click` is a dev/CLI transitive, so installs of this library already resolved a safe `click`. No action is required from users.
+
+### Removed
+- `codecov-cli` from the `dev` extra. It requires `click<8.3.0`, and since nothing else caps `click`, it alone held the dev environment on the vulnerable 8.2.1; `click` now resolves to 8.4.2. The dependency is left commented out in `pyproject.toml` with the reason inline, to be restored once codecov-cli relaxes the pin. Coverage upload is unaffected: CI uses `codecov/codecov-action`, and `bmk codecov` resolves `codecovcli` from PATH.
+
+### Changed
+- Bumped dependency floors: `httpx2>=2.5.0`, `lib_layered_config>=5.6.0`, `hatchling>=1.31.0`, plus dev tooling (`pytest>=9.1.1`, `ruff>=0.15.21`, `pyright>=1.1.411`, `hypothesis>=6.156.6`, `build>=1.5.1`, `textual>=8.2.8`, `import-linter>=2.13`, `virtualenv>=21.6.1`, `pip-audit>=2.10.1`).
+
 ## [6.0.2] 2026-06-14
 
 ### Changed
