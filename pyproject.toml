@@ -86,6 +86,10 @@ system-dependencies-macos = []
 system-dependencies-windows-pip = []
 system-dependencies-windows-choco = []
 os = ["ubuntu-latest", "windows-latest", "macos-latest"]
+# Markers the CI unit gate cannot satisfy. The integration suite (and the Admin /
+# Storefront client doctests, which carry the same marker) needs a dockware
+# container; integration.yml starts one, the unit gate does not.
+pytest-exclude-markers = ["integration"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/lib_shopware6_api_base"]
