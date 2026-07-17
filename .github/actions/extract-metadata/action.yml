@@ -1,8 +1,8 @@
 name: Extract project metadata
 description: >-
   Parse pyproject.toml and expose project metadata as step outputs.
-  Requires Python and tomllib (or tomli for Python < 3.11) to be
-  available in the runner environment.
+  Requires Python to be available in the runner environment.
+  Auto-installs rtoml if not already present.
 
 outputs:
   PACKAGE_MODULE:
@@ -37,14 +37,15 @@ runs:
       id: meta
       shell: python
       run: |
-        import os
+        import os, subprocess, sys
         try:
-            import tomllib
+            import rtoml
         except ModuleNotFoundError:
-            import tomli as tomllib
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "rtoml", "-q"])
+            import rtoml
 
-        with open('pyproject.toml', 'rb') as f:
-            data = tomllib.load(f)
+        from pathlib import Path
+        data = rtoml.load(Path('pyproject.toml'))
 
         # --- [project] section ---
         project = data['project']['name']

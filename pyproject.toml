@@ -77,6 +77,16 @@ lib-shopware6-api-base = "lib_shopware6_api_base.lib_shopware6_api_base_cli:main
 requires = ["hatchling>=1.31.0"]
 build-backend = "hatchling.build"
 
+[tool.ci]
+# The CI test matrix, read by the default_cicd_public setup job. Python versions
+# come from the classifiers above; these keys cover the OS list and any host
+# packages the runners must install before the dev deps.
+system-dependencies-ubuntu = []
+system-dependencies-macos = []
+system-dependencies-windows-pip = []
+system-dependencies-windows-choco = []
+os = ["ubuntu-latest", "windows-latest", "macos-latest"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/lib_shopware6_api_base"]
 include = [

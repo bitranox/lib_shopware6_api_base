@@ -46,13 +46,21 @@ jobs:
     environment: pypi
     permissions:
       contents: read
+      # id-token is required for OIDC / PyPI Trusted Publisher. It is harmless when
+      # a PYPI_API_TOKEN secret is configured, in which case the token path runs.
+      id-token: write
     steps:
-      - name: Verify PyPI token is set
+      - name: Select PyPI auth method
+        id: auth
+        env:
+          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
         run: |
-          if [ -z "${{ secrets.PYPI_API_TOKEN }}" ]; then
-            echo "::error title=Missing PyPI token::Set the PYPI_API_TOKEN secret in GitHub repository settings to enable PyPI publishing on releases."
-            echo "See: https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions"
-            exit 1
+          if [ -n "$PYPI_API_TOKEN" ]; then
+            echo "PYPI_API_TOKEN is set; publishing with the API token."
+            echo "method=token" >> "$GITHUB_OUTPUT"
+          else
+            echo "No PYPI_API_TOKEN; publishing via OIDC Trusted Publisher."
+            echo "method=oidc" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Download artifacts
@@ -61,9 +69,17 @@ jobs:
           name: dist
           path: dist/
 
-      - name: Publish to PyPI
+      - name: Publish to PyPI (API token)
+        if: steps.auth.outputs.method == 'token'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
           attestations: false
+          skip-existing: true
+
+      - name: Publish to PyPI (Trusted Publisher / OIDC)
+        if: steps.auth.outputs.method == 'oidc'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          attestations: true
           skip-existing: true
