@@ -11,7 +11,7 @@ dependencies = [
     "lib_cli_exit_tools>=2.3.2",
     "rich-click",
     "orjson",
-    "httpx2>=2.6.0",
+    "httpx2>=2.7.0",
 ]
 license = {text = "MIT"}
 authors = [{ name = "bitranox", email = "bitranox@gmail.com" }]
@@ -39,8 +39,8 @@ Changelog = "https://github.com/bitranox/lib_shopware6_api_base/blob/master/CHAN
 dev = [
   "pytest>=9.1.1",
   "pytest-cov>=7.1.0",
-  "hypothesis>=6.156.6",
-  "ruff>=0.15.21",
+  "hypothesis>=6.157.2",
+  "ruff>=0.15.22",
   "pyright[nodejs]>=1.1.411",
   "bandit>=1.9.4",
   # 1.5.1 was yanked upstream (unintended breaking changes), so 1.5.0 is the newest usable
@@ -58,7 +58,7 @@ dev = [
   "textual>=8.2.8",
   "import-linter>=2.13",
   "rtoml>=0.13.0",
-  "httpx2>=2.6.0",
+  "httpx2>=2.7.0",
   # Transitive CVE pins
   "click>=8.4.2",                # CVE-2026-7246
   "jaraco-context>=6.1.2",       # CVE-2025-23949
