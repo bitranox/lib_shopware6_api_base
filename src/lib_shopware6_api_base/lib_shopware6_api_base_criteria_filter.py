@@ -8,21 +8,21 @@ from pydantic import BaseModel, Discriminator, Field, Tag, computed_field, field
 from ._compat import StrEnum
 
 __all__ = [
-    # Enums
-    "FilterTypeName",
-    "RangeParam",
-    "FilterOperator",
+    "ContainsFilter",
+    "EqualsAnyFilter",
     # Filter classes
     "EqualsFilter",
-    "EqualsAnyFilter",
-    "ContainsFilter",
-    "RangeFilter",
-    "NotFilter",
-    "MultiFilter",
-    "PrefixFilter",
-    "SuffixFilter",
+    "FilterOperator",
     # Type alias
     "FilterType",
+    # Enums
+    "FilterTypeName",
+    "MultiFilter",
+    "NotFilter",
+    "PrefixFilter",
+    "RangeFilter",
+    "RangeParam",
+    "SuffixFilter",
 ]
 
 
@@ -77,7 +77,7 @@ class EqualsFilter(BaseModel):
     """
 
     field: str
-    value: None | str | int | bool
+    value: str | int | bool | None
 
     @computed_field
     @property

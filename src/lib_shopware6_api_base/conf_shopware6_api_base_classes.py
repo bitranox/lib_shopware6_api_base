@@ -9,12 +9,12 @@ from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator
 from .config import get_config
 
 __all__ = [
+    "ConfShopware6ApiBase",
+    "ConfigurationError",
     "GrantType",
     "HttpMethod",
     "ShopwareAPIError",
-    "ConfigurationError",
     "ShopwareApiResponse",
-    "ConfShopware6ApiBase",
     "load_config_from_env",
     "require_config_from_env",
 ]

@@ -1,6 +1,6 @@
 [project]
 name = "lib_shopware6_api_base"
-version = "6.0.3"
+version = "6.0.4"
 description = "python3 base API client for shopware6"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -11,7 +11,7 @@ dependencies = [
     "lib_cli_exit_tools>=2.3.2",
     "rich-click",
     "orjson",
-    "httpx2>=2.7.0",
+    "httpx2>=2.9.1",
 ]
 license = {text = "MIT"}
 authors = [{ name = "bitranox", email = "bitranox@gmail.com" }]
@@ -39,8 +39,8 @@ Changelog = "https://github.com/bitranox/lib_shopware6_api_base/blob/master/CHAN
 dev = [
   "pytest>=9.1.1",
   "pytest-cov>=7.1.0",
-  "hypothesis>=6.157.2",
-  "ruff>=0.15.22",
+  "hypothesis>=6.161.2",
+  "ruff>=0.16.0",
   "pyright[nodejs]>=1.1.411",
   "bandit>=1.9.4",
   # 1.5.1 was yanked upstream (unintended breaking changes), so 1.5.0 is the newest usable
@@ -58,7 +58,7 @@ dev = [
   "textual>=8.2.8",
   "import-linter>=2.13",
   "rtoml>=0.13.0",
-  "httpx2>=2.7.0",
+  "httpx2>=2.9.1",
   # Transitive CVE pins
   "click>=8.4.2",                # CVE-2026-7246
   "jaraco-context>=6.1.2",       # CVE-2025-23949
@@ -66,7 +66,7 @@ dev = [
   "wheel>=0.47.0",               # CVE-2025-24049
   "pynacl>=1.6.2",               # CVE-2025-69277
   "urllib3>=2.7.0",              # CVE-2025-66471, CVE-2025-66418
-  "virtualenv>=21.6.1",         # CVE-2025-22702
+  "virtualenv>=21.7.0",         # CVE-2025-22702
 ]
 
 [project.scripts]
@@ -129,26 +129,26 @@ select = [
   "PLW",         # pylint warnings
 ]
 ignore = [
-  "RUF002",    # ambiguous unicode characters in docstrings (en-dash) - typography choice
-  "RUF022",    # unsorted __all__ - kept in logical grouping order
-  "PLC0415",   # deferred imports inside functions - circular import prevention
   "PLC0414",   # import alias does not rename - intentional for explicit re-exports (X as X)
-  "TC001",     # stdlib imports at runtime - needed, not just for type hints
-  "TC002",     # third-party imports at runtime - needed, not just for type hints
-  "TC003",     # stdlib imports - same as TC001
-  "TC006",     # cast() type expressions - scripts use unquoted
   "N815",      # mixedCase variable names - required by Shopware API (naturalSorting field)
 ]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
+[tool.ruff.lint.flake8-type-checking]
+# pydantic resolves BaseModel field annotations at runtime, so those imports must stay
+# out of TYPE_CHECKING blocks even though TC001-3/TC006 would otherwise move them there
+runtime-evaluated-base-classes = ["pydantic.BaseModel"]
+
 [tool.ruff.lint.per-file-ignores]
 # Notebooks: unused imports are often intentional for side effects
 "notebooks/*.ipynb" = ["F401"]
 # Tests: assert is standard, test fixtures have passwords, magic values are clearer inline, temp paths are fine
 # S603/S607: subprocess security - test code only, PLW1510: explicit check arg, G004: f-string logging
-"tests/**/*.py" = ["T20", "S101", "S105", "S106", "S108", "S603", "S607", "FBT001", "FBT003", "PLR0913", "PLR2004", "PLW1510", "G004", "E501"]
+# PLC0415: deferred imports are a deliberate test idiom - some tests import inside the body to
+# exercise import/cache behaviour, or to keep an import scoped to the one test that needs it
+"tests/**/*.py" = ["T20", "S101", "S105", "S106", "S108", "S603", "S607", "FBT001", "FBT003", "PLR0913", "PLR2004", "PLW1510", "G004", "E501", "PLC0415"]
 # CLI module: boolean flags from click decorators, exception mapper with multiple returns
 "src/lib_shopware6_api_base/lib_shopware6_api_base_cli.py" = ["FBT001", "PLR0911"]
 # Main API module: internal methods need many params, doctest examples have long lines

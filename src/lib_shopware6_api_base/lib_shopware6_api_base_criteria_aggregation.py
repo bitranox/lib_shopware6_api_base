@@ -9,23 +9,23 @@ from .lib_shopware6_api_base_criteria_filter import FilterType
 from .lib_shopware6_api_base_criteria_sorting import SortType
 
 __all__ = [
+    # Type alias
+    "AggregationType",
     # Enums
     "AggregationTypeName",
-    # Backward compatibility alias
-    "aggregation_names",
     # Aggregation classes
     "AvgAggregation",
     "CountAggregation",
+    "DateHistogramAggregation",
+    "EntityAggregation",
+    "FilterAggregation",
     "MaxAggregation",
     "MinAggregation",
-    "SumAggregation",
     "StatsAggregation",
+    "SumAggregation",
     "TermsAggregation",
-    "FilterAggregation",
-    "EntityAggregation",
-    "DateHistogramAggregation",
-    # Type alias
-    "AggregationType",
+    # Backward compatibility alias
+    "aggregation_names",
 ]
 
 

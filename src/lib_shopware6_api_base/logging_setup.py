@@ -8,16 +8,18 @@ configuration is mapped directly onto :class:`lib_log_rich.runtime.RuntimeConfig
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import lib_log_rich.config
 import lib_log_rich.runtime
-from lib_layered_config import Config
 
 from . import __init__conf__
 from .config import get_config
 
-__all__ = ["init_logging", "shutdown_logging", "build_runtime_config"]
+if TYPE_CHECKING:
+    from lib_layered_config import Config
+
+__all__ = ["build_runtime_config", "init_logging", "shutdown_logging"]
 
 
 def build_runtime_config(config: Config) -> lib_log_rich.runtime.RuntimeConfig:

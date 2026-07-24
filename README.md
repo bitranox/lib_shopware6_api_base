@@ -332,13 +332,13 @@ For bulk operations, use the predefined header constants:
 
 ```python
 from lib_shopware6_api_base import (
-    HEADER_write_in_single_transactions,    # {"single-operation": "true"}
+    HEADER_write_in_single_transactions,  # {"single-operation": "true"}
     HEADER_write_in_separate_transactions,  # {"single-operation": "false"}
-    HEADER_index_synchronously,             # {"indexing-behavior": "null"}
-    HEADER_index_asynchronously,            # {"indexing-behavior": "use-queue-indexing"}
-    HEADER_index_disabled,                  # {"indexing-behavior": "disable-indexing"}
-    HEADER_fail_on_error,                   # {"fail-on-error": "true"}
-    HEADER_do_not_fail_on_error,            # {"fail-on-error": "false"}
+    HEADER_index_synchronously,  # {"indexing-behavior": "null"}
+    HEADER_index_asynchronously,  # {"indexing-behavior": "use-queue-indexing"}
+    HEADER_index_disabled,  # {"indexing-behavior": "disable-indexing"}
+    HEADER_fail_on_error,  # {"fail-on-error": "true"}
+    HEADER_do_not_fail_on_error,  # {"fail-on-error": "false"}
 )
 
 # Combine headers
@@ -399,16 +399,22 @@ RangeFilter(field="price", parameters={RangeParam.GTE: 10, RangeParam.LTE: 100})
 # Or with strings: parameters={"gte": 10, "lte": 100}
 
 # NOT filter
-NotFilter(operator="or", queries=[
-    EqualsFilter(field="stock", value=0),
-    EqualsFilter(field="active", value=False),
-])
+NotFilter(
+    operator="or",
+    queries=[
+        EqualsFilter(field="stock", value=0),
+        EqualsFilter(field="active", value=False),
+    ],
+)
 
 # Multi filter (combine with AND/OR)
-MultiFilter(operator="and", queries=[
-    EqualsFilter(field="active", value=True),
-    ContainsFilter(field="name", value="Premium"),
-])
+MultiFilter(
+    operator="and",
+    queries=[
+        EqualsFilter(field="active", value=True),
+        ContainsFilter(field="name", value="Premium"),
+    ],
+)
 ```
 
 ### Sorting
@@ -520,10 +526,10 @@ section, journald / Graylog, secret scrubbing) opt in explicitly:
 import logging
 from lib_shopware6_api_base import init_logging, shutdown_logging
 
-init_logging()       # loads the layered config, applies [lib_log_rich],
-                     # and bridges stdlib logging into it
+init_logging()  # loads the layered config, applies [lib_log_rich],
+# and bridges stdlib logging into it
 try:
-    ...              # use the clients; their records now flow through lib_log_rich
+    ...  # use the clients; their records now flow through lib_log_rich
 finally:
     shutdown_logging()
 ```

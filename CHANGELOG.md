@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.0.4] 2026-07-24 13:14:26
+
+### Fixed
+- Green CI again against the latest `ruff`: `PLR0917` (too many positional arguments) on `_make_request` and `_request` in the Admin client, and `RUF036` (`None` not at the end of a type union) in the Admin client and the `EqualsFilter` criteria model.
+
+### Changed
+- Removed the blanket `[tool.ruff.lint].ignore` entries for `RUF002`, `RUF022`, `PLC0415`, `TC001`, `TC002`, `TC003`, `TC006` and fixed the underlying findings at the root instead: sorted `__all__` lists, moved type-only imports into `TYPE_CHECKING` blocks, and made `_make_request` / `_request` keyword-only after `http_method` (call sites and doctests updated to match). Kept `PLC0414` and `N815` ignored (still project-specific, unrelated to the latest-ruff regression).
+- Added `[tool.ruff.lint.flake8-type-checking].runtime-evaluated-base-classes = ["pydantic.BaseModel"]` so pydantic model field imports stay out of `TYPE_CHECKING` blocks (pydantic resolves them at runtime).
+- Added `PLC0415` to the `tests/**/*.py` per-file-ignore list: deferred imports inside test bodies are a deliberate idiom here, not a lint gap to fix.
+
 ## [6.0.3] 2026-07-14 11:12:29
 
 ### Fixed

@@ -5,9 +5,9 @@ from typing import Literal
 from pydantic import BaseModel, computed_field
 
 __all__ = [
-    "FieldSorting",
     "AscFieldSorting",
     "DescFieldSorting",
+    "FieldSorting",
     "SortType",
 ]
 

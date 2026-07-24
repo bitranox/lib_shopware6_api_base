@@ -419,8 +419,8 @@ class Shopware6AdminAPIClientBase:
             junk_size = ids_limit
             payload_dict["limit"] = ids_limit
 
-        total_limit: None | int
-        records_left: None | int
+        total_limit: int | None
+        records_left: int | None
 
         total_limit = payload_dict.get("limit")
 
@@ -458,6 +458,7 @@ class Shopware6AdminAPIClientBase:
     def _make_request(
         self,
         http_method: HttpMethod,
+        *,
         request_url: str,
         payload: PayLoad = None,
         content_type: str = CONTENT_TYPE_JSON,
@@ -485,29 +486,29 @@ class Shopware6AdminAPIClientBase:
         >>> # test resource owner token
         >>> ignore = my_api_client._get_access_token_by_user_credentials()
         >>> my_api_client._get_session()
-        >>> ignore = my_api_client._make_request(HttpMethod.GET, 'customer-group')  # noqa
+        >>> ignore = my_api_client._make_request(HttpMethod.GET, request_url='customer-group')  # noqa
 
         >>> # test resource owner token refresh
         >>> my_access_token = my_api_client.token['access_token']
         >>> my_api_client.token['expires_in']=-1
         >>> my_api_client.token['expires_at']=time.time()-1
-        >>> ignore = my_api_client._make_request(HttpMethod.GET, 'customer-group')
+        >>> ignore = my_api_client._make_request(HttpMethod.GET, request_url='customer-group')
         >>> assert my_api_client.token['access_token'] != my_access_token
 
         >>> # Test client credentials token
         >>> ignore = my_api_client._get_access_token_by_resource_owner()
         >>> my_api_client._get_session()
-        >>> ignore = my_api_client._make_request(HttpMethod.GET, 'customer-group')  # noqa
+        >>> ignore = my_api_client._make_request(HttpMethod.GET, request_url='customer-group')  # noqa
 
         >>> # test client credentials token refresh
         >>> my_access_token = my_api_client.token['access_token']
         >>> my_api_client.token['expires_in']=-1
         >>> my_api_client.token['expires_at']=time.time()-1
-        >>> ignore = my_api_client._make_request(HttpMethod.GET, 'customer-group')
+        >>> ignore = my_api_client._make_request(HttpMethod.GET, request_url='customer-group')
         >>> assert my_api_client.token['access_token'] != my_access_token
 
         >>> # test invalid endpoint
-        >>> ignore = my_api_client._make_request(HttpMethod.GET, 'not-existing')
+        >>> ignore = my_api_client._make_request(HttpMethod.GET, request_url='not-existing')
         Traceback (most recent call last):
             ...
         conf_shopware6_api_base_classes.ShopwareAPIError: 404 Client Error: ...
@@ -553,6 +554,7 @@ class Shopware6AdminAPIClientBase:
     def _request(
         self,
         http_method: HttpMethod,
+        *,
         request_url: str,
         payload: PayLoad,
         content_type: str = CONTENT_TYPE_JSON,

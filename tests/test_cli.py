@@ -7,11 +7,13 @@ import os
 import pathlib
 import subprocess
 import sys
+from typing import TYPE_CHECKING
 
 import pytest
 from click.testing import CliRunner
 
-from lib_shopware6_api_base.conf_shopware6_api_base_classes import ConfShopware6ApiBase
+if TYPE_CHECKING:
+    from lib_shopware6_api_base.conf_shopware6_api_base_classes import ConfShopware6ApiBase
 
 logger = logging.getLogger()
 os.environ["PYTEST_IS_RUNNING"] = "True"  # to be able to detect pytest when running the cli command

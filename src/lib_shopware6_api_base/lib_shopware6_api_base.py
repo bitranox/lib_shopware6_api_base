@@ -165,20 +165,21 @@ from .lib_shopware6_storefront_client import (
 )
 
 __all__ = [
-    # Re-exports from conf
-    "ConfShopware6ApiBase",
-    "ConfigurationError",
-    "GrantType",
-    "HttpMethod",
-    "ShopwareAPIError",
-    "ShopwareApiResponse",
-    "load_config_from_env",
-    "require_config_from_env",
+    "CONTENT_TYPE_JSON",
+    # Module constants
+    "DEFAULT_REQUEST_TIMEOUT",
+    "HEADER_SINGLE_OPERATION",
+    "HEADER_SW_ACCESS_KEY",
+    "MAX_RETRY_ATTEMPTS",
+    "REQUEST_TIMEOUT",  # Legacy alias
     # Re-exports from criteria
     "AggregationType",
     "AggregationTypeName",
     "AscFieldSorting",
     "AvgAggregation",
+    # Re-exports from conf
+    "ConfShopware6ApiBase",
+    "ConfigurationError",
     "ContainsFilter",
     "CountAggregation",
     "Criteria",
@@ -192,47 +193,46 @@ __all__ = [
     "FilterOperator",
     "FilterType",
     "FilterTypeName",
+    "GrantType",
+    "HEADER_do_not_fail_on_error",
+    "HEADER_fail_on_error",
+    "HEADER_index_asynchronously",
+    "HEADER_index_disabled",
+    "HEADER_index_synchronously",
+    # Header constants
+    "HEADER_write_in_separate_transactions",
+    "HEADER_write_in_single_transactions",
+    "HttpMethod",
     "MaxAggregation",
     "MinAggregation",
     "MultiFilter",
     "NotFilter",
+    # Local exports
+    "PayLoad",
     "PrefixFilter",
     "Query",
     "RangeFilter",
     "RangeParam",
+    "Shopware6AdminAPIClientBase",
+    # Client classes
+    "Shopware6StoreFrontClientBase",
+    "ShopwareAPIError",
+    "ShopwareApiResponse",
     "SortType",
     "StatsAggregation",
     "SuffixFilter",
     "SumAggregation",
     "TermsAggregation",
-    "aggregation_names",
-    # Local exports
-    "PayLoad",
-    # Module constants
-    "DEFAULT_REQUEST_TIMEOUT",
-    "MAX_RETRY_ATTEMPTS",
-    "CONTENT_TYPE_JSON",
-    "HEADER_SW_ACCESS_KEY",
-    "HEADER_SINGLE_OPERATION",
-    "REQUEST_TIMEOUT",  # Legacy alias
-    # Logging hooks
-    "log_request",
-    "log_response",
-    # Header constants
-    "HEADER_write_in_separate_transactions",
-    "HEADER_write_in_single_transactions",
-    "HEADER_index_synchronously",
-    "HEADER_index_asynchronously",
-    "HEADER_index_disabled",
-    "HEADER_fail_on_error",
-    "HEADER_do_not_fail_on_error",
-    # Client classes
-    "Shopware6StoreFrontClientBase",
-    "Shopware6AdminAPIClientBase",
     # Backward compatibility (internal functions used by tests)
     "_get_payload_dict",
     "_is_type_bytes",
     "_is_type_criteria",
+    "aggregation_names",
+    "load_config_from_env",
+    # Logging hooks
+    "log_request",
+    "log_response",
+    "require_config_from_env",
 ]
 
 

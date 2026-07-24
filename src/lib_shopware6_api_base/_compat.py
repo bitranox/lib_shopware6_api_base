@@ -9,7 +9,7 @@ This module provides compatibility shims for features added in Python 3.11+:
 import sys
 from enum import Enum
 
-__all__ = ["StrEnum", "Self"]
+__all__ = ["Self", "StrEnum"]
 
 # StrEnum was added in Python 3.11
 if sys.version_info >= (3, 11):

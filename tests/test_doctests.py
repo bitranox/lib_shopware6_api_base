@@ -22,12 +22,15 @@ from __future__ import annotations
 import doctest
 import importlib
 import time
+from typing import TYPE_CHECKING
 
 import pytest
 
 import lib_shopware6_api_base as pkg
-from lib_shopware6_api_base.conf_shopware6_api_base_classes import ConfShopware6ApiBase
 from lib_shopware6_api_base.lib_shopware6_api_base_helpers import pprint_model
+
+if TYPE_CHECKING:
+    from lib_shopware6_api_base.conf_shopware6_api_base_classes import ConfShopware6ApiBase
 
 OPTIONFLAGS = doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE | doctest.IGNORE_EXCEPTION_DETAIL
 
