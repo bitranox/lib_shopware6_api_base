@@ -48,7 +48,8 @@ tmp_*
 __pycache__/
 src/bitranox_template_py_cli/__pycache__/
 *.py[cod]
-*$py.class     # other compiled artifacts
+# other compiled artifacts
+*$py.class
 
 # pytest, coverage, MyPy, Hypothesis
 .pytest_cache/
@@ -74,12 +75,15 @@ coverage.xml
 # source/package builds
 build/
 dist/
-*.egg-info/    # metadata for pip installs
+# metadata for pip installs
+*.egg-info/
 *.egg
 *.whl
 pip-wheel-metadata/
-*.manifest     # PyInstaller metadata
-*.spec         # PyInstaller spec files
+# PyInstaller metadata
+*.manifest
+# PyInstaller spec files
+*.spec
 
 # Eggs, parts, wheels, sdist, etc.
 develop-eggs/
