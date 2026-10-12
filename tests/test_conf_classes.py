@@ -220,16 +220,21 @@ class TestShopwareAPIError:
         assert isinstance(error, BaseException)
 
 
-class TestStringFieldStrictTyping:
-    """String fields reject numbers instead of silently stringifying them (avoids corrupting a mistyped secret)."""
+class TestStringFieldNumberCoercion:
+    """String fields turn a number back into the text it was written as; a bool is still refused."""
 
     @pytest.mark.os_agnostic
-    def test_numeric_value_is_rejected(self) -> None:
-        """A numeric value on a secret/string field raises rather than becoming a corrupted string."""
+    def test_numeric_value_becomes_its_text(self) -> None:
+        """An int from a config layer (lib_layered_config reads digit-only text as int) keeps its digits."""
+        assert ConfShopware6ApiBase.model_validate({"client_secret": 71}).client_secret == "71"
+
+    @pytest.mark.os_agnostic
+    def test_boolean_value_is_rejected(self) -> None:
+        """A bool on a secret/string field raises rather than becoming the string 'True'."""
         from pydantic import ValidationError
 
         with pytest.raises(ValidationError):
-            ConfShopware6ApiBase.model_validate({"client_secret": 71})
+            ConfShopware6ApiBase.model_validate({"client_secret": True})
 
     @pytest.mark.os_agnostic
     def test_plain_string_is_unchanged(self) -> None:

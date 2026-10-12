@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **A digit-only `.env` value no longer stops the program.** lib_layered_config 7.1 reads an
+  unquoted `.env` or environment value that spells a number losslessly as an int, so
+  `SHOPWARE__PASSWORD=123456` or `SHOPWARE__CLIENT_SECRET=123456` reached `ConfShopware6ApiBase`
+  as a number and was refused with `Input should be a valid string`. The model now turns such a
+  number back into the text the operator wrote, and the logging setup does the same for
+  `LIB_LOG_RICH__SERVICE` and `LIB_LOG_RICH__ENVIRONMENT`. A boolean is still refused for a text
+  field, and an invalid `grant_type` is still refused.
+
+### Changed
+- A number given directly to a text field of `ConfShopware6ApiBase` (for example
+  `client_secret=71`) is now stored as its text instead of raising `ValidationError`.
+
 ## [6.0.4] 2026-07-24 13:14:26
 
 ### Fixed

@@ -86,9 +86,10 @@ class ConfShopware6ApiBase(BaseModel):
         SHOPWARE__ADMIN_API_URL=https://shop.example.com/api
     """
 
-    # Strict typing: a numeric/bool value from a config layer is rejected (ValidationError)
-    # rather than silently stringified, so a mistyped secret surfaces instead of corrupting.
-    model_config = ConfigDict(populate_by_name=True, validate_assignment=True, extra="ignore")
+    # lib_layered_config reads an unquoted all-digit value (a numeric password or client secret) as
+    # an int. The conversion is lossless, so turning a number back into text restores exactly what
+    # the operator wrote. A bool is still rejected, so a mistyped flag in a secret field surfaces.
+    model_config = ConfigDict(populate_by_name=True, validate_assignment=True, extra="ignore", coerce_numbers_to_str=True)
 
     # API Endpoints (TOML keys drop the redundant ``shopware_`` prefix).
     shopware_admin_api_url: str = Field(default="", validation_alias=AliasChoices("admin_api_url", "shopware_admin_api_url"))
