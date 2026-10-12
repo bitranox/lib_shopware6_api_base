@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.1.0] 2026-10-12 19:13:54
+
 ### Fixed
 - **A digit-only `.env` value no longer stops the program.** lib_layered_config 7.1 reads an
   unquoted `.env` or environment value that spells a number losslessly as an int, so

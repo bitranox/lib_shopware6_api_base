@@ -1,6 +1,6 @@
 [project]
 name = "lib_shopware6_api_base"
-version = "6.0.4"
+version = "6.1.0"
 description = "python3 base API client for shopware6"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -300,3 +300,7 @@ ignore-vulns = [
   "PYSEC-2026-178",    # pyjwt 2.12.1 - not a project dependency (shared-venv noise), fix in 2.13.0
   "PYSEC-2026-179",    # pyjwt 2.12.1 - not a project dependency (shared-venv noise), fix in 2.13.0
 ]
+
+[tool.uv]
+exclude-newer = "1 day"
+exclude-newer-package = {lib-cli-exit-tools = false, lib-layered-config = false, lib-log-rich = false, pydantic = "2026-10-11T18:37:56Z", pydantic-core = "2026-10-11T18:35:45Z", rtoml = "2026-10-12T00:17:16Z", virtualenv = "2026-10-12T01:27:32Z"}
