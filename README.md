@@ -75,7 +75,37 @@ see [INSTALL.md](INSTALL.md).
 ### Python 3.10+ Baseline
 
 - The project targets **Python 3.10 and newer**.
-- CI exercises GitHub's rolling runner images across Python 3.10-3.14 on Linux, macOS, and Windows.
+- CI exercises GitHub's rolling runner images across Python 3.10-3.15 on Linux, macOS, and Windows.
+
+### Why we recommend uv: supply-chain protection
+
+This repository commits a `uv.lock`. It pins every package the project needs, transitive
+dependencies included, to an exact version and to the hashes of that version's files. The
+`exclude-newer` setting under `[tool.uv]` in `pyproject.toml` adds a cooldown: uv leaves any
+release younger than that out of the lock. CI installs from the lock, so a hijacked release that
+gets pulled again within the cooldown never reaches our builds, and a file whose hash does not
+match is refused.
+
+That protection stays in this repository. The installable package declares only lower bounds
+(`>=`) for its dependencies, so a plain `pip install` takes the newest release of every transitive
+dependency at the moment you run it. If one of them was hijacked an hour earlier, you get the
+hijacked version. `pipx install` and `uv tool install` without options do the same.
+
+To install the command line tool with a cooldown of your own (uv then skips any release younger
+than 7 days, transitive ones included), or to run the exact tree our CI tests:
+
+```bash
+uv tool install --exclude-newer "7 days" lib_shopware6_api_base
+git clone https://github.com/bitranox/lib_shopware6_api_base.git && cd lib_shopware6_api_base && uv sync --locked && uv run lib_shopware6_api_base --help
+```
+
+If you depend on lib_shopware6_api_base in your own project, give that project the same cooldown (7 days here, as
+an example) and commit the `uv.lock` that `uv add lib_shopware6_api_base` writes:
+
+```toml
+[tool.uv]
+exclude-newer = "7 days"
+```
 
 ---
 
@@ -664,7 +694,7 @@ make testintegration    # reuses the running container, finishes in seconds
 ```
 
 CI runs the unit and integration suites as separate jobs across Linux, macOS, and Windows
-for Python 3.10-3.14.
+for Python 3.10-3.15.
 
 ---
 
