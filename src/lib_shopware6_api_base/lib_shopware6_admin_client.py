@@ -578,16 +578,7 @@ class Shopware6AdminAPIClientBase:
         see : https://www.encode.io/httpx2/
 
         """
-        request_data: str | bytes
-        payload_dict: dict[str, Any] = {}
-
-        if is_type_bytes(payload):
-            if content_type.lower() == CONTENT_TYPE_JSON:
-                raise ShopwareAPIError('Content type "json" does not match the payload data type "bytes"')
-            request_data = payload  # raw bytes, sent unchanged (e.g. octet-stream / file uploads)
-        else:
-            payload_dict = get_payload_dict(payload)
-            request_data = orjson.dumps(payload_dict).decode()
+        request_data, payload_dict = self._encode_request_body(payload, content_type=content_type)
 
         if not additional_query_params:
             additional_query_params = {}
@@ -637,18 +628,52 @@ class Shopware6AdminAPIClientBase:
                 follow_redirects=self.config.follow_redirects,
             )
 
-        # Log request/response if enabled
+        self._log_and_check_response(response)
+        return response
+
+    @staticmethod
+    def _encode_request_body(payload: PayLoad, *, content_type: str) -> tuple[str | bytes, dict[str, Any]]:
+        """
+        Encode a payload into the request body and the dict a GET sends as query parameters.
+
+        parameters:
+            payload: a dict, a Criteria, or raw bytes (for file uploads)
+            content_type: the content type the body is sent as
+
+        returns
+            the body to send, and the payload as a dict (empty for raw bytes)
+
+        raises
+            ShopwareAPIError: raw bytes were given with the json content type
+
+        """
+        if is_type_bytes(payload):
+            if content_type.lower() == CONTENT_TYPE_JSON:
+                raise ShopwareAPIError('Content type "json" does not match the payload data type "bytes"')
+            return payload, {}  # raw bytes, sent unchanged (e.g. octet-stream / file uploads)
+        payload_dict = get_payload_dict(payload)
+        return orjson.dumps(payload_dict).decode(), payload_dict
+
+    def _log_and_check_response(self, response: httpx2.Response) -> None:
+        """
+        Log the exchange when request logging is enabled, then reject an HTTP error status.
+
+        parameters:
+            response: the response the session returned
+
+        raises
+            ShopwareAPIError: the response carries a 4xx or 5xx status; the message includes the response body
+
+        """
         if self.config.enable_request_logging:
-            log_request(response.request)  # type: ignore[possibly-undefined]
+            log_request(response.request)
             log_response(response)
 
         try:
-            response.raise_for_status()  # type: ignore[possibly-undefined]
+            response.raise_for_status()
         except httpx2.HTTPStatusError as exc:
             detailed_error = f" : {exc.response.text}"
             raise ShopwareAPIError(f"{exc}{detailed_error}") from exc
-
-        return response
 
     def _get_token(self) -> dict[str, Any]:
         """
