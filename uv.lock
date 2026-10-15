@@ -1217,7 +1217,7 @@ wheels = [
 
 [[package]]
 name = "lib-shopware6-api-base"
-version = "6.1.1"
+version = "6.1.2"
 source = { editable = "." }
 dependencies = [
     { name = "httpx2" },

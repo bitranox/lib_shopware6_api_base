@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.1.2] 2026-10-15 17:19:34
+
 ### Fixed
 
 - The source distribution ships only the package, its tests, `README.md`, `LICENSE`,
