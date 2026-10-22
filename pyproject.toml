@@ -6,12 +6,12 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "pydantic>=2.14.1",
-    "lib_layered_config>=7.1.9",
-    "lib_log_rich>=6.5.3",
+    "lib_layered_config>=7.3.0",
+    "lib_log_rich>=6.5.6",
     "lib_cli_exit_tools>=2.4.1",
     "rich-click",
     "orjson",
-    "httpx2>=2.13.1",
+    "httpx2>=2.14.0",
 ]
 license = {text = "MIT"}
 authors = [{ name = "bitranox", email = "bitranox@gmail.com" }]
@@ -41,7 +41,7 @@ dev = [
   "pytest>=9.1.1",
   "pytest-cov>=7.1.0",
   "hypothesis>=6.168.5",
-  "ruff>=0.17.0",
+  "ruff>=0.17.1",
   "pyright[nodejs]>=1.1.414",
   "bandit>=1.9.4",
   "build>=1.6.1",
@@ -58,7 +58,7 @@ dev = [
   "textual>=8.2.8",
   "import-linter>=2.15",
   "rtoml>=0.14.0",
-  "httpx2>=2.13.1",
+  "httpx2>=2.14.0",
   # Transitive CVE pins
   "click>=8.5.0",                # CVE-2026-7246
   "jaraco-context>=6.1.2",       # CVE-2025-23949
@@ -66,7 +66,8 @@ dev = [
   "wheel>=0.48.0",               # CVE-2025-24049
   "pynacl>=1.6.2",               # CVE-2025-69277
   "urllib3>=2.8.0",              # CVE-2025-66471, CVE-2025-66418
-  "virtualenv>=21.14.7",         # CVE-2025-22702
+  "virtualenv>=21.14.12",         # CVE-2025-22702, CVE-2026-113722
+  "certifi>=2026.10.19",         # PYSEC-2026-4320
 ]
 
 [project.scripts]
