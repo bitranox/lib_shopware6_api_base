@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- The test suite no longer reads the app and host configuration layers of the machine it runs on. An
+  autouse fixture points lib_layered_config's three app-root variables (`LIB_LAYERED_CONFIG_ETC`,
+  `_MAC_APP_ROOT`, `_PROGRAMDATA`) at an empty directory under `tmp_path`, so a system-wide deploy
+  (for example a `/etc/xdg/<slug>/config.d/99-*.toml`) can no longer fail tests locally while CI
+  stays green. The subprocess helpers in `test_cli.py` copied the environment when the module was
+  imported, before the redirect existed, and so read the real system layers; they now build it at
+  call time.
+
 ## [6.1.2] 2026-10-15 17:19:34
 
 ### Fixed

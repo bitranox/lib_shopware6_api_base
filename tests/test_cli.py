@@ -20,15 +20,24 @@ os.environ["PYTEST_IS_RUNNING"] = "True"  # to be able to detect pytest when run
 
 # Set PYTHONPATH for subprocess calls to find the src layout package
 _src_path = pathlib.Path(__file__).resolve().parent.parent / "src"
-_env = os.environ.copy()
-_env["PYTHONPATH"] = str(_src_path) + os.pathsep + _env.get("PYTHONPATH", "")
+
+
+def _subprocess_env() -> dict[str, str]:
+    """Build the subprocess environment at call time, so it keeps the system-layer redirect the autouse fixture set.
+
+    A copy taken when this module is imported predates that fixture, and its child process would read the
+    machine's real app and host configuration layers.
+    """
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(_src_path) + os.pathsep + env.get("PYTHONPATH", "")
+    return env
 
 
 def call_cli_command(commandline_args: str = "") -> bool:
     """Helper function to call CLI commands via subprocess."""
     args = [sys.executable, "-m", "lib_shopware6_api_base", *commandline_args.split()]
     try:
-        subprocess.run(args, check=True, env=_env, capture_output=True)
+        subprocess.run(args, check=True, env=_subprocess_env(), capture_output=True)
     except subprocess.CalledProcessError:
         return False
     return True
@@ -37,7 +46,7 @@ def call_cli_command(commandline_args: str = "") -> bool:
 def get_cli_output(commandline_args: str = "") -> str:
     """Helper function to get CLI output as string."""
     args = [sys.executable, "-m", "lib_shopware6_api_base", *commandline_args.split()]
-    result = subprocess.run(args, env=_env, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    result = subprocess.run(args, env=_subprocess_env(), capture_output=True, text=True, encoding="utf-8", errors="replace")
     return (result.stdout or "") + (result.stderr or "")
 
 
@@ -415,7 +424,7 @@ class TestConnectionCommandsIntegration:
     @staticmethod
     def _dockware_env(config: ConfShopware6ApiBase) -> dict[str, str]:
         prefix = "LIB_SHOPWARE6_API_BASE___SHOPWARE__"
-        env = _env.copy()
+        env = _subprocess_env()
         env.update(
             {
                 prefix + "ADMIN_API_URL": config.shopware_admin_api_url,
@@ -454,3 +463,13 @@ class TestConnectionCommandsIntegration:
         )
         assert result.returncode == 0, result.stdout + result.stderr
         assert '"version"' in result.stdout
+
+
+@pytest.mark.os_agnostic
+def test_config_show_in_a_subprocess_reads_the_redirected_app_layer_not_the_host_s(app_layer_config_file: pathlib.Path) -> None:
+    """The subprocess helpers carry the conftest's system-layer redirect into the child process."""
+    app_layer_config_file.write_text('[shopware]\nadmin_api_url = "http://redirected-app-layer/api"\n', encoding="utf-8")
+
+    output = get_cli_output("config show --section shopware")
+
+    assert "http://redirected-app-layer/api" in output, output
