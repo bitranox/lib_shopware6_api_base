@@ -1400,7 +1400,7 @@ wheels = [
 
 [[package]]
 name = "lib-log-rich"
-version = "6.5.7"
+version = "7.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "lib-cli-exit-tools" },
@@ -1410,9 +1410,9 @@ dependencies = [
     { name = "rich" },
     { name = "rich-click" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/4e/9d/a689aa5e239d950bd3520531124226b03fbe1ad64c2ba06cf5c35e54f05b/lib_log_rich-6.5.7.tar.gz", hash = "sha256:398a0b7add39043f025435d36eb52f7e8f679decef971c78d1e5ec7dad642b8f", size = 328531, upload-time = "2026-10-22T12:12:06.403Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6f/71/974de7e7a8fa0421971cb9a3fee8c8b1f2d5498e6a45197e5d4632b259cb/lib_log_rich-7.0.1.tar.gz", hash = "sha256:b586244418ebaa862688883a30bb5fc815d75224d6ff7d5e5080b09b135ddfe5", size = 376656, upload-time = "2026-10-26T12:38:39.514Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8e/4e/3a28d487df645a2f18b70e053fa9c991ec521da908e1ccd3a861f50de24f/lib_log_rich-6.5.7-py3-none-any.whl", hash = "sha256:aa111316d26d33c38323fa3713c187b598e788f38e0639a0a109c19e068a739e", size = 208822, upload-time = "2026-10-22T12:12:05.005Z" },
+    { url = "https://files.pythonhosted.org/packages/07/82/f4e4c15db52c90fdea86db6c1821c508e504f51533fed7f735c9f5fb5eeb/lib_log_rich-7.0.1-py3-none-any.whl", hash = "sha256:d4d60f6387d3b0aca83fc8086738af0b8014153ce26b244fdf38a76065ae838b", size = 228779, upload-time = "2026-10-26T12:38:38.277Z" },
 ]
 
 [[package]]
@@ -1472,7 +1472,7 @@ requires-dist = [
     { name = "jaraco-context", marker = "extra == 'dev'", specifier = ">=6.1.2" },
     { name = "lib-cli-exit-tools", specifier = ">=2.4.1" },
     { name = "lib-layered-config", specifier = ">=7.3.0" },
-    { name = "lib-log-rich", specifier = ">=6.5.7" },
+    { name = "lib-log-rich", specifier = ">=7.0.1" },
     { name = "orjson" },
     { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.1" },
     { name = "pydantic", specifier = ">=2.14.1" },

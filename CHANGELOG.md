@@ -16,6 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   stays green. The subprocess helpers in `test_cli.py` copied the environment when the module was
   imported, before the redirect existed, and so read the real system layers; they now build it at
   call time.
+- The test suite no longer reads the developer's own user configuration layer. A new autouse
+  fixture, `user_layer_in_tmp_path`, points the user layer (`XDG_CONFIG_HOME`,
+  `LIB_LAYERED_CONFIG_MAC_HOME_ROOT`, `_APPDATA`, `_LOCALAPPDATA`) at an empty directory under
+  `tmp_path`; `HOME` is left alone, because git and uv read it.
+- The two layer redirects now live in a rootdir `conftest.py`, their variable lists in
+  `tests/layer_roots.py`, as in the template; pyproject sets `testpaths` to `src` and `tests`, adds
+  `tests` to `pythonpath` and pyright's `extraPaths`, and gives pyright an execution environment
+  rooted at `tests/`. A test checks that every test in `tests/test_doctests.py`, which runs the
+  `src/` doctests, gets both redirects.
 
 ## [6.1.2] 2026-10-15 17:19:34
 

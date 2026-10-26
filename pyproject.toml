@@ -7,7 +7,7 @@ requires-python = ">=3.10"
 dependencies = [
     "pydantic>=2.14.1",
     "lib_layered_config>=7.3.0",
-    "lib_log_rich>=6.5.7",
+    "lib_log_rich>=7.0.1",
     "lib_cli_exit_tools>=2.4.1",
     "rich-click",
     "orjson",
@@ -179,6 +179,7 @@ runtime-evaluated-base-classes = ["pydantic.BaseModel"]
 typeCheckingMode = "strict"
 extraPaths = [
   "src",
+  "tests",
 ]
 # Suppress errors for third-party libs without complete stubs
 reportUnknownMemberType = "warning"
@@ -190,13 +191,14 @@ reportMissingImports = "warning"
 reportInvalidTypeForm = "warning"  # forward reference type aliases
 reportUnusedImport = "warning"  # used in doctests
 reportUnusedFunction = "warning"  # used in doctests
+executionEnvironments = [{root = "tests"}]
 
 [tool.pytest.ini_options]
 # Doctests run through tests/test_doctests.py (doctest.testmod), not --doctest-modules:
 # the offline doctests run in the unit suite, the Admin/Storefront client doctests
 # (which need a live Shopware) run in the dockware-backed integration suite.
 doctest_optionflags = ["ELLIPSIS", "NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL"]
-pythonpath = ["src"]
+pythonpath = ["src", "tests"]
 markers = [
   "os_agnostic: test runs on every supported operating system",
   "os_windows: test exercises Windows-only behavior",
@@ -206,6 +208,7 @@ markers = [
   "local_only: tests that require the local dev environment (external resources, script composition); skipped in CI",
   "integration: tests requiring external resources (SMTP, databases, APIs); run via 'bmk ti' or 'mktesti.sh'",
 ]
+testpaths = ["src", "tests"]
 
 [tool.coverage.run]
 branch = true
