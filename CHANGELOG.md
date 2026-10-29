@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   rooted at `tests/`. A test checks that every test in `tests/test_doctests.py`, which runs the
   `src/` doctests, gets both redirects.
 
-## [6.1.2] 2026-10-15 17:19:34
+## [6.1.2] - 2026-10-15
 
 ### Fixed
 
@@ -46,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tests/test_platform_markers.py` pins what the `os_windows`, `os_macos`, `os_linux` and `os_posix`
   markers do: each test asserts its own platform, so a marker that stops skipping fails off its platform.
 
-## [6.1.1] 2026-10-12 23:09:13
+## [6.1.1] - 2026-10-12
 
 ### Added
 - Python 3.15 is a supported version: declared in the classifiers, so CI and `make test-all` run it.
@@ -58,7 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The install section explains why installing with uv protects against supply-chain attacks and why
   a plain `pip install` from PyPI does not.
 
-## [6.1.0] 2026-10-12 19:13:54
+## [6.1.0] - 2026-10-12
 
 ### Fixed
 - **A digit-only `.env` value no longer stops the program.** lib_layered_config 7.1 reads an
@@ -73,7 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A number given directly to a text field of `ConfShopware6ApiBase` (for example
   `client_secret=71`) is now stored as its text instead of raising `ValidationError`.
 
-## [6.0.4] 2026-07-24 13:14:26
+## [6.0.4] - 2026-07-24
 
 ### Fixed
 - Green CI again against the latest `ruff`: `PLR0917` (too many positional arguments) on `_make_request` and `_request` in the Admin client, and `RUF036` (`None` not at the end of a type union) in the Admin client and the `EqualsFilter` criteria model.
@@ -83,7 +83,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `[tool.ruff.lint.flake8-type-checking].runtime-evaluated-base-classes = ["pydantic.BaseModel"]` so pydantic model field imports stay out of `TYPE_CHECKING` blocks (pydantic resolves them at runtime).
 - Added `PLC0415` to the `tests/**/*.py` per-file-ignore list: deferred imports inside test bodies are a deliberate idiom here, not a lint gap to fix.
 
-## [6.0.3] 2026-07-14 11:12:29
+## [6.0.3] - 2026-07-14
 
 ### Fixed
 - Green pip-audit gate again. The nightly CI run failed on `click` 8.2.1 (CVE-2026-7246 / PYSEC-2026-2132), a command injection in `click.edit()` fixed in click 8.3.3. This was a dev-toolchain exposure only: `click.edit()` is never called here and `click` is a dev/CLI transitive, so installs of this library already resolved a safe `click`. No action is required from users.
@@ -94,7 +94,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Bumped dependency floors: `httpx2>=2.5.0`, `lib_layered_config>=5.6.0`, `hatchling>=1.31.0`, plus dev tooling (`pytest>=9.1.1`, `ruff>=0.15.21`, `pyright>=1.1.411`, `hypothesis>=6.156.6`, `build>=1.5.1`, `textual>=8.2.8`, `import-linter>=2.13`, `virtualenv>=21.6.1`, `pip-audit>=2.10.1`).
 
-## [6.0.2] 2026-06-14
+## [6.0.2] - 2026-06-14
 
 ### Changed
 - Added a `typed_click.py` facade wrapping rich-click's `option` / `version_option` / `argument` decorators behind explicit, fully-known signatures, keeping the CLI strict-clean under pyright 1.1.410 (`reportUnknownMemberType`) without disabling the rule (ignore isolated to the facade).
