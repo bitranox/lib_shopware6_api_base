@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "pydantic>=2.14.1",
-    "lib_layered_config>=7.4.1",
+    "lib_layered_config>=7.5.0",
     "lib_log_rich>=8.1.2",
     "lib_cli_exit_tools>=2.4.1",
     "rich-click",
@@ -322,5 +322,5 @@ ignore-vulns = [
 ]
 
 [tool.uv]
-exclude-newer = "1 day"
-exclude-newer-package = {lib-cli-exit-tools = false, lib-layered-config = false, lib-log-rich = false}
+exclude-newer = "7 days"
+exclude-newer-package = {lib-cli-exit-tools = false, lib-layered-config = false, lib-log-rich = false, certifi = "2026-10-23T11:36:17Z", hatchling = "2026-10-28T02:27:31Z", pytest = "2026-10-27T21:30:21Z", ruff = "2026-10-27T00:34:06Z", virtualenv = "2026-10-28T01:12:51Z"}
